@@ -9,7 +9,7 @@ class network():
 
     def getIntList(self, devFilter=False):
         devList = []
-        with open(target +'proc/net/dev', 'r') as dfile:
+        with open(self.target +'proc/net/dev', 'r') as dfile:
             lines = dfile.readlines()
             # the 'Iter-' and '-face' lines from the head of proc/net/dev
             # will get captured by this. Delete them from the list
@@ -57,6 +57,10 @@ class network():
                     devInfo[dev]['Speed'] = '{:6} Mb/s'.format(devInfo[dev]['Speed'].split('M')[0])
             except:
                 pass
+        checks = ['currentRx', 'currentTx', 'Speed']
+        for check in checks:
+            if check not in devInfo:
+                devInfo[check] = ''
         return devInfo
 
 
@@ -189,7 +193,6 @@ class network():
                 'sos_commands/networking/ethtool_' + device, 'Settings')
         else:
             return False
-
         return devSettings
 
 
@@ -230,6 +233,7 @@ class network():
                         ringSettings['currentRx'] = line.split()[1].strip()
                     elif i == 10:
                         ringSettings['currentTx'] = line.split()[1].strip()
+            return ringSettings
         else:
             return {'maxRx': '?', 'maxTx': '?', 'currentRx': '?', 'currentTx': '?'}
 
@@ -257,9 +261,8 @@ class network():
                         linecolor = colors.PURPLE
                     print '\t' + linecolor + item + '\t\t ' + '{:<5}'.format(value['Link detected'].upper())\
                      + '{}'.format(value['Speed']) + '  {:>3}'.format(value['Auto-negotiation'].upper())\
-                     + '\t\t {:11}'.format(value['currentRx'] + '/' + value['currentTx'])\
-                     + '\t' + '{:<10} '.format(value['driver']) + 'ver:{:8} fw:{:8}'.format(value['driverVersion']\
-                     , value['firmware']) + colors.ENDC
+                     + '\t\t {:4}/{:4}'.format(value['currentRx'], value['currentTx'])\
+                     + '\t' + '{:<10} '.format(value['driver']) + 'ver:{:8} fw:{:8}'.format(value['driverVersion'], value['firmware']) + colors.ENDC
                 except:
                     pass
 

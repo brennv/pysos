@@ -37,7 +37,7 @@ class bios:
         return pysosutils.parseOutputSection(self.target+ 'sos_commands/hardware/dmidecode', to_check)
 
     def getBiosInfo(self):
-        return self.parseDmi('BIOS')
+        return self.parseDmi('BIOS Information')
 
     def getSysInfo(self):
         return self.parseDmi('System Information')

@@ -41,7 +41,7 @@ def doStuff(**args):
     if args['net']:
         args['ip'] = True
         args['bonding'] = True
-        args['eth'] = True
+        args['ethtool'] = True
         args['netdev'] = True
     if args['os']:
         obj = opsys.opsys(target)
