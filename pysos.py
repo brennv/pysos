@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import argparse, sys, pysosutils, opsys, bios, memory, ps, virt, kernel
 
 parser = argparse.ArgumentParser(description='Make a sosreport pretty.')
