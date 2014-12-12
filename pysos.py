@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import argparse, sys, pysosutils, opsys, bios, memory, ps, virt, kernel
+import argparse, sys, pysosutils, opsys, bios, memory, ps, virt, kernel, network
 
 parser = argparse.ArgumentParser(description='Make a sosreport pretty.')
 parser.add_argument('target', nargs='+', help='Target directory, aka the sosreport root. Use "/" to run locally')
