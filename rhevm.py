@@ -4,7 +4,7 @@ from rhevlcbridge import Database, Cluster, Table, Host, StorageDomain
 
 class rhevm():
     
-    def __init__(self, target, db):
+    def __init__(self, target, db=False):
         self.target = target
         self.db = db
         
