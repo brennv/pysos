@@ -1,5 +1,4 @@
-import sys, pysosutils, math
-from ps import procInfo
+import sys, pysosutils, math, ps
 from colors import *
 from rhevm import rhevm
 
@@ -64,13 +63,13 @@ class virt():
         elif self.checkKvmCap():
             print '\tKVM capable but does not appear to be hypervisor'
         elif not self.checkKvmCap():
-            print '\tSystem does not have any KVM modules loaded - this is not a hypervisor.'
+            print '\tSystem does not have any KVM modules loaded.'
         else:
-            print '\tCould not determine anything. Killing self.'
+            print '\tCould not determine virtualization capabilities. Bad sosreport?'
 
     def getRunningVms(self):
-        ps = procInfo(self.target)
-        procs = ps.parseProcFile()
+        psObj = ps.procInfo(self.target)
+        procs = psObj.parseProcFile()
         vms = {}
         for proc in procs:
             if '/usr/libexec/qemu-kvm' in proc:
@@ -99,6 +98,7 @@ class virt():
 
         print colors.BLUE + '\t qemu-img   : ' + colors.ENDC + '{:22}'.format(self.getQemuImg()) + colors.BLUE +' \t qemu-kvm    : '\
         + colors.ENDC + '{:22}'.format(self.getQemuKvm())
+        print ''
 
 
     def displayRhevInfo(self):
