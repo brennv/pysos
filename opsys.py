@@ -20,15 +20,15 @@ class opsys:
         u = pysosutils.fileToString(self.target+'sos_commands/general/uptime')
         if 'not found' in u:
             return u
-        idx1 = u.find('up')
-        idx2 = u.find('users')
-        u = u[idx1+2:idx2-4].replace(',',' ')
-        days = u[0:u.find('day')].strip()
-        uptime += days + ' days'
-        if ':' in u:
-            hours = u[u.find('day')+4:u.find(':')].strip()
-            uptime += ' ' + hours + ' hours'
-            minutes = u[u.find(':')+1:len(u)].strip()
+        upString = u[u.find('up')+2:u.find('users')-3].strip().strip(',')
+        if 'min' in upString:
+            return upString
+        elif ':' in u:
+            days = upString[0:upString.find('day')].strip().strip(',')
+            uptime += days + ' days'
+            hours = upString[upString.find('day')+4:upString.find(':')].strip().strip(',')
+            uptime += hours + ' hours'
+            minutes = upString[upString.find(':')+1:len(upString)].strip()
             uptime += ' ' + minutes + ' minutes'
         return uptime
 
