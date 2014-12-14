@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import argparse, sys, pysosutils, opsys, bios, memory, ps, virt, kernel, network
+import argparse, sys, pysosutils, opsys, bios, memory, ps, virt, kernel, network, lspci
 
 parser = argparse.ArgumentParser(description='Make a sosreport pretty.')
 parser.add_argument('target', nargs='+', help='Target directory, aka the sosreport root. Use "/" to run locally')
@@ -75,8 +75,9 @@ def doStuff(**args):
     if  args['netdev']:
         obj = network.network(target)
         obj.displayNetDevInfo()
-    #if  args['lspci']:
-    #    get_lspci_info(target, local)
+    if  args['lspci']:
+        obj = lspci.lspci(target)
+        obj.displayAllLspciInfo()
     if args['rhev']:
         obj = virt.virt(target)
         if args['db']:
