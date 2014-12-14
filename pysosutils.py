@@ -44,9 +44,12 @@ def getRpm(target, rpm, boolean=False):
 
 
 def getRpmVer(target, rpm):
-    ver = getRpm(target, rpm)
-    formatVer = ver[0].strip(rpm).strip('x86_64').strip('noarch').strip('-').strip('.')
-    return formatVer
+    ver = getRpm(target, rpm)[0]
+    if 'Not Installed' in ver:
+        return ver
+    else:
+        formatVer = ver.strip(rpm).strip('x86_64').strip('noarch').strip('-').strip('.')
+        return formatVer
 
 def checkRpm(target, rpm):
     return "Not yet implemented"
