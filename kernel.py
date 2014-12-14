@@ -64,8 +64,7 @@ class kernel:
         print colors.BLUE + colors.BOLD + '\t\t Free Space   : ' + colors.ENDC + crashInfo['pathFreeSpace']
         
         print ''
-        
-        print colors.HEADER_BOLD + '\t Kernel Panic Sysctl : ' + colors.ENDC
+
         print colors.HEADER_BOLD + '\t Kernel Panic Sysctl : ' + colors.ENDC
         for item in panicSysctls:
             if panicSysctls[item] == '0':
