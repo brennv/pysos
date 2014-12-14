@@ -67,14 +67,13 @@ def getSysctl(target, sysctl):
 
 
 def getChkConfig(target, service):
-    serviceStatus = "Service not found"
     if os.path.isfile(target+'chkconfig'):
         with open(target + 'chkconfig', 'r') as cfile:
             for line in cfile:
                 if service in line:
                     serviceStatus = line.lstrip(service).rstrip('\n').lstrip()
                     return serviceStatus
-
+        return "Service not found in chkconfig"
     else:
         return "No chkconfig file found"
 
