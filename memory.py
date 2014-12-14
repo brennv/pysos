@@ -1,4 +1,4 @@
-import sys, os, re
+import sys, os, re, math
 from colors import *
 
 class memory:
@@ -69,8 +69,9 @@ class memory:
         print colors.PURPLE + '\t\t Buffered  : %8.2f GB ' %(memInfo['buffered'] / 1024)\
             + self.graph(round(((memInfo['buffered'] / memInfo['total']) * 100), 2)) + colors.ENDC
         
-        print colors.WHITE + '\t\t Swap      : %8.2f MB ' % memInfo['swapUsed']\
-            + self.graph(round(((memInfo['swapUsed'] / memInfo['swapTotal']) * 100), 2)) + colors.ENDC
+        if memInfo['swapTotal'] > 0:
+            print colors.WHITE + '\t\t Swap      : %8.2f MB ' % memInfo['swapUsed']\
+                + self.graph(round(((memInfo['swapUsed'] / memInfo['swapTotal']) * 100), 2)) + colors.ENDC
         
         if memInfo['hugepages'] > 0:
             print colors.GREEN + '\t\t Hugepages : %8s    ' %memInfo['hugepages']\
@@ -80,13 +81,13 @@ class memory:
             +  self.graph(round(((memInfo['dirty'] / memInfo['total']) * 100), 2)) + colors.ENDC
         
         print '\t\t SLAB      : %8s MB ' %memInfo['slab']\
-            +  self.graph(round(((memInfo['slab'] / memInfo['swapTotal']) * 100), 2))
+            +  self.graph(round(((memInfo['slab'] / memInfo['total']) * 100), 2))
     
     def displayMemInfo(self):
         memInfo = self.memInfo()
         self.displayMemGraphs()
         print colors.HEADER + colors.BOLD + '\t RAM  :' + colors.ENDC
-        print '\t\t %6.2f GB total memory on system' %(round(memInfo['total'] / 1024) +1)
+        print '\t\t %6.2f GB total memory on system' %(math.ceil(memInfo['total'] / 1024))
         print colors.BLUE  + '\t\t %6.2f GB (%.2f %%) used' %((memInfo['used'] / 1024), (memInfo['used'] / memInfo['total']) * 100) + colors.ENDC
         print colors.CYAN + '\t\t %6.2f GB (%.2f %%) cached' %((memInfo['cached'] / 1024), (memInfo['cached'] / memInfo['total']) * 100) + colors.ENDC
         print colors.PURPLE + '\t\t %6.2f GB (%.2f %%) buffered' %((memInfo['buffered'] / 1024), ((memInfo['buffered'] / memInfo['total']) * 100)) + colors.ENDC
@@ -94,8 +95,8 @@ class memory:
           
         print colors.HEADER + colors.BOLD + '\t Swap :' + colors.ENDC
         print colors.WHITE + '\t\t %6.2f GB defined  swap space ' %(memInfo['swapTotal'] / 1024) + colors.ENDC
-        print colors.WHITE + '\t\t %6.2f MB (%.2f %%) swap space used ' %(memInfo['swapUsed'], (memInfo['swapUsed'] / memInfo['swapTotal']) * 100) + colors.ENDC
-
+        if memInfo['swapTotal'] > 0:
+            print colors.WHITE + '\t\t %6.2f MB (%.2f %%) swap space used ' %(memInfo['swapUsed'], (memInfo['swapUsed'] / memInfo['swapTotal']) * 100) + colors.ENDC
         print colors.HEADER + colors.BOLD + '\t Misc :'+ colors.ENDC
         print '\t\t %6s MB (%.2f %%) of total memory used for SLAB' %(memInfo['slab'], (memInfo['slab'] / memInfo['total']))
         if memInfo['hugepages'] > 0:
