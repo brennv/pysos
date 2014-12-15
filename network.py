@@ -83,7 +83,6 @@ class network():
 
 
     def getIpAddr(self, device):
-        print 'in ip'
         # first try the ifcfg-* file
         if os.path.isfile(self.target + 'etc/sysconfig/network-scripts/ifcfg-' + device):
             with open(self.target + 'etc/sysconfig/network-scripts/ifcfg-' + device, 'r') as ifile:
@@ -92,7 +91,6 @@ class network():
                         return line[line.find('=')+1:len(line)].replace('"', '').replace("'", '').strip('\n')
         # if that fails, go to ifconfig -a
         if os.path.isfile(self.target + 'sos_commands/networking/ifconfig_-a'):
-            print 'in ip 2'
             devInfo = pysosutils.parseOutputSection(self.target + 'sos_commands/networking/ifconfig_-a', device)
             try:
                 if devInfo['inet addr']:
@@ -110,7 +108,7 @@ class network():
                             if 'inet ' in line:
                                 return line[line.find('inet')+4:line.find('/')-1].strip()
                         
-            
+
         # if we reach this point, we can't reliably determine the IP address, and return an empty string
         return ''
 

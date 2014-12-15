@@ -43,7 +43,7 @@ class lspci():
 
 
     def displayAllLspciInfo(self):
-        print colors.SECTION + 'LSPCI' + colors.ENDC
+        print colors.SECTION + colors.BOLD + 'LSPCI' + colors.ENDC
         print colors.HEADER_BOLD + '\t Physical Devices' + colors.ENDC
         # Not really *all*, just all we're interesting in
         self.displayLspciInfo('Ethernet')

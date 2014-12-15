@@ -51,7 +51,7 @@ class bios:
         sysInfo = self.getSysInfo()
         procInfo = self.getProcInfo()
         dimmInfo = self.getDimmInfo()
-        print colors.SECTION + 'DMI Decode' + colors.ENDC
+        print colors.SECTION + colors.BOLD + 'DMI Decode' + colors.ENDC
         print '\t' + colors.HEADER_BOLD + 'BIOS' + colors.ENDC
         print '\t\t' + colors.BLUE + 'Vendor  : ' + colors.ENDC + biosInfo['Vendor']
         print '\t\t' + colors.BLUE + 'Version : ' + colors.ENDC + biosInfo['Version']

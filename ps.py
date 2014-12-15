@@ -93,7 +93,7 @@ class procInfo:
         numProcs = self.getNumProcs()
         usageReport = self.getUserReport()
         
-        print colors.HEADER_BOLD + 'PS' + colors.ENDC
+        print colors.SECTION + colors.BOLD + 'PS' + colors.ENDC
         print '\t' + colors.WHITE + 'Total Processes : ' + colors.ENDC + str(numProcs) +'\n'
         
         print '\t' + colors.WHITE + 'Top Users of CPU and Memory : ' + colors.ENDC

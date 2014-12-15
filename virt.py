@@ -52,7 +52,7 @@ class virt():
 
 
     def showVirtPlat(self, db=False):
-        print colors.SECTION + 'Virtualization' + colors.ENDC
+        print colors.SECTION + colors.BOLD + 'Virtualization' + colors.ENDC
         if self.checkIsRhev():
             self.displayRhevInfo()
         elif self.checkIsRhevm():

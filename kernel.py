@@ -32,7 +32,10 @@ class kernel:
         
         crashInfo = {}
         crashInfo['path'] = self.getKdumpConfig()['path']
-        crashInfo['memReserve'] = pysosutils.getCmdLine(self.target).split('crashkernel=')[1].split()[0]
+        try:
+            crashInfo['memReserve'] = pysosutils.getCmdLine(self.target).split('crashkernel=')[1].split()[0]
+        except IndexError:
+            crashInfo['memReserve'] = 'Not Defined'
         crashInfo['pathFreeSpace'] = "Working on it"
         return crashInfo
 
