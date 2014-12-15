@@ -19,8 +19,8 @@ class memory:
         percf = '%.2f' %perc + ' %'
         graph = tick * int(filled) + empty * int(nofill) + '  %7s' %percf
         return graph
-    
-    def memInfo(self):
+
+    def getMemInfo(self):
         if os.path.isfile(self.target + 'proc/meminfo'):
             memInfo = {}
             with open(self.target + 'proc/meminfo', 'r') as meminfo:
@@ -56,7 +56,7 @@ class memory:
             return False
             
     def displayMemGraphs(self):
-        memInfo = self.memInfo()
+        memInfo = self.getMemInfo()
         print colors.SECTION + colors.BOLD + "Memory " + colors.ENDC
         print colors.HEADER + colors.BOLD + '\t Memory Statistics graphed : ' + colors.ENDC
         
@@ -84,7 +84,7 @@ class memory:
             +  self.graph(round(((memInfo['slab'] / memInfo['total']) * 100), 2))
     
     def displayMemInfo(self):
-        memInfo = self.memInfo()
+        memInfo = self.getMemInfo()
         self.displayMemGraphs()
         print colors.HEADER + colors.BOLD + '\t RAM  :' + colors.ENDC
         print '\t\t %6.2f GB total memory on system' %(math.ceil(memInfo['total'] / 1024))
