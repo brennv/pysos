@@ -1,4 +1,4 @@
-import sys, os, pysosutils, opsys
+import sys, os, pysosutils, opsys, filesys, memory, math
 from colors import *
 
 class kernel:
@@ -31,12 +31,25 @@ class kernel:
     def getCrashInfo(self):
         
         crashInfo = {}
-        crashInfo['path'] = self.getKdumpConfig()['path']
         try:
             crashInfo['memReserve'] = pysosutils.getCmdLine(self.target).split('crashkernel=')[1].split()[0]
         except IndexError:
             crashInfo['memReserve'] = 'Not Defined'
-        crashInfo['pathFreeSpace'] = "Working on it"
+        
+        crashInfo['path'] = self.getKdumpConfig()['path']
+        fs = filesys.filesys(self.target)
+        mounts = fs.getFsMounts()
+        for mount in mounts:
+            if mounts[mount]['mountPoint'] == crashInfo['path']:
+                crashInfo['pathFreeSpace'] = fs.getFsSize(mounts[mount]['mountPoint'])['avail']
+                crashInfo['pathDevice'] = mounts[mount]['dev']
+        # hit this if there is no explicit mount point for the crashpath. Assume root fs.
+        if 'pathFreeSpace' not in crashInfo:
+            crashInfo['pathFreeSpace'] = int(fs.getFsSize('/')['avail']) / 1048576
+            crashInfo['pathDevice'] = fs.getFsDev('/')
+            
+        mem = memory.memory(self.target)
+        crashInfo['memRequired'] = int(mem.getMemInfo()['total'])
         return crashInfo
 
     def displayKernelInfo(self):
@@ -63,8 +76,12 @@ class kernel:
         print colors.HEADER_BOLD + '\t kdump.conf          : ' + colors.ENDC
         for key in kdumpConfig:
             print '\t\t\t\t%s  %s' %(key, kdumpConfig[key])
-        print colors.BLUE + colors.BOLD + '\t\t Crash Path   : ' + colors.ENDC + crashInfo['path']
-        print colors.BLUE + colors.BOLD + '\t\t Free Space   : ' + colors.ENDC + crashInfo['pathFreeSpace']
+        print colors.BLUE + colors.BOLD + '\t\t Crash Path   : ' + colors.ENDC + crashInfo['path'] + '  ({})'.format(crashInfo['pathDevice'])
+        print colors.BLUE + colors.BOLD + '\t\t Space Needed : ' + colors.ENDC + '{:>6.2f} GB'.format(math.ceil(float(crashInfo['memRequired']) / 1000))
+        print colors.BLUE + colors.BOLD + '\t\t Free Space   : ' + colors.ENDC + '{:>6.2f} GB'.format(crashInfo['pathFreeSpace'])
+        
+        if crashInfo['memRequired'] / 1000 > crashInfo['pathFreeSpace']:
+            print '\t\t\t ' + colors.WARN + 'NOT ENOUGH SPACE FOR VMCORE DUMP' + colors.ENDC
         
         print ''
 

@@ -1,10 +1,11 @@
-import sys, os
+import sys, os, textwrap
 from colors import *
 
 class filesys():
     
-    def __init__(self, target):
+    def __init__(self, target, showFsOpts=False):
         self.target = target
+        self.showFsOpts = showFsOpts
 
 
     def getFsMounts(self):
@@ -16,8 +17,8 @@ class filesys():
                         pass
                     else:
                         line2 = line.split()
-                        mounts[line2[0]] = {'dev': line2[0], 'mountPoint': line2[2], 'fsType': line2[4]\
-                        , 'mountOpts': line[line.find('(')+1:len(line)-1] }
+                        mounts[line2[0]] = {'dev': line2[0].strip(), 'mountPoint': line2[2], 'fsType': line2[4]\
+                        , 'mountOpts': line[line.find('(')+1:len(line)-2].strip() }
             return mounts
         else:
             return False
@@ -38,6 +39,18 @@ class filesys():
             return {'size': '', 'used': '', 'avail': '', 'percAvail': ''}
         else:
             return {'size': '', 'used': '', 'avail': '', 'percAvail': ''}
+
+    def getFsDev(self, mount):
+        if os.path.isfile(self.target + 'sos_commands/filesys/mount_-l'):
+            with open(self.target + 'sos_commands/filesys/mount_-l', 'r') as mfile:
+                for line in mfile:
+                    if line.split()[2] == mount:
+                        return line.split()[0]
+            # if we don't hit anything, return that fact
+            return 'Unknown Mount Device'
+        else:
+            return 'Cannot find mount file'
+        
 
     def getAllMountInfo(self):
         mounts = self.getFsMounts()
@@ -62,11 +75,13 @@ class filesys():
             except:
                 pass
             try:
-                print '\t {:^30}\t  {:<12}{:<6}    {:>5.2f} GB   {:>5.2f} GB   {:>5.2f} GB ({:^2}%)'.format(mounts[mount]['dev'], mounts[mount]['mountPoint']\
+                print '\t {:<30}\t  {:<12}{:<6}    {:>5.2f} GB   {:>5.2f} GB   {:>5.2f} GB ({:^2}%)'.format(mounts[mount]['dev'], mounts[mount]['mountPoint']\
                     ,mounts[mount]['fsType'], mounts[mount]['size'], mounts[mount]['used'], mounts[mount]['avail'], mounts[mount]['percAvail'])
             except ValueError:
                 print '\t {:^30}\t  {:<15} {:<6}'.format(mounts[mount]['dev'], mounts[mount]['mountPoint'], mounts[mount]['fsType'])
-
+                
+            if self.showFsOpts:
+                print "\t\t " + u"\u2192" + textwrap.fill(mounts[mount]['mountOpts'], 90, subsequent_indent='\t\t  ')
 
 if __name__ == '__main__':
     target = sys.argv[1]

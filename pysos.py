@@ -12,6 +12,7 @@ parser.add_argument('-c', "--cpu", action="store_true", help="Print CPU informat
 parser.add_argument('-m', "--memory", action="store_true", help="Print memory information")
 #parser.add_argument('-d', "--disk", action="store_true", help='Print /proc/partition information')
 parser.add_argument('-f', "--filesys", action="store_true", help="Print filesystem information")
+parser.add_argument("--fso", action="store_true", help="Print filesystem information AND mount options")
 parser.add_argument('-l', "--lspci", action="store_true", help="Print lspci information")
 parser.add_argument('-e', '--ethtool', action="store_true", help="Print ethtool information")
 parser.add_argument('-g', "--bonding", action="store_true", help="Print bonding information")
@@ -54,6 +55,8 @@ def doStuff(**args):
         if args['cpu']:
             obj.displayCpuInfo()
             args['cpu'] = False
+    if args['fso']:
+        args['filesys'] = True
     if args['memory']:
         obj = memory.memory(target)
         obj.displayMemInfo()
@@ -67,7 +70,7 @@ def doStuff(**args):
         obj = opsys.opsys(target)
         obj.displayCpuInfo()
     if args['filesys']:
-        obj = filesys.filesys(target)
+        obj = filesys.filesys(target, showFsOpts = args['fso'])
         obj.displayFsInfo()
     #if  args['sysctl']:
     #    get_sysctl_info(target)
@@ -109,8 +112,4 @@ if __name__ == '__main__':
     target = args.target[0]
     if not target.endswith('/'):
         target = target + '/'	
-
     doStuff(**vars(args))
-
-
-
