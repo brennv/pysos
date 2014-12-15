@@ -21,7 +21,7 @@ class kernel:
                     if not line.startswith("#") and not line.startswith('\n'):
                             kdumpConfig[line.split()[0]] = line.split(line.split()[0])[1].strip('\n')
         else:
-            kdumpConfig['path'] = "No kdump.conf file found"
+            kdumpConfig['path'] = False
         
         if 'path' not in kdumpConfig:
             kdumpConfig['path'] = '/var/crash/'
@@ -37,17 +37,22 @@ class kernel:
             crashInfo['memReserve'] = 'Not Defined'
         
         crashInfo['path'] = self.getKdumpConfig()['path']
-        fs = filesys.filesys(self.target)
-        mounts = fs.getFsMounts()
-        for mount in mounts:
-            if mounts[mount]['mountPoint'] == crashInfo['path']:
-                crashInfo['pathFreeSpace'] = fs.getFsSize(mounts[mount]['mountPoint'])['avail']
-                crashInfo['pathDevice'] = mounts[mount]['dev']
-        # hit this if there is no explicit mount point for the crashpath. Assume root fs.
-        if 'pathFreeSpace' not in crashInfo:
-            crashInfo['pathFreeSpace'] = int(fs.getFsSize('/')['avail']) / 1048576
-            crashInfo['pathDevice'] = fs.getFsDev('/')
-            
+        if crashInfo['path']:
+            fs = filesys.filesys(self.target)
+            mounts = fs.getFsMounts()
+            for mount in mounts:
+                if mounts[mount]['mountPoint'] == crashInfo['path']:
+                    crashInfo['pathFreeSpace'] = fs.getFsSize(mounts[mount]['mountPoint'])['avail']
+                    crashInfo['pathDevice'] = mounts[mount]['dev']
+            # hit this if there is no explicit mount point for the crashpath. Assume root fs.
+            if 'pathFreeSpace' not in crashInfo:
+                crashInfo['pathFreeSpace'] = int(fs.getFsSize('/')['avail']) / 1048576
+                crashInfo['pathDevice'] = fs.getFsDev('/')
+        else:
+            crashInfo['path'] = 'No kdump.conf file found'
+            crashInfo['pathDevice'] = 'device unknown'
+            crashInfo['pathFreeSpace'] = 'Unknown'
+        
         mem = memory.memory(self.target)
         crashInfo['memRequired'] = int(mem.getMemInfo()['total'])
         return crashInfo
@@ -75,13 +80,20 @@ class kernel:
         print ''
         print colors.HEADER_BOLD + '\t kdump.conf          : ' + colors.ENDC
         for key in kdumpConfig:
-            print '\t\t\t\t%s  %s' %(key, kdumpConfig[key])
+            if kdumpConfig[key]:
+                print '\t\t\t\t%s  %s' %(key, kdumpConfig[key])
         print colors.BLUE + colors.BOLD + '\t\t Crash Path   : ' + colors.ENDC + crashInfo['path'] + '  ({})'.format(crashInfo['pathDevice'])
         print colors.BLUE + colors.BOLD + '\t\t Space Needed : ' + colors.ENDC + '{:>6.2f} GB'.format(math.ceil(float(crashInfo['memRequired']) / 1000))
-        print colors.BLUE + colors.BOLD + '\t\t Free Space   : ' + colors.ENDC + '{:>6.2f} GB'.format(crashInfo['pathFreeSpace'])
         
+        if 'Unknown' not in crashInfo['pathFreeSpace']:
+            print colors.BLUE + colors.BOLD + '\t\t Free Space   : ' + colors.ENDC + '{:>6.2f} GB'.format(crashInfo['pathFreeSpace'])
+        else:
+            print colors.BLUE + colors.BOLD + '\t\t Free Space   : ' + colors.ENDC + 'Unknown'
+
+
         if crashInfo['memRequired'] / 1000 > crashInfo['pathFreeSpace']:
             print '\t\t\t ' + colors.WARN + 'NOT ENOUGH SPACE FOR VMCORE DUMP' + colors.ENDC
+
         
         print ''
 
