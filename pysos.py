@@ -2,26 +2,27 @@
 
 import argparse, sys, pysosutils, opsys, bios, memory, ps, virt, kernel, network, lspci
 
-parser = argparse.ArgumentParser(description='Make a sosreport pretty.')
-parser.add_argument('target', nargs='+', help='Target directory, aka the sosreport root. Use "/" to run locally')
-parser.add_argument('-a', "--getall", action="store_true", help='Print all information (RHEV excluded)')
-parser.add_argument('-b', "--bios", action="store_true", help='Print BIOS and dmidecode information')
-parser.add_argument('-o', "--os", action="store_true", help='Prints OS information')
-parser.add_argument('-k', "--kdump", action="store_true", help="Prints kdump information")
-parser.add_argument('-c', "--cpu", action="store_true", help='Print CPU information ONLY')
-parser.add_argument('-m', "--memory", action="store_true", help='Prints memory information')
+parser = argparse.ArgumentParser(description="Pysos is used to quickly parse and display information from a sosreport in a meaningful and human-readable manner")
+parser.add_argument('target', nargs='+', help="Target directory, aka the sosreport root.")
+parser.add_argument('-a', "--getall", action="store_true", help="Print all information (RHEV excluded)")
+parser.add_argument('-b', "--bios", action="store_true", help="Print BIOS and dmidecode information")
+parser.add_argument('-o', "--os", action="store_true", help="Print OS information")
+parser.add_argument('-k', "--kdump", "--kernel", action="store_true", help="Print kdump and kernel information")
+parser.add_argument('-c', "--cpu", action="store_true", help="Print CPU information ONLY")
+parser.add_argument('-m', "--memory", action="store_true", help="Print memory information")
 #parser.add_argument('-d', "--disk", action="store_true", help='Print /proc/partition information')
-parser.add_argument('-l', "--lspci", action="store_true", help='Print lspci information')
-parser.add_argument('-e', '--ethtool', action="store_true", help='Prints ethtool information')
-parser.add_argument('-g', "--bonding", action="store_true", help='Print bonding information')
-parser.add_argument('-i', "--ip", action="store_true", help='Print IP information')
+parser.add_argument('-l', "--lspci", action="store_true", help="Print lspci information")
+parser.add_argument('-e', '--ethtool', action="store_true", help="Print ethtool information")
+parser.add_argument('-g', "--bonding", action="store_true", help="Print bonding information")
+parser.add_argument('-i', "--ip", action="store_true", help="Print IP information")
 parser.add_argument('-n', "--netdev", action="store_true", help='Print proc/net/dev information')
-parser.add_argument("--net", action="store_true", help='Alias for --ethtool, --bonding, --ip, --netdev')
-parser.add_argument('-s', "--sysctl", action="store_true", help='Print all sysctl information')
-parser.add_argument('-p', "--ps", action="store_true", help='Print ps information')
+parser.add_argument("--net", action="store_true", help="Alias for --ethtool, --bonding, --ip, --netdev")
+parser.add_argument('-s', "--sysctl", action="store_true", help="Print common sysctl settings")
+parser.add_argument('-p', "--ps", action="store_true", help="Print process information")
 #parser.add_argument("--check", help='Check package for known bugs')
-parser.add_argument('-r', "--rhev", action="store_true", help='Print RHEV Information')
-parser.add_argument("--db", action="store_true", help = 'Print RHEV DB information')
+parser.add_argument('-r', "--rhev", action="store_true", help="Print RHEV information")
+parser.add_argument("--db", action="store_true", help = "Print RHEV DB information")
+parser.add_argument('-v', "--virt", action="store_true", help="Print KVM Virtualization information") 
 #parser.add_argument('-y', "--yum", action="store_true", help='Print yum/RHN information')
 
 
@@ -32,12 +33,14 @@ def doStuff(**args):
         args['kdump'] = True
         args['cpu'] = True
         args['sysctl'] = True
+        args['ps'] = True
         args['ip'] = True
         args['bonding'] = True
         args['netdev']= True
         args['ethtool'] = True
         args['bios'] = True
         args['disk'] = True
+        args['lspci'] = True
     if args['net']:
         args['ip'] = True
         args['bonding'] = True
@@ -78,7 +81,7 @@ def doStuff(**args):
     if  args['lspci']:
         obj = lspci.lspci(target)
         obj.displayAllLspciInfo()
-    if args['rhev']:
+    if args['rhev'] or args['virt']:
         obj = virt.virt(target)
         if args['db']:
             obj.showVirtPlat(target, db=True)
