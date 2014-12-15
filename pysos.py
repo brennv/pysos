@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import argparse, sys, pysosutils, opsys, bios, memory, ps, virt, kernel, network, lspci
+import argparse, sys, pysosutils, opsys, bios, memory, ps, virt, kernel, network, lspci, filesys
 
 parser = argparse.ArgumentParser(description="Pysos is used to quickly parse and display information from a sosreport in a meaningful and human-readable manner")
 parser.add_argument('target', nargs='+', help="Target directory, aka the sosreport root.")
@@ -11,6 +11,7 @@ parser.add_argument('-k', "--kdump", "--kernel", action="store_true", help="Prin
 parser.add_argument('-c', "--cpu", action="store_true", help="Print CPU information ONLY")
 parser.add_argument('-m', "--memory", action="store_true", help="Print memory information")
 #parser.add_argument('-d', "--disk", action="store_true", help='Print /proc/partition information')
+parser.add_argument('-f', "--filesys", action="store_true", help="Print filesystem information")
 parser.add_argument('-l', "--lspci", action="store_true", help="Print lspci information")
 parser.add_argument('-e', '--ethtool', action="store_true", help="Print ethtool information")
 parser.add_argument('-g', "--bonding", action="store_true", help="Print bonding information")
@@ -32,6 +33,7 @@ def doStuff(**args):
         args['memory'] = True
         args['kdump'] = True
         args['cpu'] = True
+        args['filesys'] = True
         args['sysctl'] = True
         args['ps'] = True
         args['ip'] = True
@@ -64,6 +66,9 @@ def doStuff(**args):
     if  args['cpu']:
         obj = opsys.opsys(target)
         obj.displayCpuInfo()
+    if args['filesys']:
+        obj = filesys.filesys(target)
+        obj.displayFsInfo()
     #if  args['sysctl']:
     #    get_sysctl_info(target)
     if  args['ip']:
