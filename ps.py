@@ -6,7 +6,7 @@ class procInfo:
     
     def __init__(self, target):
         self.target = target
-        self.psHeader = '\t' + colors.BLUE + colors.BOLD + '{:^6}\t{:^6}\t{:^5} {:^5}  {:^7}  {:^7}  {:^4} {:^4}  {:^5}{:^8}   {:<8}'\
+        self.psHeader = '\t' + colors.BLUE + colors.BOLD + '{:^6}\t{:^6}\t{:^5} {:^5}  {:^7}  {:^7}  {:^4} {:^4}  {:^5}{:^8} {:<8}'\
         .format('USER', 'PID', '%CPU', '%MEM', 'VSZ-MB', 'RSS-MB', 'TTY', 'STAT', 'START',\
          'TIME', 'COMMAND') + colors.ENDC
         
@@ -87,16 +87,16 @@ class procInfo:
 
         print self.psHeader
         for ps in report:
-            print '\t{:^8} {:^6}\t{:^5} {:^5}  {:<7.0f}  {:<7.0f}  {:^5} {:^4} {:^6} {:<9}{}'.format(ps[0], ps[1], ps[2], ps[3], ps[4], ps[5], ps[6], ps[7], ps[8], ps[9], ps[10])
+            print '\t{:^8} {:^6}\t{:^5} {:^5}  {:<7.0f}  {:<7.0f}  {:^5} {:^4} {:^6} {:<6}{}'.format(ps[0], ps[1], ps[2], ps[3], ps[4], ps[5], ps[6], ps[7], ps[8], ps[9], ps[10])
     
     def displayTopReport(self):
         numProcs = self.getNumProcs()
         usageReport = self.getUserReport()
         
         print colors.HEADER_BOLD + 'PS' + colors.ENDC
-        print '\t' + colors.WHITE + 'Total processes : ' + colors.ENDC + str(numProcs) +'\n'
+        print '\t' + colors.WHITE + 'Total Processes : ' + colors.ENDC + str(numProcs) +'\n'
         
-        print '\t' + colors.WHITE + 'Top Users of CPU and MEM : ' + colors.ENDC
+        print '\t' + colors.WHITE + 'Top Users of CPU and Memory : ' + colors.ENDC
         print '\t ' + colors.BLUE + colors.BOLD + '{:10}  {:6}  {:6}  {:8}'.format('USER', '%CPU', '%MEM', 'RSS') + colors.ENDC
 
         for i in xrange(0, 4):
@@ -106,20 +106,20 @@ class procInfo:
 
     def displayCpuReport(self):
         cpuReport = self.getTopCpu()
-        print '\t' + colors.WHITE + 'Top CPU processes : ' + colors.ENDC
+        print '\t' + colors.WHITE + 'Top CPU Consuming Processes : ' + colors.ENDC
         self._displayReport(cpuReport)
         print ''
         
     def displayMemReport(self):
         memReport = self.getTopMem()
-        print '\t' + colors.WHITE + 'Top Memory processes : ' + colors.ENDC
+        print '\t' + colors.WHITE + 'Top Memory Consuming Processes : ' + colors.ENDC
         self._displayReport(memReport)
         print ''
     
     def displayDefunctReport(self):
         defunctReport = self.getDefunctProcs()
         if defunctReport:
-            print '\t' + colors.WHITE + 'Uninterruptable Sleep and Defunct Processes : ' + colors.ENDC
+            print '\t' + colors.RED + 'Uninterruptable Sleep and Defunct Processes : ' + colors.ENDC
             defunctReport = self._formatTopReport(defunctReport, reportNum=len(defunctReport))
             self._displayReport(defunctReport)
             print ''                
