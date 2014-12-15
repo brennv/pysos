@@ -3,20 +3,20 @@ from colors import *
 from rhevlcbridge import Database, Cluster, Table, Host, StorageDomain
 
 class rhevm():
-    
+
     def __init__(self, target, db=False):
         self.target = target
         self.db = db
-        
+
     def getRhevmVer(self):
         return pysosutils.getRpmVer(self.target, 'rhevm')
-        
+
     def getReportsVer(self):
         return pysosutils.getRpmVer(self.target, 'rhevm-reports')
-        
+
     def getDwhVer(self):
-        return pysos.getRpmVer(self.target, 'rhevm-dwh')
-        
+        return pysosutils.getRpmVer(self.target, 'rhevm-dwh')
+
     def _rhevmSimpleVer(self):
         rhevm = self.getRhevmVer()
         if "3.0" in rhevm:
@@ -32,7 +32,7 @@ class rhevm():
         else:
             simpleVer = "Could not be found"
         return simpleVer
-        
+
     def checkForDb(self):
         fullPath = os.path.abspath(self.target)
         lcRoot = os.path.dirname(fullPath)
@@ -41,7 +41,7 @@ class rhevm():
             return lcRoot + "/database"
         else:
             return False
-            
+
     def parseDb(self):
         db = self.checkForDb()
         simpleVer = self._rhevmSimpleVer()
@@ -63,10 +63,10 @@ class rhevm():
         errorLines = []
         for line in lines:
             if "ERROR" in line:
-    
+
                 errorLines.append(line)
         print ''
-    
+
         for x in range(1,4):
             try:
                 lastLine = len(errorLines)-x
@@ -78,10 +78,10 @@ class rhevm():
                 3 - Command run
                 7+ - Message
                 '''
-    
+
                 print colors.HEADER_BOLD + "\t Time Stamp: " + colors.ENDC + errorProperties[0] + " " + errorProperties[1]
                 print colors.HEADER_BOLD + "\t Command: " + colors.ENDC + errorProperties[3].lstrip("[").rstrip("]")
-    
+
                 # Trying to hack this since messages seem to vary in length - basing on last capital letter. deal with it
                 errMessParts =  errorProperties[7:]
                 errorMessage = ""
@@ -93,9 +93,9 @@ class rhevm():
                             index = errMessParts.index(p)
                             errorMessage = ' '.join(errMessParts[index:]).replace("\n","")
                             #print errorMessage
-    
+
                 print colors.HEADER_BOLD + "\t Message: " + colors.ENDC  + errorMessage
-    
+
                 singleOccurance = True
                 occurances = 0
                 for line in lines:
@@ -103,28 +103,31 @@ class rhevm():
                         occurances += 1
                 if occurances > 1:
                     singleOccurance = False
-    
+
                 if singleOccurance:
                     print colors.HEADER_BOLD + "\t Only occurance of this error: " + colors.WHITE + "Yes" + colors.ENDC
                 else:
                     print colors.HEADER_BOLD + "\t Only occurance of this error: " + colors.ENDC + colors.RED + "No. Errors appear " + str(occurances) + " times in engine.log starting at " + ' '.join(errorLines[0].split(" ")[0:2]) + colors.ENDC
-    
+
                 print ""
-    
+
             except:
                 pass
         logFile.close()
 
 
     def displayRhevmInfo(self):
-        print '\t This is a RHEV Manager'
-        print colors.HEADER_BOLD + "\t Version: " + colors.CYAN + self.getRhevmVer() + colors.ENDC
+        print colors.BLUE + colors.BOLD + '\t\t This is a RHEV Manager' + colors.ENDC
+        print ''
+        print colors.HEADER_BOLD + '\t RHEV-M Version : ' + colors.CYAN + self.getRhevmVer() + colors.ENDC
+        print colors.HEADER_BOLD + '\t RHEV-M Reports : ' + colors.CYAN + self.getReportsVer() + colors.ENDC
+        print colors.HEADER_BOLD + '\t RHEV-M DWH     : ' + colors.CYAN + self.getDwhVer() + colors.ENDC
         print ''
         dbPresent = self.checkForDb()
         if dbPresent:
-            print '\t Database found. Can parse'
+            print colors.BLUE + '\t Database found. Can parse.' + colors.ENDC
         else:
-            print '\t Database not found. Unable to parse'
+            print colors.RED + '\t Database not found. Unable to parse.' + colors.ENDC
 
         print ''
         print '\t Most recent errors in engine.log : '
@@ -236,9 +239,8 @@ class rhevm():
         self.displayRhevClusterInfo()
         self.displayRhevStorageInfo()
         self.displayRhevHyperInfo()
-        
-            
-            
+
+
 if __name__ == '__main__':
     target = sys.argv[1]
     test = rhevm(target)

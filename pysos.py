@@ -91,10 +91,8 @@ def doStuff(**args):
         obj.displayAllLspciInfo()
     if args['rhev'] or args['virt']:
         obj = virt.virt(target)
-        if args['db']:
-            obj.showVirtPlat(target, db=True)
-        else:
-            obj.showVirtPlat(target)
+        obj.showVirtPlat(args['db'])
+
     #if  args['disk']:
     #    get_storage_info(target, local)
     if  args['ps']:
