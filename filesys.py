@@ -28,7 +28,12 @@ class filesys():
                 for line in mfile:
                     line = line.split()
                     if line[5] == mount:
-                        return {'size': int(line[1]), 'used': line[2], 'avail': line[3], 'percAvail': line[4].strip('%')}
+                        percUsed = line[4].strip('%')
+                        try:
+                            percAvail = 100 - int(percUsed)
+                        except:
+                            percAvail = '-'
+                        return {'size': int(line[1]), 'used': line[2], 'avail': line[3], 'percAvail': percAvail, 'percUsed': percUsed}
 
             return {'size': '', 'used': '', 'avail': '', 'percAvail': ''}
         else:
