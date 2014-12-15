@@ -20,7 +20,7 @@ class opsys:
         u = pysosutils.fileToString(self.target+'sos_commands/general/uptime')
         if 'not found' in u:
             return u
-        upString = u[u.find('up')+2:u.find('users')-3].strip().strip(',')
+        upString = u[u.find('up')+2:u.find('user')-3].strip().strip(',')
         if 'min' in upString:
             return upString
         elif ':' in u:
