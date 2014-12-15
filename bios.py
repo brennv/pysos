@@ -65,7 +65,7 @@ class bios:
         
         print '\t' + colors.HEADER_BOLD + 'CPU' + colors.ENDC
         print '\t\t' + colors.WHITE + '{} CPU sockets populated, {} cores / {} threads per core'.format(procInfo['sockets'], procInfo['cores'], procInfo['threadsPerCore']) + colors.ENDC
-        print '\t\t' + colors.WHITE + '{} total physical cores  - {} total threads'.format(procInfo['cores'], procInfo['processors']) + colors.ENDC
+        print '\t\t' + colors.WHITE + '{} total physical cores - {} total threads'.format(procInfo['cores'], procInfo['processors']) + colors.ENDC
         print '\t\t' + colors.BLUE + 'Family  : ' + colors.ENDC + procInfo['vendor'] + ' ' + procInfo['family']
         print '\t\t' + colors.BLUE + 'Model   : ' + colors.ENDC + procInfo['model']
         

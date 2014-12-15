@@ -83,10 +83,10 @@ class opsys:
                     cpuInfo['flags'] = line[index+2:len(line)]
                 # number of physical cores
                 elif line.startswith('cpu cores'):
-                    cpuInfo['cores'] = line[index+2:len(line)]
+                    cpuInfo['cores'] = int(line[index+2:len(line)])
                 # number of threads per physical core
                 elif line.startswith('siblings'):
-                    cpuInfo['threadsPerCore'] = line[index+2:len(line)]
+                    cpuInfo['threadsPerCore'] = int(line[index+2:len(line)]) +1
                 # number of physical sockets
                 elif line.startswith('physical id'):
                     cpuInfo['sockets'] = int(line[index+2:len(line)]) +1
