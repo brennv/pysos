@@ -17,7 +17,7 @@ class filesys():
                         pass
                     else:
                         line2 = line.split()
-                        mounts[line2[0]] = {'dev': line2[0].strip(), 'mountPoint': line2[2], 'fsType': line2[4]\
+                        mounts[line2[0]] = {'dev': line2[0].lstrip('/dev/mapper'), 'mountPoint': line2[2], 'fsType': line2[4]\
                         , 'mountOpts': line[line.find('(')+1:len(line)-2].strip() }
             return mounts
         else:
@@ -28,15 +28,18 @@ class filesys():
             with open(self.target + 'sos_commands/filesys/df_-al', 'r') as mfile:
                 for line in mfile:
                     line = line.split()
-                    if line[5] == mount:
-                        percUsed = line[4].strip('%')
-                        try:
-                            percAvail = 100 - int(percUsed)
-                        except:
-                            percAvail = '-'
-                        return {'size': int(line[1]), 'used': line[2], 'avail': line[3], 'percAvail': percAvail, 'percUsed': percUsed}
-
+                    try:
+                        if line[5] == mount:
+                            percUsed = line[4].strip('%')
+                            try:
+                                percAvail = 100 - int(percUsed)
+                            except:
+                                percAvail = '-'
+                            return {'size': int(line[1]), 'used': line[2], 'avail': line[3], 'percAvail': percAvail, 'percUsed': percUsed}
+                    except:
+                        pass
             return {'size': '', 'used': '', 'avail': '', 'percAvail': ''}
+
         else:
             return {'size': '', 'used': '', 'avail': '', 'percAvail': ''}
 
@@ -78,7 +81,7 @@ class filesys():
                 print '\t {:<30}\t  {:<12}{:<6}    {:>5.2f} GB   {:>5.2f} GB   {:>5.2f} GB ({:^2}%)'.format(mounts[mount]['dev'], mounts[mount]['mountPoint']\
                     ,mounts[mount]['fsType'], mounts[mount]['size'], mounts[mount]['used'], mounts[mount]['avail'], mounts[mount]['percAvail'])
             except ValueError:
-                print '\t {:^30}\t  {:<15} {:<6}'.format(mounts[mount]['dev'], mounts[mount]['mountPoint'], mounts[mount]['fsType'])
+                print '\t {:<30}\t  {:<15} {:<6}'.format(mounts[mount]['dev'], mounts[mount]['mountPoint'], mounts[mount]['fsType'])
                 
             if self.showFsOpts:
                 print "\t\t " + u"\u2192" + textwrap.fill(mounts[mount]['mountOpts'], 90, subsequent_indent='\t\t  ')
