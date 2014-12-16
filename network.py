@@ -7,6 +7,19 @@ class network():
         self.target = target
 
 
+
+    def _setLineColor(self, dev):
+        if 'eth' in dev or 'em' in dev or 'enp' in dev or dev.startswith('p'):
+            return colors.BLUE
+        elif 'vlan' in dev:
+            return colors.CYAN
+        elif 'bond' in dev:
+            return colors.GREEN
+        elif 'vnet' in dev:
+            return colors.WHITE
+        else:
+            return colors.PURPLE
+
     def getIntList(self, devFilter=False):
         devList = []
         with open(self.target +'proc/net/dev', 'r') as dfile:
@@ -54,7 +67,7 @@ class network():
                 if "Unknown!" in devInfo[dev]['Speed']:
                     devInfo[dev]['Speed'] = '{:^11}'.format('Unknown')
                 else:
-                    devInfo[dev]['Speed'] = '{:6} Mb/s'.format(devInfo[dev]['Speed'].split('M')[0])
+                    devInfo[dev]['Speed'] = devInfo[dev]['Speed'].split('M')[0]
             except:
                 pass
         checks = ['currentRx', 'currentTx', 'Speed']
@@ -213,6 +226,13 @@ class network():
                 'sos_commands/networking/ethtool_' + device, 'Settings')
         else:
             return False
+        try:
+            if 'yes' in devSettings['Link detected']:
+                devSettings['Link detected'] = 'UP'
+            else:
+                devSettings['Link detected'] = 'DOWN'
+        except:
+            pass
         return devSettings
 
 
@@ -243,6 +263,8 @@ class network():
             if 'bond' in device or 'vnet' in device:
                 return {'maxRx': '?', 'maxTx': '?', 'currentRx': '?', 'currentTx': '?'}
             with open(self.target + 'sos_commands/networking/ethtool_-g_' + device, 'r') as rfile:
+                if 'Operation not supported' in rfile.readline():
+                    return { 'maxRx': '?', 'maxTx': '?', 'currentRx': '?', 'currentTx': '?' }
                 # easiest way to parse this is by line number since it's a fixed output
                 for i, line in enumerate(rfile.readlines()):
                     if i == 2:
@@ -266,25 +288,19 @@ class network():
         # interfaces being removed
         devInfo = dict((k, v) for k, v in devInfo.iteritems() if v)
         print colors.SECTION + colors.BOLD +  'Ethtool' + colors.ENDC
-        print colors.WHITE + colors.BOLD + '\t {:^10}    {:^20}  {:^8}  {:^15}   {:^15}'.format(\
+        print colors.WHITE + colors.BOLD + '\t {:^10}    {:^20}  {:^8}  {:^15}{:^15}'.format(\
         'Device', 'Link', 'Auto-Neg', 'Ring R/T', 'Driver Info')
-        print '\t ' + '=' * 10 + '\t ' + '=' * 17 + '  ' + '=' * 10 + '\t ' + '=' * 10 + '\t ' + '=' * 15 + colors.ENDC
+        print '\t ' + '=' * 10 + '\t ' + '=' * 17 + '  ' + '=' * 10 + '\t ' + '=' * 10 + '   ' + '=' * 15 + colors.ENDC
         for item in sorted(devInfo):
-            if ';' not in item:
-                try:
-                    value = devInfo[item]
-                    if 'bond' in item:
-                        linecolor = colors.GREEN
-                    elif 'eth' in item or 'em' in item:
-                        linecolor = colors.BLUE
-                    else:
-                        linecolor = colors.PURPLE
-                    print '\t' + linecolor + item + '\t\t ' + '{:<5}'.format(value['Link detected'].upper())\
-                     + '{}'.format(value['Speed']) + '  {:>3}'.format(value['Auto-negotiation'].upper())\
-                     + '\t\t {:4}/{:4}'.format(value['currentRx'], value['currentTx'])\
-                     + '\t' + '{:<10} '.format(value['driver']) + 'ver:{:8} fw:{:8}'.format(value['driverVersion'], value['firmware']) + colors.ENDC
-                except:
-                    pass
+            try:
+                value = devInfo[item]
+                linecolor = self._setLineColor(item)
+                print '\t' + linecolor + '   {:^7}'.format(item) + '\t{:>5}'.format(value['Link detected'].upper())\
+                 + '{:>6} Mb/s'.format(value['Speed']) + '       {:^4}'.format(value['Auto-negotiation'].upper())\
+                 + '\t {:>4}/{:<4}'.format(value['currentRx'], value['currentTx'])\
+                 + '   {:<7}{:<10} fw:{:8}'.format(value['driver'], value['driverVersion'], value['firmware']) + colors.ENDC
+            except Exception as e:
+                print e
 
 
     def displayBondInfo(self):
@@ -322,16 +338,7 @@ class network():
         print colors.WHITE + colors.BOLD + '\t {:^15}        {:^20}      {:^11}   {:^12} {:^24}'.format('INT','IP ADDR', 'MEMBER OF','MTU', ' HW ADDR')
         print '\t' + '=' * 16 + ' ' * 6 + '=' * 23 + ' ' * 4 + '=' * 13 + ' ' * 5 + '=' * 5 + '\t' + '=' * 19 + colors.ENDC
         for dev in sorted(devInfo):
-            if 'eth' in dev or 'em' in dev:
-                linecolor = colors.BLUE
-            elif 'vlan' in dev:
-                linecolor = colors.CYAN
-            elif 'bond' in dev:
-                linecolor = colors.GREEN
-            elif 'vnet' in dev:
-                linecolor = colors.WHITE
-            else:
-                linecolor = colors.PURPLE
+            linecolor = self._setLineColor(dev)
             print '\t' + linecolor + '{:<15s}'.format(dev) + '{:^36s}{:<16s}{:<5} \t {:<5}'.format(devInfo[dev]['ipAddr'], devInfo[dev]['master'], devInfo[dev]['mtu'], devInfo[dev]['macAddr']) + colors.ENDC
 
 
@@ -348,17 +355,7 @@ class network():
         print '\t'+'='* 12 + '   ' + '=' * 9 + '   ' + '=' * 9 + '   ' + '=' * 9 + '   ' + '=' * 9 + '   ' + '=' * 10 \
         + '  ' + '=' * 9 + '   ' + '=' * 8 + '  ' + '=' * 9
         for dev in sorted(netStats):
-            if 'eth' in dev or 'em' in dev:
-                linecolor = colors.BLUE
-            elif 'vlan' in dev:
-                linecolor = colors.CYAN
-            elif 'bond' in dev:
-                linecolor = colors.GREEN
-            elif 'vnet' in dev:
-                linecolor = colors.WHITE
-            else:
-                linecolor = colors.PURPLE
-
+            linecolor = self._setLineColor(dev)
             print linecolor + '\t {:10}     {:>7.2f}\t    {:^5}m     {:>5}         {:>4}   \t{:>7.2f}     {:^5}m     {:>5}\t {:>4}'\
             .format(dev, math.ceil(float(netStats[dev]['rxBytes']) / 1024 / 1024 / 1024), (netStats[dev]['rxPkts'] / 1000 / 1000),\
              netStats[dev]['rxErrs'], netStats[dev]['rxDrop'], math.ceil(float(netStats[dev]['txBytes']) / 1024 / 1024 / 1024),\
