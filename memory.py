@@ -57,7 +57,6 @@ class memory:
             
     def displayMemGraphs(self):
         memInfo = self.getMemInfo()
-        print colors.SECTION + colors.BOLD + "Memory " + colors.ENDC
         print colors.HEADER + colors.BOLD + '\t Memory Statistics graphed : ' + colors.ENDC
         
         print colors.BLUE + '\t\t Used      : %8.2f GB ' %(memInfo['used'] / 1024)\
@@ -85,6 +84,10 @@ class memory:
     
     def displayMemInfo(self):
         memInfo = self.getMemInfo()
+        print colors.SECTION + colors.BOLD + "Memory " + colors.ENDC
+        if memInfo == False:
+            print colors.RED + colors.BOLD + '\t proc/meminfo not found - cannot parse' + colors.ENDC
+            return False
         self.displayMemGraphs()
         print colors.HEADER + colors.BOLD + '\t RAM  :' + colors.ENDC
         print '\t\t %6.2f GB total memory on system' %(math.ceil(memInfo['total'] / 1024))
