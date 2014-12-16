@@ -74,13 +74,13 @@ def doStuff(**args):
     if args['memory']:
         obj = memory.memory(target)
         obj.displayMemInfo()
-    if  args['bios']:
+    if args['bios']:
         obj = bios.bios(target)
         obj.displayBiosInfo()
-    if  args['kdump']:
+    if args['kdump']:
         obj = kernel.kernel(target)
         obj.displayKernelInfo()
-    if  args['cpu']:
+    if args['cpu']:
         obj = opsys.opsys(target)
         obj.displayCpuInfo()
     if args['filesys']:
@@ -88,19 +88,19 @@ def doStuff(**args):
         obj.displayFsInfo()
     #if  args['sysctl']:
     #    get_sysctl_info(target)
-    if  args['ip']:
+    if args['ip']:
         obj = network.network(target)
         obj.displayIpInfo()
-    if  args['bonding']:
+    if args['bonding']:
         obj = network.network(target)
         obj.displayBondInfo()
-    if  args['ethtool']:
+    if args['ethtool']:
         obj = network.network(target)
         obj.displayEthtoolInfo()
-    if  args['netdev']:
+    if args['netdev']:
         obj = network.network(target)
         obj.displayNetDevInfo()
-    if  args['lspci']:
+    if args['lspci']:
         obj = lspci.lspci(target)
         obj.displayAllLspciInfo()
     if args['rhev'] or args['virt']:
@@ -109,7 +109,7 @@ def doStuff(**args):
 
     #if  args['disk']:
     #    get_storage_info(target, local)
-    if  args['ps']:
+    if args['ps']:
         obj = ps.procInfo(target)
         obj.displayPsInfo()
     #if  args['check']:
@@ -123,13 +123,12 @@ def doStuff(**args):
         pysosDir =  os.path.dirname(os.path.realpath(__file__))
         os.chdir(pysosDir)
         subprocess.call(['git', 'pull', 'pysos', 'master'])
-        
-
+        os.chdir(currentDir)
 
 
 if __name__ == '__main__':
     args = parser.parse_args()
     target = args.target[0]
     if not target.endswith('/'):
-        target = target + '/'	
+        target = target + '/'
     doStuff(**vars(args))
