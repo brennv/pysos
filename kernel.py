@@ -85,7 +85,7 @@ class kernel:
         print colors.BLUE + colors.BOLD + '\t\t Crash Path   : ' + colors.ENDC + crashInfo['path'] + '  ({})'.format(crashInfo['pathDevice'])
         print colors.BLUE + colors.BOLD + '\t\t Space Needed : ' + colors.ENDC + '{:>6.2f} GB'.format(math.ceil(float(crashInfo['memRequired']) / 1000))
         
-        if 'Unknown' not in crashInfo['pathFreeSpace']:
+        if type(crashInfo['pathFreeSpace']) is int:
             print colors.BLUE + colors.BOLD + '\t\t Free Space   : ' + colors.ENDC + '{:>6.2f} GB'.format(crashInfo['pathFreeSpace'])
         else:
             print colors.BLUE + colors.BOLD + '\t\t Free Space   : ' + colors.ENDC + 'Unknown'
