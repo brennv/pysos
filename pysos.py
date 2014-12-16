@@ -1,6 +1,19 @@
 #!/usr/bin/env python
 
-import argparse, sys, pysosutils, opsys, bios, memory, ps, virt, kernel, network, lspci, filesys
+import argparse
+import sys
+import os
+import subprocess
+import pysosutils
+import opsys
+import bios
+import memory
+import ps
+import virt
+import kernel
+import network
+import lspci
+import filesys
 
 parser = argparse.ArgumentParser(description="Pysos is used to quickly parse and display information from a sosreport in a meaningful and human-readable manner")
 parser.add_argument('target', nargs='+', help="Target directory, aka the sosreport root.")
@@ -26,6 +39,7 @@ parser.add_argument('-r', "--rhev", action="store_true", help="Print RHEV inform
 parser.add_argument("--db", action="store_true", help = "Print RHEV DB information")
 parser.add_argument('-v', "--virt", action="store_true", help="Print KVM Virtualization information") 
 #parser.add_argument('-y', "--yum", action="store_true", help='Print yum/RHN information')
+parser.add_argument("--update", action="store_true", help="Update pysos from GitHub")
 
 
 def doStuff(**args):
@@ -102,6 +116,14 @@ def doStuff(**args):
     #    check_installed(target, args['check'], local)
     #if args['yum']:
     #    get_yum_info(target, local)
+
+    # Need to figure out how to do this without requiring a filler target argument.  
+    if args['update']:
+        currentDir = os.getcwd()
+        pysosDir =  os.path.dirname(os.path.realpath(__file__))
+        os.chdir(pysosDir)
+        subprocess.call(['git', 'pull', 'pysos', 'master'])
+        
 
 
 
