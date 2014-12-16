@@ -1,4 +1,4 @@
-import sys, os, pysosutils
+import sys, os, pysosutils, math
 from colors import *
 
 class network():
@@ -140,7 +140,15 @@ class network():
                 for line in nfile.readlines():
                     if line.split(':')[0].strip() == device:
                         line = line.split()
-                        netStats= {'rxBytes': line[0].split(':')[1], 'rxPkts': line[1], 'rxErrs': line[2],\
+                        # Depending on the OS version, there may or may not be a space between the device name
+                        # and the number of bytes received. What we do here is check for that, and adjust line[0]
+                        # appropriately so that the dictionary can be defined the same regardless.
+                        if line[0].strip(':') == device:
+                            line.pop(0)
+                        else:
+                            line[0] = line[0].split(':')[1]
+                        line = map(int, line)
+                        netStats= {'rxBytes': line[0], 'rxPkts': line[1], 'rxErrs': line[2],\
                             'rxDrop': line[3], 'rxFifo': line[4], 'rxFrame': line[5], 'rxComprsd': line[6], \
                             'rxMulti': line[7], 'txBytes': line[8], 'txPkts': line[9], 'txErrs': line[10],\
                             'txDrop': line[11], 'txFifo': line[12],  'txColls': line[13], 'txCarrier': line[14],\
@@ -351,10 +359,10 @@ class network():
             else:
                 linecolor = colors.PURPLE
 
-            print linecolor + '\t {:10}    {:>7.2f} \t   {:>5}m     {:>5}         {:>4}   \t {:>7.2f}   {:>5}m     {:>5}      {:>4}'\
-            .format(dev, int(netStats[dev]['rxBytes']) / 1024 / 1024 / 1024, (int(netStats[dev]['rxPkts']) / 1000 / 1000),\
-             netStats[dev]['rxErrs'], netStats[dev]['rxDrop'], int(netStats[dev]['txBytes']) / 1024 / 1024 / 1024,\
-             (int(netStats[dev]['txPkts']) / 1000 / 1000), netStats[dev]['txErrs'], netStats[dev]['txDrop']) + colors.ENDC  
+            print linecolor + '\t {:10}     {:>7.2f}\t    {:^5}m     {:>5}         {:>4}   \t{:>7.2f}     {:^5}m     {:>5}\t {:>4}'\
+            .format(dev, math.ceil(float(netStats[dev]['rxBytes']) / 1024 / 1024 / 1024), (netStats[dev]['rxPkts'] / 1000 / 1000),\
+             netStats[dev]['rxErrs'], netStats[dev]['rxDrop'], math.ceil(float(netStats[dev]['txBytes']) / 1024 / 1024 / 1024),\
+             (netStats[dev]['txPkts'] / 1000 / 1000), netStats[dev]['txErrs'], netStats[dev]['txDrop']) + colors.ENDC  
 
     def displayAllInfo(self):
         self.displayEthtoolInfo()
