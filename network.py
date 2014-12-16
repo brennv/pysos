@@ -295,7 +295,7 @@ class network():
             try:
                 value = devInfo[item]
                 linecolor = self._setLineColor(item)
-                print '\t' + linecolor + '   {:^7}'.format(item) + '\t{:>5}'.format(value['Link detected'].upper())\
+                print '\t' + linecolor + '  {:^7}'.format(item) + '\t{:>5}'.format(value['Link detected'].upper())\
                  + '{:>6} Mb/s'.format(value['Speed']) + '       {:^4}'.format(value['Auto-negotiation'].upper())\
                  + '\t {:>4}/{:<4}'.format(value['currentRx'], value['currentTx'])\
                  + '   {:<7}{:<10} fw:{:8}'.format(value['driver'], value['driverVersion'], value['firmware']) + colors.ENDC
@@ -335,11 +335,11 @@ class network():
             else:
                 del devInfo[dev]
         print colors.SECTION + colors.BOLD + 'IP Info' + colors.ENDC
-        print colors.WHITE + colors.BOLD + '\t {:^15}        {:^20}      {:^11}   {:^12} {:^24}'.format('INT','IP ADDR', 'MEMBER OF','MTU', ' HW ADDR')
-        print '\t' + '=' * 16 + ' ' * 6 + '=' * 23 + ' ' * 4 + '=' * 13 + ' ' * 5 + '=' * 5 + '\t' + '=' * 19 + colors.ENDC
+        print colors.WHITE + '\t   Device\t     IP Addr\t     Member Of\t     MTU\t      HW Addr' + colors.ENDC
+        print colors.WHITE + '\t ' + '=' * 10 + ' ' * 6 + '=' * 15 + ' ' * 4 + '=' * 11 + ' ' * 5 + '=' * 5 + '\t' + '=' * 19 + colors.ENDC
         for dev in sorted(devInfo):
             linecolor = self._setLineColor(dev)
-            print '\t' + linecolor + '{:<15s}'.format(dev) + '{:^36s}{:<16s}{:<5} \t {:<5}'.format(devInfo[dev]['ipAddr'], devInfo[dev]['master'], devInfo[dev]['mtu'], devInfo[dev]['macAddr']) + colors.ENDC
+            print linecolor + '\t {:^10}\t {:^15}     {:^10}\t    {:^5} \t {:<5}'.format(dev, devInfo[dev]['ipAddr'], devInfo[dev]['master'], devInfo[dev]['mtu'], devInfo[dev]['macAddr']) + colors.ENDC
 
 
     def displayNetDevInfo(self):
@@ -350,13 +350,13 @@ class network():
             if netStats[dev] == False:
                 del netStats[dev]
         print colors.SECTION + colors.BOLD + 'NetDev Stats' + colors.ENDC
-        print colors.WHITE + '\t Int  \t\tRxGbytes     RxPkts      RxErrs     RxDrops     TxGbytes     TxPkts    '+ \
+        print colors.WHITE + '\t   Device      RxGbytes      RxPkts      RxErrs     RxDrops     TxGbytes     TxPkts    '+ \
         ' TxErrs    TxDrops' + colors.ENDC
-        print '\t'+'='* 12 + '   ' + '=' * 9 + '   ' + '=' * 9 + '   ' + '=' * 9 + '   ' + '=' * 9 + '   ' + '=' * 10 \
-        + '  ' + '=' * 9 + '   ' + '=' * 8 + '  ' + '=' * 9
+        print colors.WHITE + '\t '+'='* 10 + '   ' + '=' * 10 + '   ' + '=' * 9 + '   ' + '=' * 9 + '   ' + '=' * 9 + '   ' + '=' * 10 \
+        + '  ' + '=' * 9 + '   ' + '=' * 8 + '  ' + '=' * 9 + colors.ENDC
         for dev in sorted(netStats):
             linecolor = self._setLineColor(dev)
-            print linecolor + '\t {:10}     {:>7.2f}\t    {:^5}m     {:>5}         {:>4}   \t{:>7.2f}     {:^5}m     {:>5}\t {:>4}'\
+            print linecolor + '\t {:^10}     {:>7.2f}\t    {:^5}m     {:>5}         {:>4}   \t{:>7.2f}     {:^5}m     {:>5}\t {:>4}'\
             .format(dev, math.ceil(float(netStats[dev]['rxBytes']) / 1024 / 1024 / 1024), (netStats[dev]['rxPkts'] / 1000 / 1000),\
              netStats[dev]['rxErrs'], netStats[dev]['rxDrop'], math.ceil(float(netStats[dev]['txBytes']) / 1024 / 1024 / 1024),\
              (netStats[dev]['txPkts'] / 1000 / 1000), netStats[dev]['txErrs'], netStats[dev]['txDrop']) + colors.ENDC  
