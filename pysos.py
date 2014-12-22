@@ -14,6 +14,7 @@ import kernel
 import network
 import lspci
 import filesys
+import yum
 
 parser = argparse.ArgumentParser(description="Pysos is used to quickly parse and display information from a sosreport in a meaningful and human-readable manner")
 parser.add_argument('target', nargs='+', help="Target directory, aka the sosreport root.")
@@ -38,7 +39,7 @@ parser.add_argument('-p', "--ps", action="store_true", help="Print process infor
 parser.add_argument('-r', "--rhev", action="store_true", help="Print RHEV information")
 parser.add_argument("--db", action="store_true", help = "Print RHEV DB information")
 parser.add_argument('-v', "--virt", action="store_true", help="Print KVM Virtualization information") 
-#parser.add_argument('-y', "--yum", action="store_true", help='Print yum/RHN information')
+parser.add_argument('-y', "--yum", action="store_true", help='Print yum/RHN information')
 parser.add_argument("--update", action="store_true", help="Update pysos from GitHub")
 
 
@@ -114,8 +115,9 @@ def doStuff(**args):
         obj.displayPsInfo()
     #if  args['check']:
     #    check_installed(target, args['check'], local)
-    #if args['yum']:
-    #    get_yum_info(target, local)
+    if args['yum']:
+        obj = yum.yum(target)
+        obj.displayYumInfo()
 
     # Need to figure out how to do this without requiring a filler target argument.  
     if args['update']:
