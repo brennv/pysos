@@ -1,4 +1,6 @@
-import sys, os, re
+import sys
+import os
+import re
 from collections import OrderedDict
 
 
@@ -147,35 +149,37 @@ def getTaintCodes(target):
 
 
 def parseOutputSection(fname, section):
-    with open(fname, 'r') as pfile:
-        handle_regex = re.compile('^%s\s'%section)
-        newline = re.compile('^$')
-        lines = pfile.readlines()
-        for x in range(0,len(lines)):
-            line = lines[x]
-            if handle_regex.findall(line):
-            # Found header for section
-                sectionInfo = {}
-                sectionInfo['info'] = [] 
-                while True:
-                    try:
-                        line = lines[x+1]
-                # repeat until we hit newline
-                        if not newline.findall(line):
-                             sectionInfo['info'].append(line.strip().strip('\t'))
-                             x += 1
-                        else:
+    if os.path.isfile(fname):
+        with open(fname, 'r') as pfile:
+            handle_regex = re.compile('^%s\s'%section)
+            newline = re.compile('^$')
+            lines = pfile.readlines()
+            for x in range(0,len(lines)):
+                line = lines[x]
+                if handle_regex.findall(line):
+                # Found header for section
+                    sectionInfo = {}
+                    sectionInfo['info'] = [] 
+                    while True:
+                        try:
+                            line = lines[x+1]
+                    # repeat until we hit newline
+                            if not newline.findall(line):
+                                 sectionInfo['info'].append(line.strip().strip('\t'))
+                                 x += 1
+                            else:
+                                break
+                        except:
                             break
-                    except:
-                        break
-
-                info = {}
-                for item in sectionInfo['info']:
-                    try:
-                        key = item.split(':')[0]
-                        value = item.split(':')[1]
-                        info[key] = value
-                    except:
-                        pass
-    return info
+                    info = {}
+                    for item in sectionInfo['info']:
+                        try:
+                            key = item.split(':')[0]
+                            value = item.split(':')[1]
+                            info[key] = value.strip()
+                        except:
+                            pass
+        return info
+    else:
+        return False
     
