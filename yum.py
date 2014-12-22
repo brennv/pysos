@@ -26,12 +26,15 @@ class yum():
     def getRepoList(self):
         if os.path.isfile(self.target + 'sos_commands/yum/yum_-C_repolist'):
             yumInfo = {}
-            with open(self.target + 'sos_commands/yum/yum_-C_repolist', 'r') as yfile:
+            with open(self.target + 'sos_commands/yum/yum_-C_repolist'\
+                        , 'r') as yfile:
                 for line in yfile:
                     if line.startswith('Loaded plugins:'):
                         yumInfo['plugins'] = line.split(':')[1].strip('\n')
                     elif not line.startswith('repo id') and not \
-                             line.startswith('repolist:'):
+                             line.startswith('repolist:') and not \
+                             line.startswith('This') and not \
+                             line.startswith(' '):
                         line = line.split()
                         repo = line[0]
                         repoName = line[1]
@@ -80,8 +83,8 @@ class yum():
 
         print ''
         if prodInfo:
-            print colors.HEADER_BOLD + '\t Products    :  ' + colors.ENDC +\
-             str(len(prodInfo))
+            print colors.HEADER_BOLD + '\t Products    :  ' + \
+                colors.ENDC + str(len(prodInfo))
             for prod in prodInfo:
                 print '\t\t\t' + prod
                 print '\t\t\t' + prodInfo[prod]['Version'] + ' ' + \
