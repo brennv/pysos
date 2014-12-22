@@ -299,8 +299,8 @@ class network():
                  + '{:>6} Mb/s'.format(value['Speed']) + '       {:^4}'.format(value['Auto-negotiation'].upper())\
                  + '\t {:>4}/{:<4}'.format(value['currentRx'], value['currentTx'])\
                  + '   {:<7}{:<10} fw:{:8}'.format(value['driver'], value['driverVersion'], value['firmware']) + colors.ENDC
-            except Exception as e:
-                print e
+            except:
+                pass
 
 
     def displayBondInfo(self):

@@ -28,13 +28,15 @@ class lspci():
                         pass
                 
             return lspciInfo
+        else:
+            return False
             
 
-    def displayLspciInfo(self, chkType, lspciInfo = False):
-        if not lspciInfo:
-            lspciInfo = self.getLspciInfo()
+    def displayLspciInfo(self, chkType):
+        if not self.lspciInfo:
+            self.lspciInfo = self.getLspciInfo()
 
-        for key in lspciInfo:
+        for key in self.lspciInfo:
             if chkType in lspciInfo[key]['devType']:
                 if lspciInfo[key]['count'] > 1:
                     print colors.HEADER_BOLD + '\t\t {:10} : '.format(lspciInfo[key]['devType']) + colors.ENDC + colors.WHITE + '[{} ports]'.format(lspciInfo[key]['count']) + colors.ENDC +' {}'.format(lspciInfo[key]['dev'])
@@ -43,15 +45,19 @@ class lspci():
 
 
     def displayAllLspciInfo(self):
+        self.lspciInfo = self.getLspciInfo()
         print colors.SECTION + colors.BOLD + 'LSPCI' + colors.ENDC
-        print colors.HEADER_BOLD + '\t Physical Devices' + colors.ENDC
-        # Not really *all*, just all we're interesting in
-        self.displayLspciInfo('Ethernet')
-        self.displayLspciInfo('Network')
-        self.displayLspciInfo('IPMI')
-        self.displayLspciInfo('VGA')
-        self.displayLspciInfo('SCSI')
-        self.displayLspciInfo('Serial Attached')
+        if self.lspciInfo:
+            print colors.HEADER_BOLD + '\t Physical Devices' + colors.ENDC
+            # Not really *all*, just all we're interesting in
+            self.displayLspciInfo('Ethernet')
+            self.displayLspciInfo('Network')
+            self.displayLspciInfo('IPMI')
+            self.displayLspciInfo('VGA')
+            self.displayLspciInfo('SCSI')
+            self.displayLspciInfo('Serial Attached')
+        else:
+            print colors.RED + colors.BOLD + '\t LSPCI Information Not Found' + colors.ENDC
 
 
 if __name__ == '__main__':
