@@ -64,8 +64,11 @@ class bios:
         print '\t\t' + colors.BLUE + 'UUID    : ' + colors.ENDC + sysInfo['UUID']
         
         print '\t' + colors.HEADER_BOLD + 'CPU' + colors.ENDC
-        print '\t\t' + colors.WHITE + '{} CPU sockets populated, {} cores / {} threads per core'.format(procInfo['sockets'], procInfo['cores'], procInfo['threadsPerCore']) + colors.ENDC
-        print '\t\t' + colors.WHITE + '{} total physical cores - {} total threads'.format(procInfo['cores'], procInfo['processors']) + colors.ENDC
+        if procInfo['sockets'] > 0:
+            print '\t\t' + colors.WHITE + '{} CPU sockets populated, {} cores / {} threads per core'.format(procInfo['sockets'], procInfo['cores'], procInfo['threadsPerCore']) + colors.ENDC
+            print '\t\t' + colors.WHITE + '{} total physical cores - {} total threads'.format(procInfo['cores'], procInfo['processors']) + colors.ENDC
+        else:
+            print colors.WHITE + '\t\tThis is a Virtual Machine with no defined sockets, cores or threads' + colors.ENDC
         print '\t\t' + colors.BLUE + 'Family  : ' + colors.ENDC + procInfo['vendor'] + ' ' + procInfo['family']
         print '\t\t' + colors.BLUE + 'Model   : ' + colors.ENDC + procInfo['model']
         

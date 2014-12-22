@@ -108,6 +108,10 @@ class opsys:
         for flag in importantFlags:
             pattern = re.compile(flag)
             cpuInfo['flags'] = pattern.sub(colors.WHITE + flag + colors.ENDC, cpuInfo['flags'])
+        if 'sockets' not in cpuInfo:
+            cpuInfo['sockets'] = 0
+            cpuInfo['cores'] = 0
+            cpuInfo['threadsPerCore'] = 0
         return cpuInfo
 
     def displayOpSys(self):
@@ -145,8 +149,11 @@ class opsys:
         cpuInfo = self.getCpuInfo()
         print colors.SECTION + colors.BOLD + 'CPU' + colors.ENDC
         print colors.WHITE + colors.BOLD + '\t\t ' + str(cpuInfo['processors']) +' logical processors' + colors.ENDC
-        print '\t\t ' + str(cpuInfo['sockets']) + ' ' + cpuInfo['model'].strip() + ' processors'
-        print '\t\t %s cores / %s threads per physical processor' %(cpuInfo['cores'], cpuInfo['threadsPerCore'])
+        if cpuInfo['sockets'] > 0:
+            print '\t\t ' + str(cpuInfo['sockets']) + ' ' + cpuInfo['model'].strip() + ' processors'
+            print '\t\t %s cores / %s threads per physical processor' %(cpuInfo['cores'], cpuInfo['threadsPerCore'])
+        else:
+            print colors.BLUE + '\t\t This is a Virtual Machine with no defined sockets, cores or threads' + colors.ENDC
         print '\t\t flags : ' + textwrap.fill(cpuInfo['flags'], 90, subsequent_indent='\t\t\t ')
 
 
