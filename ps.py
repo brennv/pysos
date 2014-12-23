@@ -88,9 +88,9 @@ class procInfo:
         badProcs = []
         for item in self.psInfo:
             value = self.psInfo[self.psInfo.index(item)]
-            if (any('<defunct>' in item for item in value) or
-                    any('D' in item for item in value[7]) or
-                    any('Ds' in item for item in value[7])):
+            if (any('<defunct>' in item for item in value or
+                    'D' in item for item in value[7] or
+                    'Ds' in item for item in value[7])):
                 badProcs.append(value)
         return badProcs
 
