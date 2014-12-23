@@ -4,14 +4,16 @@ from colors import *
 
 class lspci():
     """ Capture and optionally display hardware device information """
+
     def __init__(self, target):
         self.target = target
-        self.lspciInfo = self.getLspciInfo()
+        self.lspciInfo = self._getLspciInfo()
 
-    def getLspciInfo(self):
+    def _getLspciInfo(self):
         if os.path.isfile(self.target + 'sos_commands/hardware/lspci'):
             lspciInfo = {}
-            with open(self.target + 'sos_commands/hardware/lspci', 'r') as lfile:
+            with open(self.target + 'sos_commands/hardware/lspci', 'r')\
+                                                            as lfile:
                 for line in lfile:
                     if 'lspci -nvv:' in line:
                         break
@@ -20,34 +22,42 @@ class lspci():
                         if lspciInfo.has_key(pciAddr):
                             lspciInfo[pciAddr]['count'] += 1
                         else:
-                            devType = line[line.find(pciAddr):line.find(': ')+1].strip(pciAddr).strip()
-                            dev = line[line.find(': ')+2:len(line)].strip('\n')
+                            devType = line[line.find(pciAddr):
+                                line.find(': ')+1].strip(pciAddr).strip()
+                            dev = line[line.find(': ')+2:
+                                        len(line)].strip('\n')
                             if 'Ethernet' in devType:
                                 devType = 'Ethernet'
                             elif 'VGA' in devType:
                                 devType = 'VGA'
-                            lspciInfo[pciAddr] = {'pciAddr': pciAddr, 'devType': devType, 'dev': dev, 'count': 1}
+                            elif 'SCSI' in devType:
+                                devType = 'SCSI'
+                            lspciInfo[pciAddr] = {'pciAddr': pciAddr, 
+                                    'devType': devType, 'dev': dev, 
+                                    'count': 1}
                     except:
                         pass
-                
             return lspciInfo
         else:
             return False
-            
 
     def displayLspciInfo(self, chkType):
+        """ Display hardware devices for the given type of device """
         for key in self.lspciInfo:
             if chkType in self.lspciInfo[key]['devType']:
                 if self.lspciInfo[key]['count'] > 1:
-                    print colors.HEADER_BOLD + '\t\t {:10} : '.format(chkType)\
-                        + colors.ENDC + colors.WHITE + '[{} ports]'.format(self.lspciInfo[key]['count'])\
-                        + colors.ENDC +' {}'.format(self.lspciInfo[key]['dev'])
+                    print colors.HEADER_BOLD + '\t\t {:10} : '.format(
+                        self.lspciInfo[key]['devType']) + colors.ENDC +\
+                        colors.WHITE + '[{} ports]'.format(
+                        self.lspciInfo[key]['count'])+ colors.ENDC +\
+                        ' {}'.format(self.lspciInfo[key]['dev'])
                 else:
-                    print colors.HEADER_BOLD + '\t\t {:10} : '.format(chkType)\
-                        + colors.ENDC + ' {}'.format(self.lspciInfo[key]['dev'])
-
+                    print colors.HEADER_BOLD + '\t\t {:10} : '.format(
+                    self.lspciInfo[key]['devType']) + colors.ENDC +\
+                    ' {}'.format(self.lspciInfo[key]['dev'])
 
     def displayAllLspciInfo(self):
+        """ Helper for displaying the most common device types """
         print colors.SECTION + colors.BOLD + 'LSPCI' + colors.ENDC
         if self.lspciInfo:
             print colors.HEADER_BOLD + '\t Physical Devices' + colors.ENDC
@@ -57,14 +67,10 @@ class lspci():
             self.displayLspciInfo('IPMI')
             self.displayLspciInfo('VGA')
             self.displayLspciInfo('SCSI')
-            self.displayLspciInfo('Serial Attached')
         else:
             print colors.RED + colors.BOLD + '\t LSPCI Information Not Found' + colors.ENDC
-
 
 if __name__ == '__main__':
     target = sys.argv[1]
     test = lspci(target)
     test.displayAllLspciInfo()
-                        
-            
