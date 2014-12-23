@@ -33,6 +33,7 @@ parser.add_argument('-g', "--bonding", action="store_true", help="Print bonding 
 parser.add_argument('-i', "--ip", action="store_true", help="Print IP information")
 parser.add_argument('-n', "--netdev", action="store_true", help='Print proc/net/dev information')
 parser.add_argument("--net", action="store_true", help="Alias for --ethtool, --bonding, --ip, --netdev")
+parser.add_argument("--vnet", action="store_true", help="Also display vnet interfaces in network output")
 parser.add_argument('-s', "--sysctl", action="store_true", help="Print common sysctl settings")
 parser.add_argument('-p', "--ps", action="store_true", help="Print process information")
 #parser.add_argument("--check", help='Check package for known bugs')
@@ -60,10 +61,8 @@ def doStuff(**args):
         args['disk'] = True
         args['lspci'] = True
     if args['net']:
-        args['ip'] = True
-        args['bonding'] = True
-        args['ethtool'] = True
-        args['netdev'] = True
+        obj = network.network(target, vnetDisplay=args['vnet'])
+        obj.displayAllNetInfo()
     if args['os']:
         obj = opsys.opsys(target)
         obj.displayOpSys()
@@ -90,16 +89,16 @@ def doStuff(**args):
     #if  args['sysctl']:
     #    get_sysctl_info(target)
     if args['ip']:
-        obj = network.network(target)
+        obj = network.network(target, vnetDisplay=args['vnet'])
         obj.displayIpInfo()
     if args['bonding']:
-        obj = network.network(target)
+        obj = network.network(target, vnetDisplay=args['vnet'])
         obj.displayBondInfo()
     if args['ethtool']:
-        obj = network.network(target)
+        obj = network.network(target, vnetDisplay=args['vnet'])
         obj.displayEthtoolInfo()
     if args['netdev']:
-        obj = network.network(target)
+        obj = network.network(target, vnetDisplay=args['vnet'])
         obj.displayNetDevInfo()
     if args['lspci']:
         obj = lspci.lspci(target)

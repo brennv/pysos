@@ -3,10 +3,11 @@ from colors import *
 
 class network():
 
-    def __init__(self, target):
+    def __init__(self, target, vnetDisplay=False, vlanDisplay=False):
         self.target = target
-
-
+        self.vnetDisplay = vnetDisplay
+        self.vlanDisplay = vlanDisplay
+        self.devList = self.getIntList()
 
     def _setLineColor(self, dev):
         if 'eth' in dev or 'em' in dev or 'enp' in dev or dev.startswith('p'):
@@ -31,12 +32,16 @@ class network():
             lines.pop(0)
             for line in lines:
                 index = line.find(':')
-                dev = str(line[0:index]).strip()
+                dev = str(line[0:index]).strip().lower()
                 if devFilter:
                     if devFilter in dev:
                         devList.append(dev)
                 else:
-                    devList.append(dev)
+                    if not 'vnet' in dev and not 'vlan' in dev:
+                        devList.append(dev)
+                    else:
+                        if self.vnetDisplay:
+                            devList.append(dev)
         # we don't care about these devices
         try:
             devList.remove('lo')
@@ -59,21 +64,18 @@ class network():
 
 
     def getAllIntInfo(self):
-        devList = self.getIntList()
         devInfo = {}
-        for dev in devList:
-            devInfo[dev] = self.getInterfaceInfo(dev)
-            try:
-                if "Unknown!" in devInfo[dev]['Speed']:
-                    devInfo[dev]['Speed'] = '{:^11}'.format('Unknown')
-                else:
-                    devInfo[dev]['Speed'] = devInfo[dev]['Speed'].split('M')[0]
-            except:
-                pass
-        checks = ['currentRx', 'currentTx', 'Speed']
-        for check in checks:
-            if check not in devInfo:
-                devInfo[check] = ''
+        for dev in self.devList:
+            if not '.' in dev:
+                devInfo[dev] = self.getInterfaceInfo(dev)
+                try:
+                    if "Unknown!" in devInfo[dev]['Speed']:
+                        devInfo[dev]['Speed'] = '{:^11}'.format('Unknown')
+                    else:
+                        devInfo[dev]['Speed'] = devInfo[dev]['Speed'].split('M')[0]
+                except KeyError:
+                    devInfo[dev]['Speed'] = ''
+                    devInfo[dev]['Auto-negotiation'] = ''
         return devInfo
 
 
@@ -267,13 +269,13 @@ class network():
                     return { 'maxRx': '?', 'maxTx': '?', 'currentRx': '?', 'currentTx': '?' }
                 # easiest way to parse this is by line number since it's a fixed output
                 for i, line in enumerate(rfile.readlines()):
-                    if i == 2:
-                        ringSettings['maxRx'] = line.split()[1]
-                    elif i == 5:
-                        ringSettings['maxTx'] = line.split()[1]
-                    elif i == 7:
+                    if i == 1:
+                        ringSettings['maxRx'] = line.split()[1].strip()
+                    elif i == 4:
+                        ringSettings['maxTx'] = line.split()[1].strip()
+                    elif i == 6:
                         ringSettings['currentRx'] = line.split()[1].strip()
-                    elif i == 10:
+                    elif i == 9:
                         ringSettings['currentTx'] = line.split()[1].strip()
             return ringSettings
         else:
@@ -296,12 +298,11 @@ class network():
                 value = devInfo[item]
                 linecolor = self._setLineColor(item)
                 print '\t' + linecolor + '  {:^7}'.format(item) + '\t{:>5}'.format(value['Link detected'].upper())\
-                 + '{:>6} Mb/s'.format(value['Speed']) + '       {:^4}'.format(value['Auto-negotiation'].upper())\
+                 + '{:^10} '.format(value['Speed']) + '\t{:^4}'.format(value['Auto-negotiation'].upper())\
                  + '\t {:>4}/{:<4}'.format(value['currentRx'], value['currentTx'])\
                  + '   {:<7}{:<10} fw:{:8}'.format(value['driver'], value['driverVersion'], value['firmware']) + colors.ENDC
             except:
                 pass
-
 
     def displayBondInfo(self):
         bondInfo = self.getBondInfo()
@@ -325,9 +326,8 @@ class network():
 
 
     def displayIpInfo(self):
-        devList = self.getIntList()
         devInfo = {}
-        for dev in devList:
+        for dev in self.devList:
             devInfo[dev] = self.getIfcfgInfo(dev)
             if devInfo[dev]:
                 devInfo[dev]['ipAddr'] = self.getIpAddr(dev)
@@ -343,9 +343,8 @@ class network():
 
 
     def displayNetDevInfo(self):
-        devList = self.getIntList()
         netStats = {}
-        for dev in devList:
+        for dev in self.devList:
             netStats[dev] = self.getNetDevInfo(dev)
             if netStats[dev] == False:
                 del netStats[dev]
@@ -356,18 +355,23 @@ class network():
         + '  ' + '=' * 9 + '   ' + '=' * 8 + '  ' + '=' * 9 + colors.ENDC
         for dev in sorted(netStats):
             linecolor = self._setLineColor(dev)
-            print linecolor + '\t {:^10}     {:>7.2f}\t    {:^5}m     {:>5}         {:>4}   \t{:>7.2f}     {:^5}m     {:>5}\t {:>4}'\
-            .format(dev, math.ceil(float(netStats[dev]['rxBytes']) / 1024 / 1024 / 1024), (netStats[dev]['rxPkts'] / 1000 / 1000),\
-             netStats[dev]['rxErrs'], netStats[dev]['rxDrop'], math.ceil(float(netStats[dev]['txBytes']) / 1024 / 1024 / 1024),\
-             (netStats[dev]['txPkts'] / 1000 / 1000), netStats[dev]['txErrs'], netStats[dev]['txDrop']) + colors.ENDC  
-
-    def displayAllInfo(self):
-        self.displayEthtoolInfo()
-        self.displayIpInfo()
-        self.displayBondInfo()
-        self.displayNetDevInfo()
+            try:
+                print linecolor + '\t {:^10}     {:>7.2f}\t    {:^5}m     {:>5}         {:>4}   \t{:>7.2f}     {:^5}m     {:>5}\t {:>4}'\
+                .format(dev, math.ceil(float(netStats[dev]['rxBytes']) / 1024 / 1024 / 1024), (netStats[dev]['rxPkts'] / 1000 / 1000),\
+                 netStats[dev]['rxErrs'], netStats[dev]['rxDrop'], math.ceil(float(netStats[dev]['txBytes']) / 1024 / 1024 / 1024),\
+                 (netStats[dev]['txPkts'] / 1000 / 1000), netStats[dev]['txErrs'], netStats[dev]['txDrop']) + colors.ENDC  
+            except:
+                pass
+    def displayAllNetInfo(self):
+        if self.devList:
+            self.displayEthtoolInfo()
+            self.displayIpInfo()
+            self.displayBondInfo()
+            self.displayNetDevInfo()
+        else:
+            print colors.RED + colors.BOLD + 'Could not parse interface information' + colors.ENDC
 
 if __name__ == '__main__':
     target = sys.argv[1]
     test = network(target)
-    test.displayAllInfo()
+    test.displayAllNetInfo()
