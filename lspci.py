@@ -1,14 +1,17 @@
-import sys, os
+import sys
+import os
 from colors import *
-class lspci():
 
+class lspci():
+    """ Capture and optionally display hardware device information """
     def __init__(self, target):
         self.target = target
+        self.lspciInfo = self.getLspciInfo()
 
     def getLspciInfo(self):
-        if os.path.isfile(self.target + 'sos_commands/pci/lspci'):
+        if os.path.isfile(self.target + 'sos_commands/hardware/lspci'):
             lspciInfo = {}
-            with open(self.target + 'sos_commands/pci/lspci', 'r') as lfile:
+            with open(self.target + 'sos_commands/hardware/lspci', 'r') as lfile:
                 for line in lfile:
                     if 'lspci -nvv:' in line:
                         break
@@ -33,19 +36,18 @@ class lspci():
             
 
     def displayLspciInfo(self, chkType):
-        if not self.lspciInfo:
-            self.lspciInfo = self.getLspciInfo()
-
         for key in self.lspciInfo:
-            if chkType in lspciInfo[key]['devType']:
-                if lspciInfo[key]['count'] > 1:
-                    print colors.HEADER_BOLD + '\t\t {:10} : '.format(lspciInfo[key]['devType']) + colors.ENDC + colors.WHITE + '[{} ports]'.format(lspciInfo[key]['count']) + colors.ENDC +' {}'.format(lspciInfo[key]['dev'])
+            if chkType in self.lspciInfo[key]['devType']:
+                if self.lspciInfo[key]['count'] > 1:
+                    print colors.HEADER_BOLD + '\t\t {:10} : '.format(self.lspciInfo[key]['devType'])\
+                        + colors.ENDC + colors.WHITE + '[{} ports]'.format(self.lspciInfo[key]['count'])\
+                        + colors.ENDC +' {}'.format(self.lspciInfo[key]['dev'])
                 else:
-                    print colors.HEADER_BOLD + '\t\t {:10} : '.format(lspciInfo[key]['devType']) + colors.ENDC + ' {}'.format(lspciInfo[key]['dev'])
+                    print colors.HEADER_BOLD + '\t\t {:10} : '.format(self.lspciInfo[key]['devType'])\
+                        + colors.ENDC + ' {}'.format(self.lspciInfo[key]['dev'])
 
 
     def displayAllLspciInfo(self):
-        self.lspciInfo = self.getLspciInfo()
         print colors.SECTION + colors.BOLD + 'LSPCI' + colors.ENDC
         if self.lspciInfo:
             print colors.HEADER_BOLD + '\t Physical Devices' + colors.ENDC
