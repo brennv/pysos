@@ -39,11 +39,11 @@ class lspci():
         for key in self.lspciInfo:
             if chkType in self.lspciInfo[key]['devType']:
                 if self.lspciInfo[key]['count'] > 1:
-                    print colors.HEADER_BOLD + '\t\t {:10} : '.format(self.lspciInfo[key]['devType'])\
+                    print colors.HEADER_BOLD + '\t\t {:10} : '.format(chkType)\
                         + colors.ENDC + colors.WHITE + '[{} ports]'.format(self.lspciInfo[key]['count'])\
                         + colors.ENDC +' {}'.format(self.lspciInfo[key]['dev'])
                 else:
-                    print colors.HEADER_BOLD + '\t\t {:10} : '.format(self.lspciInfo[key]['devType'])\
+                    print colors.HEADER_BOLD + '\t\t {:10} : '.format(chkType)\
                         + colors.ENDC + ' {}'.format(self.lspciInfo[key]['dev'])
 
 
