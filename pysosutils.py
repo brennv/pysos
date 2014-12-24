@@ -117,7 +117,7 @@ def getTaintCodes(target):
     t['512']="Kernel warning occurred"
     t['256']="ACPI table overridden"
     t['128']="Kernel has oopsed before"
-    t['64']="User requested taint (software modifying hardware?)"
+    t['64']="Unsigned kernel modules"
     t['32']="System has hit bad_page"
     t['16']="System experienced a machine check exception"
     t['8']="User forced a module unload"
