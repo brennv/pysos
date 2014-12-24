@@ -2,7 +2,7 @@ import sys, os, pysosutils, math
 from colors import *
 
 class network():
-    """ capture and optionally display network and interface data """
+    """ Capture and optionally display network and interface data """
 
     def __init__(self, target, vnetDisplay=False, vlanDisplay=False):
         self.target = target
@@ -11,8 +11,8 @@ class network():
         self.devList = self.getIntList()
 
     def _setLineColor(self, dev):
-        if 'eth' in dev or 'em' in dev or 'enp' in dev or
-                                                    dev.startswith('p'):
+        if ('eth' in dev or 'em' in dev or 'enp' in dev or 
+                                                dev.startswith('p')):
             return colors.BLUE
         elif 'vlan' in dev:
             return colors.CYAN
@@ -28,7 +28,7 @@ class network():
         devList = []
         with open(self.target +'proc/net/dev', 'r') as dfile:
             lines = dfile.readlines()
-            # the 'Iter-' and '-face' lines from the head of proc/net/dev
+            # the 'Iter-' and '-face' lines from head of proc/net/dev
             # will get captured by this. Delete them from the list
             # There has to be a better way to do this
             lines.pop(0)
@@ -99,7 +99,8 @@ class network():
         if os.path.isfile(self.target +
                     'sos_commands/networking/ifconfig_-a'):
             with open(self.target +
-                    'sos_commands/networking/ifconfig_-a', 'r') as ifile:
+                    'sos_commands/networking/ifconfig_-a',
+                    'r') as ifile:
                 for line in ifile:
                     if line[0].isalpha():
                         if line.split()[0] == device:
@@ -194,15 +195,14 @@ class network():
                         else:
                             line[0] = line[0].split(':')[1]
                         line = map(int, line)
-                        netStats= {'rxBytes': line[0], 'rxPkts':
-                            line[1], 'rxErrs': line[2], 'rxDrop':
-                            line[3], 'rxFifo': line[4], 'rxFrame':
-                            line[5], 'rxComprsd': line[6], 'rxMulti':
-                            line[7], 'txBytes': line[8], 'txPkts':
-                            line[9], 'txErrs': line[10],'txDrop':
-                            line[11], 'txFifo': line[12], 'txColls':
-                            line[13], 'txCarrier': line[14], 
-                            'txComprsd': line[15]}
+                        netStats= {'rxBytes': line[0], 'rxPkts': line[1]
+                            , 'rxErrs': line[2], 'rxDrop': line[3],
+                            'rxFifo': line[4], 'rxFrame': line[5],
+                            'rxComprsd': line[6], 'rxMulti': line[7],
+                            'txBytes': line[8], 'txPkts': line[9],
+                            'txErrs': line[10],'txDrop': line[11],
+                            'txFifo': line[12], 'txColls': line[13],
+                            'txCarrier': line[14],'txComprsd': line[15]}
                         if netStats['rxBytes'] == '':
                             netStats['rxBytes'] = 0
             return netStats
@@ -224,7 +224,8 @@ class network():
                         if line.startswith('BONDING_OPTS'):
                             bondInfo[bond]['bondingOpts'] = line[
                                     line.find('=')+1:len(line)].replace(
-                                    '"', '').replace("'", '').strip('\n')
+                                                    '"', '').replace(
+                                                    "'", '').strip('\n')
                             break
         return bondInfo
 
@@ -343,6 +344,7 @@ class network():
                     'currentRx': '?', 'currentTx': '?'}
 
     def displayEthtoolInfo(self):
+        """ Display formatted ethtool information for all devices """
         devInfo = self.getAllIntInfo()
         # remove invalid devices that ethtool cannot run against
         devInfo = dict((k, v) for k, v in devInfo.iteritems() if v)
@@ -371,6 +373,7 @@ class network():
                 pass
 
     def displayBondInfo(self):
+        """ Display formatted bonding information for all bonds """
         bondInfo = self.getBondInfo()
         print colors.SECTION + colors.BOLD + 'Bonding' + colors.ENDC
         print colors.WHITE + colors.BOLD +\
@@ -395,6 +398,7 @@ class network():
                 pass
 
     def displayIpInfo(self):
+        """ Display formatted IP configuration for all devices """
         devInfo = {}
         for dev in self.devList:
             devInfo[dev] = self.getIfcfgInfo(dev)
@@ -418,6 +422,7 @@ class network():
             devInfo[dev]['mtu'], devInfo[dev]['macAddr']) + colors.ENDC
 
     def displayNetDevInfo(self):
+        """ Display formatted /proc/net/dev stats for all devices """
         netStats = {}
         for dev in self.devList:
             netStats[dev] = self.getNetDevInfo(dev)
@@ -436,16 +441,17 @@ class network():
             try:
                 print linecolor +\
                 '\t {:^10}     {:>7.2f}\t    {:^5}m     {:>5}         {:>4}   \t{:>7.2f}     {:^5}m     {:>5}\t {:>4}'\
-                .format(dev, math.ceil(float(netStats[dev]['rxBytes']) /
+                .format(dev, math.ceil(float(netStats[dev]['rxBytes'])/
                  1073741824), (netStats[dev]['rxPkts'] / 1000000),
                  netStats[dev]['rxErrs'], netStats[dev]['rxDrop'], 
-                 math.ceil(float(netStats[dev]['txBytes']) / 1073741824),
-                 (netStats[dev]['txPkts'] / 1000000),
+                 math.ceil(float(netStats[dev]['txBytes'])
+                 / 1073741824), (netStats[dev]['txPkts'] / 1000000),
                  netStats[dev]['txErrs'], netStats[dev]['txDrop'])\
                  + colors.ENDC  
             except:
                 pass
     def displayAllNetInfo(self):
+        """ Display ethtool, IP, bond and net stat information """
         if self.devList:
             self.displayEthtoolInfo()
             self.displayIpInfo()

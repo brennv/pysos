@@ -43,7 +43,6 @@ parser.add_argument('-v', "--virt", action="store_true", help="Print KVM Virtual
 parser.add_argument('-y', "--yum", action="store_true", help='Print yum/RHN information')
 parser.add_argument("--update", action="store_true", help="Update pysos from GitHub")
 
-
 def doStuff(**args):
     if args['getall']:
         args['os'] = True
@@ -106,26 +105,19 @@ def doStuff(**args):
     if args['rhev'] or args['virt']:
         obj = virt.virt(target)
         obj.showVirtPlat(args['db'])
-
-    #if  args['disk']:
-    #    get_storage_info(target, local)
     if args['ps']:
         obj = ps.procInfo(target)
         obj.displayPsInfo()
-    #if  args['check']:
-    #    check_installed(target, args['check'], local)
     if args['yum']:
         obj = yum.yum(target)
         obj.displayYumInfo()
-
-    # Need to figure out how to do this without requiring a filler target argument.  
+    # Need to figure out how to do this without needing target argument  
     if args['update']:
         currentDir = os.getcwd()
         pysosDir =  os.path.dirname(os.path.realpath(__file__))
         os.chdir(pysosDir)
         subprocess.call(['git', 'pull', 'pysos', 'master'])
         os.chdir(currentDir)
-
 
 if __name__ == '__main__':
     args = parser.parse_args()
