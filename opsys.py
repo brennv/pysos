@@ -178,8 +178,7 @@ class opsys:
             for item in taintCodes:
                 print '\t\t    ' + item
 
-        print colors.GREEN + '%9s' % (' ' + colors.BOLD + '~ ' * 20 + 
-                                                            colors.ENDC)
+        print '\t ' + colors.BGREEN + '~ ' * 20 + colors.ENDC
         print colors.HEADER_BOLD  + '\t Boot time : ' + colors.ENDC +\
                                                     procStat['boottime']
         print colors.HEADER_BOLD  + '\t Sys time  : ' + colors.ENDC +\
