@@ -4,27 +4,36 @@ import re
 from collections import OrderedDict
 
 
-
 def fileToString(filepath):
+    """
+    For single line files, read the file in and return
+    contents as a string.
+    """
     try:
         with open(filepath, 'r') as f:
             return f.readline().strip('\n')
     except IOError:
         return '%s not found' %filepath
 
-
 def getCmdLine(target):
+    """ Get the booted kernel cmdline options """
     return fileToString(target + 'proc/cmdline')
 
 def getRelease(target):
-        return fileToString(target+'etc/redhat-release')
+    """ Get the OS release """
+    return fileToString(target + 'etc/redhat-release')
 
 def getKernelVersion(target):
+    """ Get the booted kernel version """
     uname = fileToString(target + 'sos_commands/kernel/uname_-a')
     return uname.split()[2]
 
-
 def getRpm(target, rpm, boolean=False):
+    """ 
+    Get details on a given rpm.
+
+    Boolean option can be used to see if rpm is installed or not.
+    """
     rpms = []
     if os.path.isfile(target+'installed-rpms'):
         with open(target+'installed-rpms', 'r') as rfile:
@@ -44,8 +53,8 @@ def getRpm(target, rpm, boolean=False):
             rpms.append("Not Installed")
     return rpms
 
-
 def getRpmVer(target, rpm):
+    """ Get _just_ the version of a given RPM """
     ver = getRpm(target, rpm)[0]
     if 'Not Installed' in ver:
         return ver
@@ -54,10 +63,14 @@ def getRpmVer(target, rpm):
         return formatVer
 
 def checkRpm(target, rpm):
+    """
+    This function will check pysosweb DB for any known issues
+    for a given RPM and version.
+    """
     return "Not yet implemented"
 
-
 def getSysctl(target, sysctl):
+    """ Get the setting for a given sysctl """
     sysctls = {}
     if os.path.isfile(target +'sos_commands/kernel/sysctl_-a'):
         with open(target + 'sos_commands/kernel/sysctl_-a', 'r') as sysfile:
@@ -70,8 +83,12 @@ def getSysctl(target, sysctl):
         sysctls = "No sysctl_-a file to parse"
     return sysctls
 
-
 def getChkConfig(target, service):
+    """
+    Check the current service configuration from chkconfig.
+
+    TO DO: expand to systemd.
+    """
     if os.path.isfile(target+'chkconfig'):
         with open(target + 'chkconfig', 'r') as cfile:
             for line in cfile:
@@ -83,6 +100,7 @@ def getChkConfig(target, service):
         return "No chkconfig file found"
 
 def getSeLinux(target):
+    """ Get the current and configured SELinux setting """
     selStatus = {}
     if os.path.isfile(target+'sos_commands/selinux/sestatus_-b'):
         with open(target+'sos_commands/selinux/sestatus_-b', 'r') as sfile:
@@ -106,7 +124,10 @@ def getSeLinux(target):
     return selStatus
 
 def getTaintCodes(target):
-    # check for kernel taint, well known values go in this dictionary
+    """
+    Get the current taint state of the kernel and return a
+    description of the code along with the numerical code.
+    """
     t=OrderedDict()
     t['536870912']="Technology Preview code is loaded"
     t['268435456']="Hardware is unsupported"
@@ -125,7 +146,6 @@ def getTaintCodes(target):
     t['2']="Module has been forcibly loaded"
     t['1']="Proprietary module has been loaded"
     t['0']="Not tainted. Hooray!"
-    
 
     with open(target + 'proc/sys/kernel/tainted', 'r') as tfile:
         check = tfile.read().splitlines()
@@ -147,8 +167,12 @@ def getTaintCodes(target):
         taintCodes.append("Undefined taint code: %s") %str(check)
         return taintCodes
 
-
 def parseOutputSection(fname, section):
+    """
+    Given a filename (fname) and a section header, parse the file
+    and then return all content between the section header and 
+    a new line, signifying the end of the section.
+    """
     if os.path.isfile(fname):
         with open(fname, 'r') as pfile:
             handle_regex = re.compile('^%s\s'%section)
@@ -182,4 +206,3 @@ def parseOutputSection(fname, section):
         return info
     else:
         return False
-    

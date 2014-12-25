@@ -12,8 +12,8 @@ class lspci():
     def _getLspciInfo(self):
         if os.path.isfile(self.target + 'sos_commands/hardware/lspci'):
             lspciInfo = {}
-            with open(self.target + 'sos_commands/hardware/lspci', 'r')\
-                                                            as lfile:
+            with open(self.target +
+                        'sos_commands/hardware/lspci', 'r') as lfile:
                 for line in lfile:
                     if 'lspci -nvv:' in line:
                         break
@@ -23,7 +23,8 @@ class lspci():
                             lspciInfo[pciAddr]['count'] += 1
                         else:
                             devType = line[line.find(pciAddr):
-                                line.find(': ')+1].strip(pciAddr).strip()
+                                line.find(': ')+1].strip(
+                                                        pciAddr).strip()
                             dev = line[line.find(': ')+2:
                                         len(line)].strip('\n')
                             if 'Ethernet' in devType:
@@ -60,7 +61,8 @@ class lspci():
         """ Helper for displaying the most common device types """
         print colors.SECTION + colors.BOLD + 'LSPCI' + colors.ENDC
         if self.lspciInfo:
-            print colors.HEADER_BOLD + '\t Physical Devices' + colors.ENDC
+            print colors.HEADER_BOLD + '\t Physical Devices'\
+                    + colors.ENDC
             # Not really *all*, just all we're interesting in
             self.displayLspciInfo('Ethernet')
             self.displayLspciInfo('Network')
@@ -68,7 +70,8 @@ class lspci():
             self.displayLspciInfo('VGA')
             self.displayLspciInfo('SCSI')
         else:
-            print colors.RED + colors.BOLD + '\t LSPCI Information Not Found' + colors.ENDC
+            print colors.RED + colors.BOLD +\
+                    '\t LSPCI Information Not Found' + colors.ENDC
 
 if __name__ == '__main__':
     target = sys.argv[1]

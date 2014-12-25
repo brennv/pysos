@@ -6,7 +6,6 @@ from colors import *
 class procInfo:
     """ Get and optionally display information from ps output """
 
-
     def __init__(self, target):
         self.target = target
         self.psInfo = self.parseProcFile()
@@ -16,11 +15,15 @@ class procInfo:
             'TTY', 'STAT', 'START', 'TIME', 'COMMAND') + colors.ENDC
 
     def parseProcFile(self):
+        """ 
+        Parse through a ps output file and return the contents
+        as list vaues
+        """
         if os.path.isfile(
                 self.target + 'sos_commands/process/ps_auxwww'):
             retval = []
-            with open(self.target + 'sos_commands/process/ps_auxwww', 'r') \
-                    as psfile:
+            with open(self.target +
+                    'sos_commands/process/ps_auxwww', 'r') as psfile:
                 psfile.next()
                 for line in psfile:
                     proc = line.split()
@@ -31,9 +34,11 @@ class procInfo:
             return False
 
     def getNumProcs(self):
+        """ Get the number of processes running """
         return len(self.psInfo)
 
     def getUserReport(self):
+        """ Get a report on CPU and RSS usage by user """
         usage = defaultdict(list)
         for proc in self.psInfo:
             value = self.psInfo[self.psInfo.index(proc)]
@@ -75,16 +80,19 @@ class procInfo:
         return report
 
     def getTopMem(self, reportNum=5):
+        """ Get report on top memory consuming processes """
         topMemReport = self._formatTopReport(self.psInfo.sort(
                             reverse=True, key=lambda x: float(x[5])))
         return topMemReport
 
     def getTopCpu(self, reportNum=5):
+        """ Get report on top CPU consuming processes """
         topCpuReport = self._formatTopReport(self.psInfo.sort(
                             reverse=True, key=lambda x: float(x[2])))
         return topCpuReport
 
     def getDefunctProcs(self):
+        """ Get report of all defunct processess """
         badProcs = []
         for item in self.psInfo:
             value = self.psInfo[self.psInfo.index(item)]
@@ -103,6 +111,7 @@ class procInfo:
                 ps[3], ps[4], ps[5], ps[6], ps[7], ps[8], ps[9], ps[10])
 
     def displayTopReport(self):
+        """ Display report from getUserReport() """
         numProcs = self.getNumProcs()
         usageReport = self.getUserReport()
         print '\t' + colors.WHITE + 'Total Processes : ' + colors.ENDC \
@@ -122,13 +131,15 @@ class procInfo:
         print ''
 
     def displayCpuReport(self):
+        """ Display report from getTopCpu() """
         cpuReport = self.getTopCpu()
-        print '\t' + colors.WHITE + 'Top CPU Consuming Processes : ' + \
-                colors.ENDC
+        print '\t' + colors.WHITE + 'Top CPU Consuming Processes : '\
+                + colors.ENDC
         self._displayReport(cpuReport)
         print ''
 
     def displayMemReport(self):
+        """ Display report from getTopMem() """
         memReport = self.getTopMem()
         print '\t' + colors.WHITE + 'Top Memory Consuming Processes : '\
                 + colors.ENDC
@@ -136,6 +147,7 @@ class procInfo:
         print ''
 
     def displayDefunctReport(self):
+        """ Display report from getDefunctProcs() """
         defunctReport = self.getDefunctProcs()
         if defunctReport:
             print '\t' + colors.RED + \
@@ -158,7 +170,6 @@ class procInfo:
         else:
             print colors.RED + colors.WARN + 'No PS information found' \
                 + colors.ENDC
-            
 
 if __name__ == '__main__':
     target = sys.argv[1]
