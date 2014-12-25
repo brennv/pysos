@@ -59,7 +59,8 @@ def getRpmVer(target, rpm):
     if 'Not Installed' in ver:
         return ver
     else:
-        formatVer = ver.strip(rpm).strip('x86_64').strip('noarch').strip('-').strip('.')
+        formatVer = ver.strip(rpm).strip('x86_64').strip(
+                                        'noarch').strip('-').strip('.')
         return formatVer
 
 def checkRpm(target, rpm):
@@ -73,7 +74,8 @@ def getSysctl(target, sysctl):
     """ Get the setting for a given sysctl """
     sysctls = {}
     if os.path.isfile(target +'sos_commands/kernel/sysctl_-a'):
-        with open(target + 'sos_commands/kernel/sysctl_-a', 'r') as sysfile:
+        with open(target + 'sos_commands/kernel/sysctl_-a',
+                    'r') as sysfile:
             for line in sysfile:
                 if sysctl in line:
                     name = line.split()[0]
@@ -93,7 +95,8 @@ def getChkConfig(target, service):
         with open(target + 'chkconfig', 'r') as cfile:
             for line in cfile:
                 if service in line:
-                    serviceStatus = line.lstrip(service).rstrip('\n').lstrip()
+                    serviceStatus = line.lstrip(service).rstrip(
+                                                        '\n').lstrip()
                     return serviceStatus
         return "Service not found in chkconfig"
     else:
@@ -103,19 +106,23 @@ def getSeLinux(target):
     """ Get the current and configured SELinux setting """
     selStatus = {}
     if os.path.isfile(target+'sos_commands/selinux/sestatus_-b'):
-        with open(target+'sos_commands/selinux/sestatus_-b', 'r') as sfile:
+        with open(target+'sos_commands/selinux/sestatus_-b',
+                    'r') as sfile:
             for i, line in enumerate(sfile):
                 index = line.find(':')
                 if line.startswith('SELinux status'):
-                    selStatus['status'] = line[index+1:len(line)].strip()
+                    selStatus['status'] = line[index+1:
+                                                    len(line)].strip()
                     if selStatus['status'] == 'disabled':
                         selStatus['current'] = 'disabled'
                         selStatus['config'] = 'disabled'
                         break
                 elif line.startswith('Current'):
-                    selStatus['current'] = line[index+1:len(line)].strip()
+                    selStatus['current'] = line[index+1:
+                                                    len(line)].strip()
                 elif line.startswith('Mode'):
-                    selStatus['config'] = line[index+1:len(line)].strip()
+                    selStatus['config'] = line[index+1:
+                                                    len(line)].strip()
                 elif i > 6:
                     break
     else:
@@ -163,7 +170,7 @@ def getTaintCodes(target):
                     return taintCodes
             else:
                 pass
-        # we should only hit this if we have an undefined taint code remainder from the above
+        # we should only hit this if we have an undefined taint code
         taintCodes.append("Undefined taint code: %s") %str(check)
         return taintCodes
 
@@ -189,7 +196,8 @@ def parseOutputSection(fname, section):
                             line = lines[x+1]
                     # repeat until we hit newline
                             if not newline.findall(line):
-                                 sectionInfo['info'].append(line.strip().strip('\t'))
+                                 sectionInfo['info'].append(line.strip(
+                                                        ).strip('\t'))
                                  x += 1
                             else:
                                 break
