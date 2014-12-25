@@ -5,6 +5,9 @@ import opsys
 import pysosutils
 from colors import *
 
+class Object(object):
+    pass
+
 class bios:
     """ Capture and optionally display bios and dmidecode data """
 
@@ -20,25 +23,29 @@ class bios:
         """ Get information about populated and empty dimms.
         We can then also extract memory support data from this
         """
-        dimmInfo = dict.fromkeys(['maxMem', 'dimmCount', 'emptyDimms',
-                                    'totalMem', 'memArrays'], 0)
+        props = ['maxMem', 'dimmCount', 'emptyDimms', 'totalMem',
+                    'memArrays']
+        dimm = Object()
+        for prop in props:
+            setattr(dimm, prop, int())
         with open(self.dmifile, 'r') as dfile:
         # main iterables that have distinct leading names
             for line in dfile:
                 if 'Maximum Capacity:' in line:
                     index = line.find(':')
-                    dimmInfo['maxMem'] = line[index+1:len(line)].strip()
+                    dimm.maxMem = int(line[index+1:len(line)].strip(
+                                                        ).strip('GB'))
                 if 'Number Of Devices:' in line:
-                    dimmInfo['dimmCount'] += int(line.split()[3])
+                    dimm.dimmCount += int(line.split()[3])
                 if re.match('\tSize:', line):
                     if 'No Module Installed' in line:
-                        dimmInfo['emptyDimms'] += 1
+                        dimm.emptyDimms += 1
                     else:
                         size = int(line.split()[1])
-                        dimmInfo['totalMem'] += size
+                        dimm.totalMem += size
                 if 'Physical Memory Array' in line:
-                    dimmInfo['memArrays'] +=  1
-        return dimmInfo
+                    dimm.memArrays +=  1
+        return dimm
 
     def parseDmi(self, to_check):
         """ 
@@ -68,7 +75,7 @@ class bios:
         biosInfo = self.getBiosInfo()
         sysInfo = self.getSysInfo()
         procInfo = self.getProcInfo()
-        dimmInfo = self.getDimmInfo()
+        dimm = self.getDimmInfo()
         print colors.SECTION + colors.BOLD + 'DMI Decode' + colors.ENDC
         print '\t' + colors.HEADER_BOLD + 'BIOS' + colors.ENDC
         print '\t\t' + colors.BLUE + 'Vendor  : ' + colors.ENDC\
@@ -91,7 +98,7 @@ class bios:
         print '\t' + colors.HEADER_BOLD + 'CPU' + colors.ENDC
         if procInfo['sockets'] > 0:
             print '\t\t' + colors.WHITE +\
-            '{} sockets populated {} cores  {} threads per core'.format(
+            '{} sockets - {} cores - {} threads per core'.format(
                         procInfo['sockets'], procInfo['cores'],
                         procInfo['threadsPerCore']) + colors.ENDC
             print '\t\t' + colors.WHITE + '{} total cores {} total threads'.format(
@@ -104,20 +111,20 @@ class bios:
         print '\t\t' + colors.BLUE + 'Family  : ' + colors.ENDC\
                 + procInfo['vendor'] + ' ' + procInfo['family']
         print '\t\t' + colors.BLUE + 'Model   : ' + colors.ENDC\
-                + procInfo['model']
+                + procInfo['model'].strip()
 
         print '\t' + colors.HEADER_BOLD + 'Memory' + colors.ENDC
         print '\t\t' + colors.WHITE + '{} of {} DIMMs populated'.format(
-                (dimmInfo['dimmCount'] - dimmInfo['emptyDimms']),
-                dimmInfo['dimmCount']) + colors.ENDC
+                (dimm.dimmCount - dimm.emptyDimms),
+                dimm.dimmCount) + colors.ENDC
         print '\t\t' + colors.BLUE + 'Total   : ' + colors.ENDC + str(
-                dimmInfo['totalMem']) + ' MB' + '  ({} GB)'.format((
-                dimmInfo['totalMem'] / 1024))
+                dimm.totalMem) + ' MB' + '  ({} GB)'.format((
+                dimm.totalMem / 1024))
         print '\t\t' + colors.BLUE + 'Max Mem : ' + colors.ENDC\
-                + dimmInfo['maxMem']
+                + '{} GB'.format(dimm.maxMem)
         print '\t\t' + colors.GREEN +\
-        '{} total memory controllers {} maximum per controller'.format(
-        dimmInfo['memArrays'], dimmInfo['maxMem']) + colors.ENDC 
+        '{} total controllers {} GB maximum per controller'.format(
+        dimm.memArrays, dimm.maxMem) + colors.ENDC 
 
 if __name__ == '__main__':
     target = sys.argv[1]
