@@ -14,28 +14,50 @@ import kernel
 import network
 import lspci
 import filesys
+import disk
 import yum
 
-parser = argparse.ArgumentParser(description="Pysos is used to quickly parse and display information from a sosreport in a meaningful and human-readable manner")
-parser.add_argument('target', nargs='+', help="Target directory, aka the sosreport root.")
-parser.add_argument('-a', "--getall", action="store_true", help="Print all information (RHEV excluded)")
-parser.add_argument('-b', "--bios", action="store_true", help="Print BIOS and dmidecode information")
-parser.add_argument('-o', "--os", action="store_true", help="Print OS information")
-parser.add_argument('-k', "--kdump", "--kernel", action="store_true", help="Print kdump and kernel information")
-parser.add_argument('-c', "--cpu", action="store_true", help="Print CPU information ONLY")
-parser.add_argument('-m', "--memory", action="store_true", help="Print memory information")
-#parser.add_argument('-d', "--disk", action="store_true", help='Print /proc/partition information')
-parser.add_argument('-f', "--filesys", action="store_true", help="Print filesystem information")
-parser.add_argument("--fso", action="store_true", help="Print filesystem information AND mount options")
-parser.add_argument('-l', "--lspci", action="store_true", help="Print lspci information")
-parser.add_argument('-e', '--ethtool', action="store_true", help="Print ethtool information")
-parser.add_argument('-g', "--bonding", action="store_true", help="Print bonding information")
-parser.add_argument('-i', "--ip", action="store_true", help="Print IP information")
-parser.add_argument('-n', "--netdev", action="store_true", help='Print proc/net/dev information')
-parser.add_argument("--net", action="store_true", help="Alias for --ethtool, --bonding, --ip, --netdev")
-parser.add_argument("--vnet", action="store_true", help="Also display vnet interfaces in network output")
-parser.add_argument('-s', "--sysctl", action="store_true", help="Print common sysctl settings")
-parser.add_argument('-p', "--ps", action="store_true", help="Print process information")
+parser = argparse.ArgumentParser(description=
+"Pysos is used to quickly parse and display information from a\
+                sosreport in a meaningful and human-readable manner")
+parser.add_argument('target', nargs='+',
+                help="Target directory, aka the sosreport root.")
+parser.add_argument('-a', "--getall", action="store_true",
+                help="Print all information (RHEV excluded)")
+parser.add_argument('-b', "--bios", action="store_true",
+                help="Print BIOS and dmidecode information")
+parser.add_argument('-o', "--os", action="store_true",
+                                help="Print OS information")
+parser.add_argument('-k', "--kdump", "--kernel", action="store_true",
+                help="Print kdump and kernel information")
+parser.add_argument('-c', "--cpu", action="store_true",
+                                help="Print CPU information ONLY")
+parser.add_argument('-m', "--memory", action="store_true",
+                                help="Print memory information")
+parser.add_argument('-d', "--disk", action="store_true",
+                help='Print block device and multipath information')
+parser.add_argument('-f', "--filesys", action="store_true",
+                                help="Print filesystem information")
+parser.add_argument("--fso", action="store_true",
+                help="Print filesystem information AND mount options")
+parser.add_argument('-l', "--lspci", action="store_true",
+                                help="Print lspci information")
+parser.add_argument('-e', '--ethtool', action="store_true",
+                                help="Print ethtool information")
+parser.add_argument('-g', "--bonding", action="store_true",
+                                help="Print bonding information")
+parser.add_argument('-i', "--ip", action="store_true",
+                                help="Print IP information")
+parser.add_argument('-n', "--netdev", action="store_true",
+                                help='Print proc/net/dev information')
+parser.add_argument("--net", action="store_true",
+                help="Alias for --ethtool, --bonding, --ip, --netdev")
+parser.add_argument("--vnet", action="store_true",
+                help="Also display vnet interfaces in network output")
+parser.add_argument('-s', "--sysctl", action="store_true",
+                                help="Print common sysctl settings")
+parser.add_argument('-p', "--ps", action="store_true",
+                                help="Print process information")
 #parser.add_argument("--check", help='Check package for known bugs')
 parser.add_argument('-r', "--rhev", action="store_true", help="Print RHEV information")
 parser.add_argument("--db", action="store_true", help = "Print RHEV DB information")
@@ -82,6 +104,9 @@ def doStuff(**args):
     if args['cpu']:
         obj = opsys.opsys(target)
         obj.displayCpuInfo()
+    if args['disk']:
+        obj = disk.disk(target)
+        obj.displayMultiPathInfo()
     if args['filesys']:
         obj = filesys.filesys(target, showFsOpts = args['fso'])
         obj.displayFsInfo()
