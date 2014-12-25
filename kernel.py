@@ -67,7 +67,7 @@ class kernel:
             crashInfo['pathFreeSpace'] = 'Unknown'
 
         mem = memory.memory(self.target)
-        crashInfo['memRequired'] = int(mem.getMemInfo()['total'])
+        crashInfo['memRequired'] = int(mem.getMemInfo().total)
         return crashInfo
 
     def displayKernelInfo(self):
