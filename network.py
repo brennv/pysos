@@ -1,5 +1,11 @@
-import sys, os, pysosutils, math
+import sys
+import os
+import pysosutils
+import math
 from colors import *
+
+class Object(object):
+    pass
 
 class network():
     """ Capture and optionally display network and interface data """
@@ -55,31 +61,31 @@ class network():
 
     def getInterfaceInfo(self, device):
         """ Given a device, compile ethtool, driver and ring info """
-        devSettings = {}
         try:
-            devSettings.update(self.getEthtoolInfo(device))
-            devSettings.update(self.getIntDriverInfo(device))
-            devSettings.update(self.getRingInfo(device))
+            device = self.getEthtoolInfo(device = device)
+            device = self.getIntDriverInfo(device = device)
+            device = self.getRingInfo(device = device)
         except:
             pass
-        return devSettings
+        return device
 
     def getAllIntInfo(self):
         """ Get all information for every interface in devList """
-        devInfo = {}
-        for dev in self.devList:
-            if not '.' in dev:
-                devInfo[dev] = self.getInterfaceInfo(dev)
+        devInfo = []
+        for device in self.devList:
+            dev = Object()
+            if not '.' in device:
+                dev.name = device
+                dev.valid = True
+                dev = self.getInterfaceInfo(dev)
                 try:
-                    if "Unknown!" in devInfo[dev]['Speed']:
-                        devInfo[dev]['Speed'] = '{:^11}'.format(
-                                                            'Unknown')
+                    if "Unknown!" in dev.speed:
+                        dev.speed = '{:^11}'.format('Unknown')
                     else:
-                        devInfo[dev]['Speed'] = devInfo[dev][
-                                                'Speed'].split('M')[0]
-                except KeyError:
-                    devInfo[dev]['Speed'] = ''
-                    devInfo[dev]['Auto-negotiation'] = ''
+                        dev.speed = dev.speed.split('M')[0]
+                except:
+                    pass
+            devInfo.append(dev)
         return devInfo
 
     def getMacAddr(self, device):
@@ -94,7 +100,7 @@ class network():
                     if line.startswith('HWADDR'):
                         return line[line.find('=')+1:len(line)].replace(
                                 '"', '').replace("'", '').strip('\n')
-        # then default to ifconfig
+        # then default to ifconfig output file
         # though this will cause duplicate MACs with most bond modes
         if os.path.isfile(self.target +
                     'sos_commands/networking/ifconfig_-a'):
@@ -131,7 +137,6 @@ class network():
                     return devInfo['inet addr']
             except KeyError:
                 return ''
-
         # if that fails try ip_address which may or may not be present
         if os.path.isfile(self.target +
                     'sos_commands/networking/ip_address'):
@@ -145,98 +150,108 @@ class network():
                                 return line[line.find('inet')+4:
                                             line.find('/')-1].strip()
         # if we reach this point, we can't reliably determine the IP 
-        # address, and return an empty string
         return ''
 
-    def getIfcfgInfo(self, device):
+    def getIfcfgInfo(self, dev):
         """ Get the ifcfg-file config settings for an interface """
+        if not isinstance(dev, Object):
+            name = device
+            dev = Object()
+            dev.name = name 
+
         if os.path.isfile(self.target +
-                    'etc/sysconfig/network-scripts/ifcfg-' + device):
-            ifcfgInfo = {}
+                    'etc/sysconfig/network-scripts/ifcfg-' + dev.name):
             with open(self.target + 
-                    'etc/sysconfig/network-scripts/ifcfg-' + device,
+                    'etc/sysconfig/network-scripts/ifcfg-' + dev.name,
                     'r') as ifile:
                  for line in ifile.readlines():
                      if line.startswith('MASTER'):
-                         ifcfgInfo['master'] = line[line.find('=')+1:
+                         dev.master = line[line.find('=')+1:
                              len(line)].replace('"', '').replace(
                              "'", '').strip('\n')
                      elif line.startswith('MTU'):
-                         ifcfgInfo['mtu'] = line[line.find('=')+1:
+                         dev.mtu = line[line.find('=')+1:
                              len(line)].replace('"', '').replace(
                              "'", '').strip('\n')
                      elif line.startswith('BRIDGE'):
-                         ifcfgInfo['master'] = line[line.find('=')+1:
+                         dev.master = line[line.find('=')+1:
                              len(line)].replace('"', '').replace(
                              "'", '').strip('\n')
-            if not 'mtu' in ifcfgInfo:
-                ifcfgInfo['mtu'] = 1500
-            if not 'master' in ifcfgInfo:
-                ifcfgInfo['master'] = ''
-            return ifcfgInfo
+            try:
+                dev.mtu
+            except:
+                dev.mtu = 1500
+
+            try: 
+                dev.master
+            except:
+                dev.master = ''
         else:
-            return False
+            dev = False
+
+        return dev
 
     def getNetDevInfo(self, device):
         """ Get interface stats from /proc/net/dev """
         if os.path.isfile(self.target + 'proc/net/dev'):
-            netStats = {}
+            stats = ['rxbytes', 'rxpkts', 'rxerrs', 'rxdrop', 'rxfifo',
+                'rxframe', 'rxcomprsd', 'rxmulti', 'txbytes', 'txpkts',
+                'txerrs', 'txdrop', 'txfifo', 'txcolls', 'txcarrier',
+                'txcomprsd']
             with open(self.target + 'proc/net/dev', 'r') as nfile:
                 for line in nfile.readlines():
                     if line.split(':')[0].strip() == device:
+                        dev = Object()
+                        dev.name = device
                         line = line.split()
-                        # Depending on the OS there may or may not be a 
-                        # space between the device name and the number 
-                        # of bytes received. What we do here is check for
-                        # that and adjust line[0] appropriately so that
-                        # the dict can be defined the same regardless.
+                        # Depending on the OS there may or may not be a
+                        # space between the device name and the number
+                        # of bytes received.
                         if line[0].strip(':') == device:
                             line.pop(0)
                         else:
                             line[0] = line[0].split(':')[1]
                         line = map(int, line)
-                        netStats= {'rxBytes': line[0], 'rxPkts': line[1]
-                            , 'rxErrs': line[2], 'rxDrop': line[3],
-                            'rxFifo': line[4], 'rxFrame': line[5],
-                            'rxComprsd': line[6], 'rxMulti': line[7],
-                            'txBytes': line[8], 'txPkts': line[9],
-                            'txErrs': line[10],'txDrop': line[11],
-                            'txFifo': line[12], 'txColls': line[13],
-                            'txCarrier': line[14],'txComprsd': line[15]}
-                        if netStats['rxBytes'] == '':
-                            netStats['rxBytes'] = 0
-            return netStats
+                        x = 0
+                        for stat in stats:
+                            setattr(dev, stat, line[x])
+                            x += 1
+                        if dev.rxbytes == '':
+                            dev.rxbytes = 0
+            return dev
         else:
             return False
 
     def getBondInfo(self):
         """ Get bonding ifcfg-file information for a bond interface """
         bonds = self.getIntList(devFilter='bond')
-        bondInfo = {}
+        bondInfo = []
         for bond in bonds:
-            bondInfo[bond] = self.getBondIntInfo(bond)
+            dev = self.getBondIntInfo(bond)
             if os.path.isfile(self.target +
-                        'etc/sysconfig/network-scripts/ifcfg-'+ bond):
+                        'etc/sysconfig/network-scripts/ifcfg-'\
+                        + bond):
                 with open(self.target +
-                        'etc/sysconfig/network-scripts/ifcfg-'+ bond, 
-                        'r') as bfile:
+                        'etc/sysconfig/network-scripts/ifcfg-'\
+                        + bond, 'r') as bfile:
                     for line in bfile.readlines():
                         if line.startswith('BONDING_OPTS'):
-                            bondInfo[bond]['bondingOpts'] = line[
-                                    line.find('=')+1:len(line)].replace(
-                                                    '"', '').replace(
-                                                    "'", '').strip('\n')
+                            dev.bondingopts = line[line.find('=')+1:
+                                len(line)].replace('"', '').replace(
+                                "'", '').strip('\n')
                             break
+            bondInfo.append(dev)
         return bondInfo
 
-    def getBondIntInfo(self, bond):
+    def getBondIntInfo(self, bondDev):
         """ Get bond information from /proc/net/bonding/ """
-        bondInfo = {}
-        bondInfo['slaves'] = []
-        bondInfo['failures'] = []
-        bondInfo['macAddrs'] = []
-        if os.path.isfile(self.target + 'proc/net/bonding/' + bond):
-            with open(self.target + 'proc/net/bonding/' + bond,
+        bond = Object()
+        bond.name = bondDev
+        bond.slaves = []
+        bond.failures = []
+        bond.macaddrs = []
+        if os.path.isfile(self.target + 'proc/net/bonding/' + bond.name):
+            with open(self.target + 'proc/net/bonding/' + bond.name,
                         'r') as bfile:
                 for line in bfile.readlines():
                     if line.startswith('Bonding Mode:'):
@@ -244,38 +259,43 @@ class network():
                                     len(line)].strip('\n')
                         if 'IEEE 802.3ad' in mode:
                             mode = '802.3ad (LACP)'
-                        bondInfo['mode'] = mode
+                        bond.mode = mode
                     elif line.startswith('Primary Slave'):
-                         bondInfo['primary']= line[line.find(':')+2:
+                         bond.primary= line[line.find(':')+2:
                                     len(line)].strip('\n')
                     elif line.startswith('Currently Active Slave:'):
-                        bondInfo['active'] = line[line.find(':')+2:
+                        bond.active = line[line.find(':')+2:
                                     len(line)].strip('\n')
                     elif line.startswith('Slave Interface:'):
                         slave = line[line.find(':')+2:
                                     len(line)].strip('\n')
                         try:
-                            if slave == bondInfo['active']:
+                            if slave == bond.active:
                                 slave = slave + '*'
                         except:
                             pass
-                        bondInfo['slaves'].append(slave)
+                        bond.slaves.append(slave)
                     elif line.startswith('Link Failure Count:'):
-                        bondInfo['failures'].append(line[
-                                line.find(':')+2:len(line)].strip('\n'))
+                        bond.failures.append(line[line.find(':')+2:
+                                                len(line)].strip('\n'))
                     elif line.startswith('Permanent HW addr:'):
-                        bondInfo['macAddrs'].append(line[
+                        bond.macaddrs.append(line[
                                 line.find(':')+2:len(line)].strip('\n'))
-        return bondInfo
+        return bond
 
-    def getEthtoolInfo(self, device):
+    def getEthtoolInfo(self, device=False, devName=False):
         """ Get information as reported by ethtool for an interface """
+        if not device:
+            device = Object()
+            device.name = devName
         if os.path.isfile(self.target +
-                'sos_commands/networking/ethtool_' + device):
-            devSettings = pysosutils.parseOutputSection(self.target+\
-                'sos_commands/networking/ethtool_' + device, 'Settings')
+                'sos_commands/networking/ethtool_' + device.name):
+            devSettings = pysosutils.parseOutputSection(self.target +
+                'sos_commands/networking/ethtool_' + device.name, 
+                'Settings')
         else:
-            return False
+            device.valid = False
+            return device
         try:
             if 'yes' in devSettings['Link detected']:
                 devSettings['Link detected'] = 'UP'
@@ -283,71 +303,89 @@ class network():
                 devSettings['Link detected'] = 'DOWN'
         except:
             pass
-        return devSettings
+
+        for key, value in devSettings.items():
+            setattr(device, 
+                    key.replace(' ', '').replace('-', '').lower(),
+                    value)
+        
+        try:
+            device.speed
+        except AttributeError:
+            device.speed = ''
+            device.autonegotiation = ''
+
+        return device
 
     def getIntDriverInfo(self, device):
         """ Get driver information for an interface """
-        driverSettings = {}
         if os.path.isfile(self.target +
-                'sos_commands/networking/ethtool_-i_' + device):
+                'sos_commands/networking/ethtool_-i_' + device.name):
             with open(self.target +
-                'sos_commands/networking/ethtool_-i_' + device, 
+                'sos_commands/networking/ethtool_-i_' + device.name, 
                 'r') as efile:
                 for line in efile:
                     if line.startswith('driver'):
-                        driverSettings['driver'] = line.split(
-                                                    ':')[1].strip('\n')
+                        device.driver = line.split(':')[1].strip('\n')
                     elif line.startswith('version'):
-                        driverSettings['driverVersion'] = line.split(
+                        device.driverversion = line.split(
                                                     ':')[1].strip('\n')
                     elif line.startswith('firmware-version'):
-                        driverSettings['firmware'] = line.split(
+                        device.firmware = line.split(
                                                     ':')[1].strip('\n')
                     else:
                         break
         else:
-            driverSettings['driver'] = '?'
-            driverSettings['driverVersion'] = '?'
-            driverSettings['firmware'] = '?'
-        return driverSettings
+            device.driver = ''
+            device.driverVersion = ''
+            device.firmware = ''
+        return device
 
     def getRingInfo(self, device):
         """ Get ring information for an interface """
-        ringSettings = {}
         if os.path.isfile(self.target +
-                'sos_commands/networking/ethtool_-g_' + device):
-            if 'bond' in device or 'vnet' in device:
-                return {'maxRx': '?', 'maxTx': '?',
-                        'currentRx': '?', 'currentTx': '?'}
+                'sos_commands/networking/ethtool_-g_' + device.name):
+            if 'bond' in device.name or 'vnet' in device.name:
+                for item in ['maxrx', 'maxtx', 'currentrx',
+                                'currenttx']:
+                    setattr(device, item, '?')
+                return device
             with open(self.target +
-                'sos_commands/networking/ethtool_-g_' + device,
+                'sos_commands/networking/ethtool_-g_' + device.name,
                 'r') as rfile:
                 if 'Operation not supported' in rfile.readline():
-                    return { 'maxRx': '?', 'maxTx': '?',
-                            'currentRx': '?', 'currentTx': '?' }
+                    for item in ['maxrx', 'maxtx', 'currentrx',
+                                'currenttx']:
+                        setattr(device, item, '?')
+                    return device
                 # easiest way to parse this is by line number 
                 # since it's a fixed output
                 for i, line in enumerate(rfile.readlines()):
                     if i == 1:
-                        ringSettings['maxRx'] = line.split()[1].strip()
+                        device.maxrx = line.split()[1].strip()
                     elif i == 4:
-                        ringSettings['maxTx'] = line.split()[1].strip()
+                        device.maxtx = line.split()[1].strip()
                     elif i == 6:
-                        ringSettings['currentRx'] = line.split(
-                                                            )[1].strip()
+                        device.currentrx = line.split()[1].strip()
                     elif i == 9:
-                        ringSettings['currentTx'] = line.split(
-                                                            )[1].strip()
-            return ringSettings
+                        device.currenttx = line.split()[1].strip()
+            return device
         else:
-            return {'maxRx': '?', 'maxTx': '?',
-                    'currentRx': '?', 'currentTx': '?'}
+            for item in ['maxrx', 'maxtx', 'currentrx', 'currenttx']:
+                setattr(device, item, '?')
+            return device
 
     def displayEthtoolInfo(self):
         """ Display formatted ethtool information for all devices """
         devInfo = self.getAllIntInfo()
-        # remove invalid devices that ethtool cannot run against
-        devInfo = dict((k, v) for k, v in devInfo.iteritems() if v)
+        for dev in devInfo:
+            try:
+                if not dev.valid:
+                    devInfo.remove(dev)
+            except KeyError:
+                devInfo.remove(dev)
+            except:
+                pass
         print colors.SECTION + colors.BOLD +  'Ethtool' + colors.ENDC
         print colors.WHITE + colors.BOLD +\
                     '\t {:^10}    {:^20}  {:^8}  {:^15}{:^15}'.format(
@@ -356,19 +394,18 @@ class network():
         # this is ugly, need to do this better
         print '\t ' + '=' * 10 + '\t ' + '=' * 17 + '  ' + '=' * 10 +\
                     '\t ' + '=' * 10 + '   ' + '=' * 15 + colors.ENDC
-        for item in sorted(devInfo):
+        for dev in devInfo:
             try:
-                value = devInfo[item]
-                linecolor = self._setLineColor(item)
-                print '\t' + linecolor + '  {:^7}'.format(item) +\
-                        '\t{:>5}'.format(value['Link detected'].upper(
-                        )) + '{:^10} '.format(value['Speed']) +\
-                        '\t{:^4}'.format(value['Auto-negotiation'].upper(
-                        )) + '\t {:>4}/{:<4}'.format(value['currentRx'],
-                        value['currentTx']) +\
-                        '   {:<7}{:<10} fw:{:8}'.format(value['driver'],
-                        value['driverVersion'], value['firmware'])\
-                        + colors.ENDC
+                linecolor = self._setLineColor(dev.name)
+                print '\t' + linecolor + '  {:^7}'.format(
+                        dev.name) + '\t{:>5}'.format(
+                        dev.linkdetected.upper()) + '{:^10} '.format(
+                        dev.speed) + '\t{:^4}'.format(
+                        dev.autonegotiation.upper()) +\
+                        '\t {:>4}/{:<4}'.format(dev.currentrx,
+                        dev.currenttx) +'   {:<7}{:<10} fw:{:8}'.format(
+                        dev.driver, dev.driverversion, 
+                        dev.firmware) + colors.ENDC
             except:
                 pass
 
@@ -383,30 +420,32 @@ class network():
                                     '\t' + '=' * 24 + colors.ENDC
         for bond in sorted(bondInfo):
             try:
-                print colors.GREEN + '\t {:<10}'.format(bond) +\
-                    colors.ENDC + '     {:^20}'.format(bondInfo[bond]
-                    ['mode']) + '\t   {:6}{:<6}'.format(bondInfo[bond]
-                    ['slaves'][0], bondInfo[bond]['macAddrs'][0]) +\
-                    '\t{}'.format(bondInfo[bond]['bondingOpts'])
+                print colors.GREEN + '\t {:<10}'.format(
+                    bond.name) + colors.ENDC + '     {:^20}'.format(
+                    bond.mode) + '\t   {:6}{:<6}'.format(bond.slaves[0],
+                    bond.macaddrs[0]) + '\t{}'.format(bond.bondingopts)
 
-                bondInfo[bond]['slaves'].pop(0)
-                bondInfo[bond]['macAddrs'].pop(0)
-                for i in range(len(bondInfo[bond]['slaves'])):
-                    print '{:<51}{:6}{:<10}'.format(' ', bondInfo[bond]
-                        ['slaves'][i], bondInfo[bond]['macAddrs'][i])
+                bond.slaves.pop(0)
+                bond.macaddrs.pop(0)
+                for i in range(len(bond.slaves)):
+                    print '{:<51}{:6}{:<10}'.format(' ', bond.slaves[i],
+                            bond.macaddrs[i])
             except:
                 pass
 
     def displayIpInfo(self):
         """ Display formatted IP configuration for all devices """
-        devInfo = {}
-        for dev in self.devList:
-            devInfo[dev] = self.getIfcfgInfo(dev)
-            if devInfo[dev]:
-                devInfo[dev]['ipAddr'] = self.getIpAddr(dev)
-                devInfo[dev]['macAddr'] = self.getMacAddr(dev)
+        devInfo = []
+        for device in self.devList:
+            dev = Object()
+            dev.name = device
+            dev = self.getIfcfgInfo(dev)
+            devInfo.append(dev)
+            if dev:
+                dev.ipaddr = self.getIpAddr(dev.name)
+                dev.macaddr = self.getMacAddr(dev.name)
             else:
-                del devInfo[dev]
+                devInfo.remove(dev)
         print colors.SECTION + colors.BOLD + 'IP Info' + colors.ENDC
         print colors.WHITE +\
         '\t   Device\t     IP Addr\t     Member Of\t     MTU\t      HW Addr'\
@@ -415,41 +454,42 @@ class network():
                         ' ' * 4 + '=' * 11 + ' ' * 5 + '=' * 5 + '\t' +\
                         '=' * 19 + colors.ENDC
         for dev in sorted(devInfo):
-            linecolor = self._setLineColor(dev)
+            linecolor = self._setLineColor(dev.name)
             print linecolor + \
             '\t {:^10}\t {:^15}     {:^10}\t    {:^5} \t {:<5}'.format(
-            dev, devInfo[dev]['ipAddr'], devInfo[dev]['master'],
-            devInfo[dev]['mtu'], devInfo[dev]['macAddr']) + colors.ENDC
+            dev.name, dev.ipaddr, dev.master, dev.mtu, 
+            dev.macaddr) + colors.ENDC
 
     def displayNetDevInfo(self):
         """ Display formatted /proc/net/dev stats for all devices """
-        netStats = {}
+        netStats = []
         for dev in self.devList:
-            netStats[dev] = self.getNetDevInfo(dev)
-            if netStats[dev] == False:
-                del netStats[dev]
-        print colors.SECTION + colors.BOLD + 'NetDev Stats' + colors.ENDC
-        print colors.WHITE +\
-        '\t   Device      RxGbytes      RxPkts      RxErrs     RxDrops     TxGbytes     TxPkts    ' + \
-        ' TxErrs    TxDrops' + colors.ENDC
+            netStats.append(self.getNetDevInfo(dev))
+
+        print colors.SECTION + colors.BOLD + 'NetDev Stats'\
+                + colors.ENDC
+        print colors.WHITE + '\t   {}       {}     {}'.format(
+            'Device', 'RxGbytes', 'RxPkts') + '\t {}\t    {}'.format(
+            'RxErrs', 'RxDrops') + '\t{}     {}\t{}\t  {}'.format(
+            'TxGbytes', 'TxPkts', 'TxErrs', 'TxDrops') + colors.ENDC
         print colors.WHITE + '\t '+'='* 10 + '   ' + '=' * 10 + '   ' +\
          '=' * 9 + '   ' + '=' * 9 + '   ' + '=' * 9 + '   ' + '=' * 10\
-         + '  ' + '=' * 9 + '   ' + '=' * 8 + '  ' + '=' * 9 +\
+         + '   ' + '=' * 8 + '   ' + '=' * 8 + '  ' + '=' * 9 +\
          colors.ENDC
         for dev in sorted(netStats):
-            linecolor = self._setLineColor(dev)
+            linecolor = self._setLineColor(dev.name)
             try:
                 print linecolor +\
-                '\t {:^10}     {:>7.2f}\t    {:^5}m     {:>5}         {:>4}   \t{:>7.2f}     {:^5}m     {:>5}\t {:>4}'\
-                .format(dev, math.ceil(float(netStats[dev]['rxBytes'])/
-                 1073741824), (netStats[dev]['rxPkts'] / 1000000),
-                 netStats[dev]['rxErrs'], netStats[dev]['rxDrop'], 
-                 math.ceil(float(netStats[dev]['txBytes'])
-                 / 1073741824), (netStats[dev]['txPkts'] / 1000000),
-                 netStats[dev]['txErrs'], netStats[dev]['txDrop'])\
-                 + colors.ENDC  
-            except:
-                pass
+                '\t {:^10}     {:>7.2f}\t    {:^5}m     {:>5}'.format(
+                dev.name, math.ceil(float(dev.rxbytes)/ 1073741824),
+                (dev.rxpkts / 1000000),
+                dev.rxerrs) + '\t    {:>4}   \t{:>7.2f}'.format(
+                dev.rxdrop, math.ceil(float(dev.txbytes) / 1073741824)
+                ) + '\t     {:^5}m     {:^5}\t {:>4}'.format((dev.txpkts
+                / 1000000), dev.txerrs, dev.txdrop) + colors.ENDC  
+            except Exception as e:
+                print e
+
     def displayAllNetInfo(self):
         """ Display ethtool, IP, bond and net stat information """
         if self.devList:
