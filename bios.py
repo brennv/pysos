@@ -33,8 +33,11 @@ class bios:
             for line in dfile:
                 if 'Maximum Capacity:' in line:
                     index = line.find(':')
-                    dimm.maxMem = int(line[index+1:len(line)].strip(
-                                                        ).strip('GB'))
+                    maxmem = line[index+1:len(line)].strip()
+                    if 'GB' in maxmem:
+                        dimm.maxMem = int(maxmem.strip('GB'))
+                    elif 'TB' in maxmem:
+                        dimm.maxMem = int(maxmem.strip('TB')) * 1024
                 if 'Number Of Devices:' in line:
                     dimm.dimmCount += int(line.split()[3])
                 if re.match('\tSize:', line):
