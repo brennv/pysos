@@ -4,6 +4,7 @@ class colors:
     GREEN = '\033[92m'
     BGREEN = '\033[92m' + '\033[1m'
     SECTION = '\033[93m'
+    BSECTION = '\033[93m' + '\033[1m'
     RED = '\033[91m'
     ENDC = '\033[0m'
     BOLD = '\033[1m'

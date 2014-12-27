@@ -7,6 +7,9 @@ import memory
 import math
 from colors import *
 
+class Object(object):
+    pass
+
 class kernel:
     """ Capture and optionally display kernel and dump data """
 
@@ -23,51 +26,53 @@ class kernel:
 
     def getKdumpConfig(self):
         """ Get all config settings for kdump """
-        kdumpConfig = {}
+        kdump = {}
         if os.path.isfile(self.target + 'etc/kdump.conf'):
             with open(self.target + 'etc/kdump.conf', 'r') as kfile:
                 for line in kfile:
                     if (not line.startswith("#") and not
                             line.startswith('\n')):
-                            kdumpConfig[line.split()[0]] = line.split(
-                                        line.split()[0])[1].strip('\n')
+                            kdump[line.split()[0]] = (line.split(
+                                        line.split()[0])[1].strip('\n'))
         else:
-            kdumpConfig['path'] = False
-        if 'path' not in kdumpConfig:
-            kdumpConfig['path'] = '/var/crash/'
-        return kdumpConfig
+            kdump = False
+        try:
+            kdump['path']
+        except KeyError:
+            kdump['path'] = '/var/crash'
+        return kdump
 
     def getCrashInfo(self):
         """ Get data related to the crashkernel memory reservation """
-        crashInfo = {}
+        crashInfo = Object()
         try:
-            crashInfo['memReserve'] = pysosutils.getCmdLine(
+            crashInfo.memreserve = pysosutils.getCmdLine(
                         self.target).split('crashkernel=')[1].split()[0]
         except IndexError:
-            crashInfo['memReserve'] = 'Not Defined'
+            crashInfo.memreserve = 'Not Defined'
 
-        crashInfo['path'] = self.getKdumpConfig()['path']
-        if crashInfo['path']:
+        crashInfo.path = self.getKdumpConfig()['path']
+        if crashInfo.path:
             fs = filesys.filesys(self.target)
             mounts = fs.getFsMounts()
             for mount in mounts:
-                if mounts[mount]['mountPoint'] == crashInfo['path']:
-                    crashInfo['pathFreeSpace'] = fs.getFsSize(
-                                mounts[mount]['mountPoint'])['avail']
-                    crashInfo['pathDevice'] = mounts[mount]['dev']
+                if mount.mountpoint == crashInfo.path.strip():
+                    crashInfo.pathfreespace = fs.getFsSize(
+                                mount.mountpoint).avail / 1048576
+                    crashInfo.pathdevice = mount.dev
             # Hit this if no explicit mount point for crashpath.
             # Assume root fs.
-            if 'pathFreeSpace' not in crashInfo:
-                crashInfo['pathFreeSpace'] = int(fs.getFsSize('/')
-                                                    ['avail']) / 1048576
-                crashInfo['pathDevice'] = fs.getFsDev('/')
+            if not hasattr(crashInfo, 'pathfreespace'):
+                crashInfo.pathfreespace = int(fs.getFsSize('/').avail
+                                                            ) / 1048576
+                crashInfo.pathdevice = fs.getFsDev('/')
         else:
-            crashInfo['path'] = 'No kdump.conf file found'
-            crashInfo['pathDevice'] = 'device unknown'
-            crashInfo['pathFreeSpace'] = 'Unknown'
+            crashInfo.path = 'No kdump.conf file found'
+            crashInfo.pathdevice = 'device unknown'
+            crashInfo.pathfreespace = 'Unknown'
 
         mem = memory.memory(self.target)
-        crashInfo['memRequired'] = int(mem.getMemInfo().total)
+        crashInfo.memrequired = int(mem.getMemInfo().total)
         return crashInfo
 
     def displayKernelInfo(self):
@@ -75,7 +80,7 @@ class kernel:
         kernel = pysosutils.getKernelVersion(self.target)
         kdumpVer = self.getKdumpVersion()[0]
         kdumpState = self.getKdumpState()
-        kdumpConfig = self.getKdumpConfig()
+        kdump = self.getKdumpConfig()
         panicSysctls = pysosutils.getSysctl(self.target, 'panic')
         crashInfo = self.getCrashInfo()
         taintCodes = pysosutils.getTaintCodes(self.target)
@@ -94,32 +99,32 @@ class kernel:
         print colors.HEADER_BOLD + '\t Service enablement  :  '\
                 + colors.ENDC + kdumpState
         print colors.HEADER_BOLD + '\t Memory Reservation  :  '\
-                + colors.ENDC + crashInfo['memReserve']
+                + colors.ENDC + crashInfo.memreserve
 
         print ''
         print colors.HEADER_BOLD + '\t kdump.conf          : '\
                 + colors.ENDC
-        for key in kdumpConfig:
-            if kdumpConfig[key]:
-                print '\t\t\t\t%s  %s' %(key, kdumpConfig[key])
+
+        for key in kdump:
+            print '\t\t\t\t%s  %s' %(key, kdump[key])
         print colors.BLUE + colors.BOLD + '\t\t Crash Path   : '\
-                + colors.ENDC + crashInfo['path'] + '  ({})'.format(
-                                                crashInfo['pathDevice'])
+                + colors.ENDC + crashInfo.path + '  ({})'.format(
+                                                crashInfo.pathdevice)
         print colors.BLUE + colors.BOLD + '\t\t Space Needed : '\
                 + colors.ENDC + '{:>6.2f} GB'.format(math.ceil(
-                                float(crashInfo['memRequired']) / 1000))
+                                float(crashInfo.memrequired) / 1000))
 
-        if type(crashInfo['pathFreeSpace']) is int:
+        if type(crashInfo.pathfreespace) is int:
             print colors.BLUE + colors.BOLD + '\t\t Free Space   : '\
                 + colors.ENDC + '{:>6.2f} GB'.format(
-                                            crashInfo['pathFreeSpace'])
+                                            crashInfo.pathfreespace)
         else:
             print colors.BLUE + colors.BOLD + '\t\t Free Space   : '\
                 + colors.ENDC + 'Unknown'
 
-        if crashInfo['memRequired'] / 1000 > crashInfo['pathFreeSpace']:
+        if crashInfo.memrequired / 1000 > crashInfo.pathfreespace:
             print '\t\t\t ' + colors.WARN \
-                    + 'NOT ENOUGH SPACE FOR VMCORE DUMP' + colors.ENDC
+                    + '\tNOT ENOUGH SPACE FOR VMCORE DUMP' + colors.ENDC
         print ''
 
         print colors.HEADER_BOLD + '\t Kernel Panic Sysctl : '\

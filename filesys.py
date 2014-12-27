@@ -1,36 +1,53 @@
-import sys, os, textwrap
+import sys
+import os
+import textwrap
 from collections import OrderedDict
 from colors import *
 
+class Object(object):
+    pass
+
 class filesys():
-    
+    """ Capture and optionally display filesystem data """
     def __init__(self, target, showFsOpts=False):
         self.target = target
         self.showFsOpts = showFsOpts
 
-
     def getFsMounts(self):
-        if os.path.isfile(self.target + 'sos_commands/filesys/mount_-l'):
-            mounts= OrderedDict()
-            with open(self.target + 'sos_commands/filesys/mount_-l', 'r') as mfile:
+        """ Get a list of all mounts from sosreport """
+        if os.path.isfile(
+                self.target + 'sos_commands/filesys/mount_-l'):
+            mounts = []
+            with open(self.target + 'sos_commands/filesys/mount_-l',
+                        'r') as mfile:
                 for line in mfile:
                     if line.startswith('cgroup'):
                         pass
                     else:
+                        mount = Object()
                         line2 = line.strip('\n').split()
                         try:
-                            mounts[line2[0]] = {'dev': line2[0].lstrip('/dev/mapper'), 'mountPoint': line2[2], 'fsType': line2[4]\
-                            , 'mountOpts': line[line.find('(')+1:line.find(')')-2].strip() }
+                            mount.name = line2[0]
+                            mount.dev = line2[0].replace("/dev/mapper/",
+                            '')
+                            mount.mountpoint = line2[2].strip()
+                            mount.fstype = line2[4]
+                            mount.mountopts = line[line.find('(')+1:
+                                            line.find(')')-2].strip()
                         except:
                             pass
+                    mounts.append(mount)
             return mounts
         else:
             return False
 
     def getFsSize(self, mount):
+        """ Get filesystem size data for a given mount """ 
+        dev = Object()
         if os.path.isfile(self.target + 'sos_commands/filesys/df_-al'):
             mount = mount.strip()
-            with open(self.target + 'sos_commands/filesys/df_-al', 'r') as mfile:
+            with open(self.target + 'sos_commands/filesys/df_-al',
+                        'r') as mfile:
                 for line in mfile:
                     line = line.split()
                     try:
@@ -42,17 +59,26 @@ class filesys():
                                 percAvail = 100 - float(percUsed)
                             except:
                                 percAvail = '-'
-                            return {'size': int(line[0]), 'used': line[1], 'avail': line[2], 'percAvail': percAvail, 'percUsed': percUsed}
+                            dev.size = int(line[0])
+                            dev.used = line[1]
+                            dev.avail = int(line[2])
+                            dev.percavail = percAvail
+                            dev.percused = percUsed
+                            return dev
                     except:
                         pass
-            return {'size': '', 'used': '', 'avail': '', 'percAvail': ''}
-
-        else:
-            return {'size': '', 'used': '', 'avail': '', 'percAvail': ''}
+        dev.size = ''
+        dev.used = ''
+        dev.avail = ''
+        dev.percavail = ''
+        dev.percused = ''
+        return dev
 
     def getFsDev(self, mount):
+        """ Get the backing device for a given mountpoint """
         if os.path.isfile(self.target + 'sos_commands/filesys/mount_-l'):
-            with open(self.target + 'sos_commands/filesys/mount_-l', 'r') as mfile:
+            with open(self.target + 'sos_commands/filesys/mount_-l',
+                        'r') as mfile:
                 for line in mfile:
                     if line.split()[2] == mount:
                         return line.split()[0]
@@ -63,35 +89,48 @@ class filesys():
         
 
     def getAllMountInfo(self):
+        """ Compile all data for all mounts in sosreport """
         mounts = self.getFsMounts()
         for mount in mounts:
-            mounts[mount].update(self.getFsSize(mounts[mount]['mountPoint']))
+            dev = self.getFsSize(mount.mountpoint)
+            mount.__dict__.update(dev.__dict__)
         return mounts
 
     def displayFsInfo(self):
+        """ Display data from getAllMountInfo() """
         mounts = self.getAllMountInfo()
-        for key in mounts.keys():
-            if mounts[key]['size'] < 1 or 'tmpfs' in mounts[key]['dev']:
-                del mounts[key]
-        print colors.SECTION + colors.BOLD + 'File System Information' + colors.ENDC
+        for mount in mounts:
+            if mount.size < 1 or 'tmpfs' in mount.dev:
+                del mount
+        print colors.BSECTION + 'File System Information' + colors.ENDC
         print ''
-        print colors.WHITE + '\t {:^30}\t {:^20}\t  {:^7}    {:^7}    {:^12}'.format('Device', 'Mount Point', 'Size', 'Used', 'Available') + colors.ENDC
-        print colors.WHITE + '\t ' + '=' * 30 +'\t ' + '=' * 19 + '\t' + '=' * 9 + '  ' + '=' * 9 + '   ' + '=' * 14 + colors.ENDC
+        print colors.WHITE +\
+                '\t {:^30}\t {:^20}\t  {:^7}    {:^7}    {:^12}'.format(
+                'Device', 'Mount Point', 'Size', 'Used',
+                'Available') + colors.ENDC
+        print colors.WHITE + '\t ' + '=' * 30 +'\t ' + '=' * 19 + '\t'\
+                + '=' * 9 + '  ' + '=' * 9 + '   ' + '=' * 14\
+                + colors.ENDC
         for mount in mounts:
             try:
-                mounts[mount]['size'] = float(mounts[mount]['size']) / 1048576
-                mounts[mount]['used'] = float(mounts[mount]['used']) / 1048576
-                mounts[mount]['avail'] = float(mounts[mount]['avail']) / 1048576
+                mount.size = float(mount.size) / 1048576
+                mount.used = float(mount.used) / 1048576
+                mount.avail = float(mount.avail) / 1048576
             except:
                 pass
             try:
-                print '\t {:<30}\t  {:<12} {:<6}   {:>6.2f} GB  {:>6.2f} GB   {:>6.2f} GB ({:^2}%)'.format(mounts[mount]['dev'], mounts[mount]['mountPoint']\
-                    ,mounts[mount]['fsType'], mounts[mount]['size'], mounts[mount]['used'], mounts[mount]['avail'], mounts[mount]['percAvail'])
-            except ValueError:
-                print '\t {:<30}\t  {:<12} {:<6}'.format(mounts[mount]['dev'], mounts[mount]['mountPoint'], mounts[mount]['fsType'])
+                print '\t {:<30}\t  {:<12} {:<6}   {:>6.2f} GB'.format(
+                mount.dev, mount.mountpoint, mount.fstype,
+                mount.size) + ' {:>6.2f} GB  {:>6.2f}GB'.format(
+                mount.used, mount.avail) + ' ({:^2}%)'.format(
+                mount.percavail)
+            except:
+                print '\t {:<30}\t  {:<12} {:<6}'.format(mount.dev,
+                                        mount.mountpoint, mount.fstype)
                 
             if self.showFsOpts:
-                print "\t\t " + u"\u2192" + textwrap.fill(mounts[mount]['mountOpts'], 90, subsequent_indent='\t\t  ')
+                print "\t\t " + u"\u2192" + textwrap.fill(
+                        mount.mountOpts, 90, subsequent_indent='\t\t  ')
 
 if __name__ == '__main__':
     target = sys.argv[1]
