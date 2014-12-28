@@ -21,7 +21,10 @@ class filesys():
             with open(self.target + 'sos_commands/filesys/mount_-l',
                         'r') as mfile:
                 for line in mfile:
-                    if line.startswith('cgroup'):
+                    if (line.startswith('cgroup') or
+                        line.startswith('tmpfs') or
+                        line.startswith('none') or
+                        line.startswith('sunrpc')):
                         pass
                     else:
                         mount = Object()
@@ -29,14 +32,14 @@ class filesys():
                         try:
                             mount.name = line2[0]
                             mount.dev = line2[0].replace("/dev/mapper/",
-                            '')
+                            '').replace("/dev/", '')
                             mount.mountpoint = line2[2].strip()
                             mount.fstype = line2[4]
                             mount.mountopts = line[line.find('(')+1:
                                             line.find(')')-2].strip()
                         except:
                             pass
-                    mounts.append(mount)
+                        mounts.append(mount)
             return mounts
         else:
             return False
@@ -105,11 +108,11 @@ class filesys():
         print colors.BSECTION + 'File System Information' + colors.ENDC
         print ''
         print colors.WHITE +\
-                '\t {:^30}\t {:^20}\t  {:^7}    {:^7}    {:^12}'.format(
+                '\t {:^30}\t {:^20}\t  {:^7}    {:^7}\t  {:>11}'.format(
                 'Device', 'Mount Point', 'Size', 'Used',
                 'Available') + colors.ENDC
         print colors.WHITE + '\t ' + '=' * 30 +'\t ' + '=' * 19 + '\t'\
-                + '=' * 9 + '  ' + '=' * 9 + '   ' + '=' * 14\
+                + '=' * 9 + '  ' + '=' * 9 + '    ' + '=' * 18\
                 + colors.ENDC
         for mount in mounts:
             try:
@@ -121,7 +124,7 @@ class filesys():
             try:
                 print '\t {:<30}\t  {:<12} {:<6}   {:>6.2f} GB'.format(
                 mount.dev, mount.mountpoint, mount.fstype,
-                mount.size) + ' {:>6.2f} GB  {:>6.2f}GB'.format(
+                mount.size) + ' {:>6.2f} GB\t{:>6.2f} GB'.format(
                 mount.used, mount.avail) + ' ({:^2}%)'.format(
                 mount.percavail)
             except:
@@ -130,7 +133,7 @@ class filesys():
                 
             if self.showFsOpts:
                 print "\t\t " + u"\u2192" + textwrap.fill(
-                        mount.mountOpts, 90, subsequent_indent='\t\t  ')
+                        mount.mountopts, 90, subsequent_indent='\t\t  ')
 
 if __name__ == '__main__':
     target = sys.argv[1]
