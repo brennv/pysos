@@ -41,7 +41,7 @@ class network():
             lines.pop(0)
             for line in lines:
                 index = line.find(':')
-                dev = str(line[0:index]).strip().lower()
+                dev = str(line[0:index]).strip()
                 if devFilter:
                     if devFilter in dev:
                         devList.append(dev)
@@ -76,7 +76,6 @@ class network():
             dev = Object()
             if not '.' in device:
                 dev.name = device
-                dev.valid = True
                 dev = self.getInterfaceInfo(dev)
                 try:
                     if "Unknown!" in dev.speed:
@@ -210,7 +209,9 @@ class network():
                         if line[0].strip(':') == device:
                             line.pop(0)
                         else:
-                            line[0] = line[0].split(':')[1]
+                            line[0] = line[0].split(':')[1].strip()
+                            if line[0] == '':
+                                line.pop(0)
                         line = map(int, line)
                         x = 0
                         for stat in stats:
@@ -218,7 +219,10 @@ class network():
                             x += 1
                         if dev.rxbytes == '':
                             dev.rxbytes = 0
-            return dev
+            try:
+                return dev
+            except Exception as e:
+                pass
         else:
             return False
 
@@ -256,7 +260,7 @@ class network():
                 for line in bfile.readlines():
                     if line.startswith('Bonding Mode:'):
                         mode = line[line.find(':')+2:
-                                    len(line)].strip('\n')
+                                    line.find('(')-1].strip('\n')
                         if 'IEEE 802.3ad' in mode:
                             mode = '802.3ad (LACP)'
                         bond.mode = mode
@@ -294,7 +298,6 @@ class network():
                 'sos_commands/networking/ethtool_' + device.name, 
                 'Settings')
         else:
-            device.valid = False
             return device
         try:
             if 'yes' in devSettings['Link detected']:
@@ -380,9 +383,9 @@ class network():
         devInfo = self.getAllIntInfo()
         for dev in devInfo:
             try:
-                if not dev.valid:
+                if not dev.name:
                     devInfo.remove(dev)
-            except KeyError:
+            except KeyError or AttributeError:
                 devInfo.remove(dev)
             except:
                 pass
@@ -465,7 +468,6 @@ class network():
         netStats = []
         for dev in self.devList:
             netStats.append(self.getNetDevInfo(dev))
-
         print colors.SECTION + colors.BOLD + 'NetDev Stats'\
                 + colors.ENDC
         print colors.WHITE + '\t   {}       {}     {}'.format(
