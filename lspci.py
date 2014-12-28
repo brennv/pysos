@@ -2,6 +2,9 @@ import sys
 import os
 from colors import *
 
+class Object(object):
+    pass
+
 class lspci():
     """ Capture and optionally display hardware device information """
 
@@ -11,51 +14,58 @@ class lspci():
 
     def _getLspciInfo(self):
         if os.path.isfile(self.target + 'sos_commands/hardware/lspci'):
-            lspciInfo = {}
+            lspciInfo = []
             with open(self.target +
                         'sos_commands/hardware/lspci', 'r') as lfile:
                 for line in lfile:
                     if 'lspci -nvv:' in line:
                         break
                     try:
-                        pciAddr = line[0:line.find('.')-1]
-                        if lspciInfo.has_key(pciAddr):
-                            lspciInfo[pciAddr]['count'] += 1
-                        else:
-                            devType = line[line.find(pciAddr):
-                                line.find(': ')+1].strip(
-                                                        pciAddr).strip()
-                            dev = line[line.find(': ')+2:
+                        pciaddr = line[0:line.find('.')-1].strip()
+                        newDev = True
+                        if len(lspciInfo) > 0:
+                            for dev in lspciInfo:
+                                if dev.pciaddr == pciaddr:
+                                    dev.count += 1
+                                    newDev = False
+                                    break
+                        if newDev:
+                            dev = Object()
+                            dev.pciaddr = pciaddr
+                            dev.devtype = line[line.find(pciaddr):
+                                            line.find(': ')+1].strip(
+                                            pciaddr).strip()
+                            dev.name = line[line.find(': ')+2:
                                         len(line)].strip('\n')
-                            if 'Ethernet' in devType:
-                                devType = 'Ethernet'
-                            elif 'VGA' in devType:
-                                devType = 'VGA'
-                            elif 'SCSI' in devType:
-                                devType = 'SCSI'
-                            lspciInfo[pciAddr] = {'pciAddr': pciAddr, 
-                                    'devType': devType, 'dev': dev, 
-                                    'count': 1}
+                            if 'Ethernet' in dev.devtype:
+                                dev.devtype = 'Ethernet'
+                            elif 'VGA' in dev.devtype:
+                                dev.devtype = 'VGA'
+                            elif 'SCSI' in dev.devtype:
+                                dev.devtype = 'SCSI'
+                            elif 'Fibre Channel' in dev.devtype:
+                                dev.devtype = 'Fibre HBA'
+                            dev.count = 1
+                            lspciInfo.append(dev)
                     except:
                         pass
+
             return lspciInfo
         else:
             return False
 
     def displayLspciInfo(self, chkType):
         """ Display hardware devices for the given type of device """
-        for key in self.lspciInfo:
-            if chkType in self.lspciInfo[key]['devType']:
-                if self.lspciInfo[key]['count'] > 1:
+        for dev in self.lspciInfo:
+            if chkType in dev.devtype:
+                if dev.count > 1:
                     print colors.HEADER_BOLD + '\t\t {:10} : '.format(
-                        self.lspciInfo[key]['devType']) + colors.ENDC +\
-                        colors.WHITE + '[{} ports]'.format(
-                        self.lspciInfo[key]['count'])+ colors.ENDC +\
-                        ' {}'.format(self.lspciInfo[key]['dev'])
+                        dev.devtype) + colors.ENDC + colors.WHITE +\
+                        '[{} ports]'.format(dev.count)+ colors.ENDC +\
+                        ' {}'.format(dev.name)
                 else:
                     print colors.HEADER_BOLD + '\t\t {:10} : '.format(
-                    self.lspciInfo[key]['devType']) + colors.ENDC +\
-                    ' {}'.format(self.lspciInfo[key]['dev'])
+                    dev.devtype) + colors.ENDC + '{}'.format(dev.name)
 
     def displayAllLspciInfo(self):
         """ Helper for displaying the most common device types """
@@ -69,6 +79,7 @@ class lspci():
             self.displayLspciInfo('IPMI')
             self.displayLspciInfo('VGA')
             self.displayLspciInfo('SCSI')
+            self.displayLspciInfo('Fibre')
         else:
             print colors.RED + colors.BOLD +\
                     '\t LSPCI Information Not Found' + colors.ENDC
