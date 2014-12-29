@@ -73,7 +73,7 @@ class virt():
         return pysosutils.getRpm(self.target, 'qemu-kvm', boolean=True)
 
     def showVirtPlat(self, db=False):
-        print colors.SECTION + colors.BOLD + 'Virtualization' + colors.ENDC
+        print colors.BSECTION + 'Virtualization' + colors.ENDC
         if self.checkIsRhev():
             self.hyper = self.getHyperInfo()
             self.displayRhevInfo()
@@ -116,9 +116,9 @@ class virt():
             self.hyper
         except:
             self.hyper = self.getHyperInfo()
-        print colors.HEADER_BOLD + '\t Release    : ' + colors.ENDC +\
+        print colors.BHEADER + '\t Release    : ' + colors.ENDC +\
                             pysosutils.getRelease(self.target)
-        print colors.HEADER_BOLD + '\t Kernel     : ' + colors.ENDC +\
+        print colors.BHEADER + '\t Kernel     : ' + colors.ENDC +\
                             pysosutils.getKernelVersion(self.target)
         print ''
 
@@ -151,7 +151,7 @@ class virt():
 
     def displayRunningVms(self):
         vms = self.getRunningVms()
-        print colors.HEADER_BOLD + '\t Running VMs on this host : ' +\
+        print colors.BHEADER + '\t Running VMs on this host : ' +\
                 colors.ENDC + str(len(vms)) + '\t CPU/RSS GB usage in ()'
         for i in range(0, (len(vms) / 4) +1):
             vmLine = '\t '

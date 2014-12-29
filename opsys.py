@@ -75,7 +75,7 @@ class opsys:
                 loads[index] = (loads[index] + colors.WARN + '(%.2f%%)'
                                     + colors.ENDC) %loadperc
             else:
-                loads[index] = (loads[index] + colors.RED + colors.BOLD
+                loads[index] = (loads[index] + colors.BRED
                                 + '(%.2f%%)' + colors.ENDC) %loadperc
         return str(loads[0] + loads[1] + loads[2])
         
@@ -152,25 +152,25 @@ class opsys:
         loadAvg = self.formatLoadAvg()
         taintCodes = pysosutils.getTaintCodes(self.target)
 
-        print colors.SECTION + colors.BOLD + "OS " + colors.ENDC
-        print colors.HEADER_BOLD + '\t Hostname  : ' + colors.ENDC +\
+        print colors.BSECTION + "OS " + colors.ENDC
+        print colors.BHEADER + '\t Hostname  : ' + colors.ENDC +\
                                                     self.getHostName()
-        print colors.HEADER_BOLD +  '\t Release   : ' + colors.ENDC +\
+        print colors.BHEADER +  '\t Release   : ' + colors.ENDC +\
                                     pysosutils.getRelease(self.target)
-        print colors.HEADER_BOLD + '\t Runlevel  : ' + colors.ENDC +\
+        print colors.BHEADER + '\t Runlevel  : ' + colors.ENDC +\
                                                     self.getRunLevel()
-        print colors.HEADER_BOLD +  '\t SELinux   : ' + colors.ENDC +\
+        print colors.BHEADER +  '\t SELinux   : ' + colors.ENDC +\
                     selStatus['current'] + ' ( config: ' + selStatus[
                                                         'config'] + ' )'
 
-        print colors.HEADER_BOLD + '\t Kernel    : ' + colors.ENDC
-        print '\t   ' + colors.BLUE + colors.BOLD + 'Booted kernel  : '\
+        print colors.BHEADER + '\t Kernel    : ' + colors.ENDC
+        print '\t   ' + colors.BBLUE + 'Booted kernel  : '\
                 + colors.ENDC + pysosutils.getKernelVersion(self.target)
-        print '\t   ' + colors.BLUE + colors.BOLD + 'Booted cmdline : '\
+        print '\t   ' + colors.BBLUE + 'Booted cmdline : '\
                 + colors.ENDC
         print '%15s' % ' ' + textwrap.fill(pysosutils.getCmdLine(
                 self.target), 90, subsequent_indent='%15s' % ' ')
-        print colors.HEADER_BOLD + '\t Taints    :' + colors.ENDC +\
+        print colors.BHEADER + '\t Taints    :' + colors.ENDC +\
                                                         taintCodes[0]
 
         if len(taintCodes) > 1:
@@ -179,18 +179,18 @@ class opsys:
                 print '\t\t    ' + item
 
         print '\t ' + colors.BGREEN + '~ ' * 20 + colors.ENDC
-        print colors.HEADER_BOLD  + '\t Boot time : ' + colors.ENDC +\
+        print colors.BHEADER  + '\t Boot time : ' + colors.ENDC +\
                                                     procStat['boottime']
-        print colors.HEADER_BOLD  + '\t Sys time  : ' + colors.ENDC +\
+        print colors.BHEADER  + '\t Sys time  : ' + colors.ENDC +\
                                                     self.getSosDate()
-        print colors.HEADER_BOLD + '\t Uptime    : ' + colors.ENDC +\
+        print colors.BHEADER + '\t Uptime    : ' + colors.ENDC +\
                                                     self.getUptime()
-        print colors.HEADER_BOLD + '\t Load Avg  : ' + colors.WHITE +\
+        print colors.BHEADER + '\t Load Avg  : ' + colors.WHITE +\
                 '[%s CPUs] ' %(
                         cpuInfo['processors']) + colors.ENDC + loadAvg
 
-        print colors.HEADER_BOLD + '\t /proc/stat: ' + colors.ENDC
-        print '\t   ' + colors.BLUE + colors.BOLD + 'procs_running : '\
+        print colors.BHEADER + '\t /proc/stat: ' + colors.ENDC
+        print '\t   ' + colors.BBLUE + 'procs_running : '\
         + colors.ENDC + procStat['procs_running']  + colors.BLUE +\
         colors.BOLD + '   processes (since boot) : ' + colors.ENDC +\
         procStat['processes']
@@ -198,7 +198,7 @@ class opsys:
     def displayCpuInfo(self):
         """ Display CPU detail information including flags """
         cpuInfo = self.getCpuInfo()
-        print colors.SECTION + colors.BOLD + 'CPU' + colors.ENDC
+        print colors.BSECTION + 'CPU' + colors.ENDC
         print colors.WHITE + colors.BOLD + '\t\t ' + str(
             cpuInfo['processors']) +' logical processors' + colors.ENDC
 

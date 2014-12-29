@@ -59,19 +59,19 @@ class lspci():
         for dev in self.lspciInfo:
             if chkType in dev.devtype:
                 if dev.count > 1:
-                    print colors.HEADER_BOLD + '\t\t {:10} : '.format(
+                    print colors.BHEADER + '\t\t {:10} : '.format(
                         dev.devtype) + colors.ENDC + colors.WHITE +\
                         '[{} ports]'.format(dev.count)+ colors.ENDC +\
                         ' {}'.format(dev.name)
                 else:
-                    print colors.HEADER_BOLD + '\t\t {:10} : '.format(
+                    print colors.BHEADER + '\t\t {:10} : '.format(
                     dev.devtype) + colors.ENDC + '{}'.format(dev.name)
 
     def displayAllLspciInfo(self):
         """ Helper for displaying the most common device types """
-        print colors.SECTION + colors.BOLD + 'LSPCI' + colors.ENDC
+        print colors.BSECTION + 'LSPCI' + colors.ENDC
         if self.lspciInfo:
-            print colors.HEADER_BOLD + '\t Physical Devices'\
+            print colors.BHEADER + '\t Physical Devices'\
                     + colors.ENDC
             # Not really *all*, just all we're interesting in
             self.displayLspciInfo('Ethernet')
@@ -81,7 +81,7 @@ class lspci():
             self.displayLspciInfo('SCSI')
             self.displayLspciInfo('Fibre')
         else:
-            print colors.RED + colors.BOLD +\
+            print colors.BRED +\
                     '\t LSPCI Information Not Found' + colors.ENDC
 
 if __name__ == '__main__':

@@ -79,8 +79,8 @@ class rhevm():
                 7+ - Message
                 '''
 
-                print colors.HEADER_BOLD + "\t Time Stamp: " + colors.ENDC + errorProperties[0] + " " + errorProperties[1]
-                print colors.HEADER_BOLD + "\t Command: " + colors.ENDC + errorProperties[3].lstrip("[").rstrip("]")
+                print colors.BHEADER + "\t Time Stamp: " + colors.ENDC + errorProperties[0] + " " + errorProperties[1]
+                print colors.BHEADER + "\t Command: " + colors.ENDC + errorProperties[3].lstrip("[").rstrip("]")
 
                 # Trying to hack this since messages seem to vary in length - basing on last capital letter. deal with it
                 errMessParts =  errorProperties[7:]
@@ -94,7 +94,7 @@ class rhevm():
                             errorMessage = ' '.join(errMessParts[index:]).replace("\n","")
                             #print errorMessage
 
-                print colors.HEADER_BOLD + "\t Message: " + colors.ENDC  + errorMessage
+                print colors.BHEADER + "\t Message: " + colors.ENDC  + errorMessage
 
                 singleOccurance = True
                 occurances = 0
@@ -105,9 +105,9 @@ class rhevm():
                     singleOccurance = False
 
                 if singleOccurance:
-                    print colors.HEADER_BOLD + "\t Only occurance of this error: " + colors.WHITE + "Yes" + colors.ENDC
+                    print colors.BHEADER + "\t Only occurance of this error: " + colors.WHITE + "Yes" + colors.ENDC
                 else:
-                    print colors.HEADER_BOLD + "\t Only occurance of this error: " + colors.ENDC + colors.RED + "No. Errors appear " + str(occurances) + " times in engine.log starting at " + ' '.join(errorLines[0].split(" ")[0:2]) + colors.ENDC
+                    print colors.BHEADER + "\t Only occurance of this error: " + colors.ENDC + colors.RED + "No. Errors appear " + str(occurances) + " times in engine.log starting at " + ' '.join(errorLines[0].split(" ")[0:2]) + colors.ENDC
 
                 print ""
 
@@ -117,11 +117,11 @@ class rhevm():
 
 
     def displayRhevmInfo(self):
-        print colors.BLUE + colors.BOLD + '\t\t This is a RHEV Manager' + colors.ENDC
+        print colors.BBLUE + '\t\t This is a RHEV Manager' + colors.ENDC
         print ''
-        print colors.HEADER_BOLD + '\t RHEV-M Version : ' + colors.CYAN + self.getRhevmVer() + colors.ENDC
-        print colors.HEADER_BOLD + '\t RHEV-M Reports : ' + colors.CYAN + self.getReportsVer() + colors.ENDC
-        print colors.HEADER_BOLD + '\t RHEV-M DWH     : ' + colors.CYAN + self.getDwhVer() + colors.ENDC
+        print colors.BHEADER + '\t RHEV-M Version : ' + colors.CYAN + self.getRhevmVer() + colors.ENDC
+        print colors.BHEADER + '\t RHEV-M Reports : ' + colors.CYAN + self.getReportsVer() + colors.ENDC
+        print colors.BHEADER + '\t RHEV-M DWH     : ' + colors.CYAN + self.getDwhVer() + colors.ENDC
         print ''
         dbPresent = self.checkForDb()
         if dbPresent:
@@ -156,7 +156,7 @@ class rhevm():
         # create DC list
         dcList = self.getDcList()
         print ""
-        print colors.SECTION + colors.BOLD + "RHEV Database Information" + colors.ENDC
+        print colors.BSECTION + "RHEV Database Information" + colors.ENDC
         print ""
         print '\n\t' + colors.BOLD + colors.GREEN + '[Data Centers Managed By RHEV-M]' + colors.ENDC
         dc_table = Table(dcList,"name","uuid","compat")

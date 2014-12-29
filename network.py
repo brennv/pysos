@@ -389,7 +389,7 @@ class network():
                 devInfo.remove(dev)
             except:
                 pass
-        print colors.SECTION + colors.BOLD +  'Ethtool' + colors.ENDC
+        print colors.BSECTION +  'Ethtool' + colors.ENDC
         print colors.WHITE + colors.BOLD +\
                     '\t {:^10}    {:^20}  {:^8}  {:^15}{:^15}'.format(
                     'Device', 'Link', 'Auto-Neg', 'Ring R/T', 
@@ -415,7 +415,7 @@ class network():
     def displayBondInfo(self):
         """ Display formatted bonding information for all bonds """
         bondInfo = self.getBondInfo()
-        print colors.SECTION + colors.BOLD + 'Bonding' + colors.ENDC
+        print colors.BSECTION + 'Bonding' + colors.ENDC
         print colors.WHITE + colors.BOLD +\
         '\t {:^10}    {:^20}    {:^30}{:^31}'.format('Device', 'Mode',
                                     'Slave Interfaces', 'Bonding Opts')
@@ -449,7 +449,7 @@ class network():
                 dev.macaddr = self.getMacAddr(dev.name)
             else:
                 devInfo.remove(dev)
-        print colors.SECTION + colors.BOLD + 'IP Info' + colors.ENDC
+        print colors.BSECTION + 'IP Info' + colors.ENDC
         print colors.WHITE +\
         '\t   Device\t     IP Addr\t     Member Of\t     MTU\t      HW Addr'\
         + colors.ENDC
@@ -468,7 +468,7 @@ class network():
         netStats = []
         for dev in self.devList:
             netStats.append(self.getNetDevInfo(dev))
-        print colors.SECTION + colors.BOLD + 'NetDev Stats'\
+        print colors.BSECTION + 'NetDev Stats'\
                 + colors.ENDC
         print colors.WHITE + '\t   {}       {}     {}'.format(
             'Device', 'RxGbytes', 'RxPkts') + '\t {}\t    {}'.format(
@@ -500,7 +500,7 @@ class network():
             self.displayBondInfo()
             self.displayNetDevInfo()
         else:
-            print colors.RED + colors.BOLD +\
+            print colors.BRED +\
                 'Could not parse interface information' + colors.ENDC
 
 if __name__ == '__main__':

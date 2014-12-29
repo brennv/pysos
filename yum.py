@@ -69,21 +69,21 @@ class yum():
         yumInfo = self.getRepoList()
         prodInfo = self.getSubMgrInst()
         lastUpdate = self.getLastUpdateDate()
-        print colors.SECTION + colors.BOLD + "Package Information"\
+        print colors.BSECTION + "Package Information"\
             + colors.ENDC
-        print colors.HEADER_BOLD + '\t Plugins     : ' + colors.ENDC + \
+        print colors.BHEADER + '\t Plugins     : ' + colors.ENDC + \
             yumInfo['plugins']
         del yumInfo['plugins']
         if lastUpdate:
-            print colors.HEADER_BOLD + '\t Last Update :  ' + \
+            print colors.BHEADER + '\t Last Update :  ' + \
                 colors.ENDC + lastUpdate
-        print colors.HEADER_BOLD + '\t Repos       : ' + colors.ENDC
+        print colors.BHEADER + '\t Repos       : ' + colors.ENDC
         for repo in yumInfo:
             print '\t\t\t' + yumInfo[repo]['repo']
 
         print ''
         if prodInfo:
-            print colors.HEADER_BOLD + '\t Products    :  ' + \
+            print colors.BHEADER + '\t Products    :  ' + \
                 colors.ENDC + str(len(prodInfo))
             for prod in prodInfo:
                 print '\t\t\t' + prod

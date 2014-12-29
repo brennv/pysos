@@ -85,41 +85,41 @@ class kernel:
         crashInfo = self.getCrashInfo()
         taintCodes = pysosutils.getTaintCodes(self.target)
 
-        print colors.SECTION + colors.BOLD + 'Kernel ' + colors.ENDC
-        print colors.HEADER_BOLD + '\t Running Kernel      :  '\
+        print colors.BSECTION + 'Kernel ' + colors.ENDC
+        print colors.BHEADER + '\t Running Kernel      :  '\
                 + colors.ENDC + kernel
-        print colors.HEADER_BOLD + '\t Kernel Taint State  : '\
+        print colors.BHEADER + '\t Kernel Taint State  : '\
                 + colors.ENDC + taintCodes[0]
         if len(taintCodes) > 1:
             taintCodes.pop(0)
             for item in taintCodes:
                 print '\t\t\t       ' + item
-        print colors.HEADER_BOLD + '\t kexec-tools version :  '\
+        print colors.BHEADER + '\t kexec-tools version :  '\
                 + colors.ENDC + kdumpVer
-        print colors.HEADER_BOLD + '\t Service enablement  :  '\
+        print colors.BHEADER + '\t Service enablement  :  '\
                 + colors.ENDC + kdumpState
-        print colors.HEADER_BOLD + '\t Memory Reservation  :  '\
+        print colors.BHEADER + '\t Memory Reservation  :  '\
                 + colors.ENDC + crashInfo.memreserve
 
         print ''
-        print colors.HEADER_BOLD + '\t kdump.conf          : '\
+        print colors.BHEADER + '\t kdump.conf          : '\
                 + colors.ENDC
 
         for key in kdump:
             print '\t\t\t\t%s  %s' %(key, kdump[key])
-        print colors.BLUE + colors.BOLD + '\t\t Crash Path   : '\
+        print colors.BBLUE + '\t\t Crash Path   : '\
                 + colors.ENDC + crashInfo.path + '  ({})'.format(
                                                 crashInfo.pathdevice)
-        print colors.BLUE + colors.BOLD + '\t\t Space Needed : '\
+        print colors.BBLUE + '\t\t Space Needed : '\
                 + colors.ENDC + '{:>6.2f} GB'.format(math.ceil(
                                 float(crashInfo.memrequired) / 1000))
 
         if type(crashInfo.pathfreespace) is int:
-            print colors.BLUE + colors.BOLD + '\t\t Free Space   : '\
+            print colors.BBLUE + '\t\t Free Space   : '\
                 + colors.ENDC + '{:>6.2f} GB'.format(
                                             crashInfo.pathfreespace)
         else:
-            print colors.BLUE + colors.BOLD + '\t\t Free Space   : '\
+            print colors.BBLUE + '\t\t Free Space   : '\
                 + colors.ENDC + 'Unknown'
 
         if crashInfo.memrequired / 1000 > crashInfo.pathfreespace:
@@ -127,7 +127,7 @@ class kernel:
                     + '\tNOT ENOUGH SPACE FOR VMCORE DUMP' + colors.ENDC
         print ''
 
-        print colors.HEADER_BOLD + '\t Kernel Panic Sysctl : '\
+        print colors.BHEADER + '\t Kernel Panic Sysctl : '\
                     + colors.ENDC
         for item in panicSysctls:
             if panicSysctls[item] == '0':

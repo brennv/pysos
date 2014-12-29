@@ -79,8 +79,8 @@ class bios:
         sysInfo = self.getSysInfo()
         procInfo = self.getProcInfo()
         dimm = self.getDimmInfo()
-        print colors.SECTION + colors.BOLD + 'DMI Decode' + colors.ENDC
-        print '\t' + colors.HEADER_BOLD + 'BIOS' + colors.ENDC
+        print colors.BSECTION + 'DMI Decode' + colors.ENDC
+        print '\t' + colors.BHEADER + 'BIOS' + colors.ENDC
         print '\t\t' + colors.BLUE + 'Vendor  : ' + colors.ENDC\
                     + biosInfo['Vendor']
         print '\t\t' + colors.BLUE + 'Version : ' + colors.ENDC\
@@ -88,7 +88,7 @@ class bios:
         print '\t\t' + colors.BLUE + 'Release : ' + colors.ENDC\
                     + biosInfo['Release Date']
         
-        print '\t' + colors.HEADER_BOLD + 'System' + colors.ENDC
+        print '\t' + colors.BHEADER + 'System' + colors.ENDC
         print '\t\t' + colors.BLUE + 'Vendor  : ' + colors.ENDC\
                     + sysInfo['Manufacturer']
         print '\t\t' + colors.BLUE + 'Server  : ' + colors.ENDC\
@@ -98,7 +98,7 @@ class bios:
         print '\t\t' + colors.BLUE + 'UUID    : ' + colors.ENDC\
                     + sysInfo['UUID']
 
-        print '\t' + colors.HEADER_BOLD + 'CPU' + colors.ENDC
+        print '\t' + colors.BHEADER + 'CPU' + colors.ENDC
         if procInfo['sockets'] > 0:
             print '\t\t' + colors.WHITE +\
             '{} sockets - {} cores - {} threads per core'.format(
@@ -116,7 +116,7 @@ class bios:
         print '\t\t' + colors.BLUE + 'Model   : ' + colors.ENDC\
                 + procInfo['model'].strip()
 
-        print '\t' + colors.HEADER_BOLD + 'Memory' + colors.ENDC
+        print '\t' + colors.BHEADER + 'Memory' + colors.ENDC
         print '\t\t' + colors.WHITE + '{} of {} DIMMs populated'.format(
                 (dimm.dimmCount - dimm.emptyDimms),
                 dimm.dimmCount) + colors.ENDC

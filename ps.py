@@ -102,7 +102,7 @@ class procInfo:
 
     def displayReport(self, report):
 
-        print '\t' + colors.BLUE + colors.BOLD +\
+        print '\t' + colors.BBLUE +\
         '{:^6}\t{:^6}\t{:^5} {:^5}  {:^7}  {:^7}  {:^4} {:^4}  {:^5}{:^8}  {:<8}'\
         .format('USER', 'PID', '%CPU', '%MEM', 'VSZ-MB', 'RSS-MB',
             'TTY', 'STAT', 'START', 'TIME', 'COMMAND') + colors.ENDC
@@ -123,7 +123,7 @@ class procInfo:
 
         print '\t' + colors.WHITE + 'Top Users of CPU and Memory : ' + \
                 colors.ENDC
-        print '\t ' + colors.BLUE + colors.BOLD + \
+        print '\t ' + colors.BBLUE + \
             '{:10}  {:6}  {:6}  {:8}'.format('USER', '%CPU', '%MEM', 
                                                 'RSS') + colors.ENDC
 
@@ -165,7 +165,7 @@ class procInfo:
     def displayPsInfo(self):
         """ display ps information for top consumers, CPU, memory and
         defunct process, if any """
-        print colors.SECTION + colors.BOLD + 'PS' + colors.ENDC
+        print colors.BSECTION + 'PS' + colors.ENDC
         if self.psInfo:
             self.displayTopReport()
             self.displayDefunctReport()

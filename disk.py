@@ -83,7 +83,6 @@ class disk:
                             if len(line) == 4:
                                 dev.pathType = line[1]
                             elif (len(line) >= 5 and len(line) <= 7):
-                                print line
                                 for item in line:
                                     if 'sd' in item:
                                         dev.lunDevs.append(item)
@@ -104,10 +103,10 @@ class disk:
     def displayMultiPathInfo(self):
         devList = self.getBlockDevs()
         mpathInfo = self.getMultiPathInfo()
-        print colors.SECTION + colors.BOLD +\
+        print colors.BSECTION +\
                         'Disk and MultiPath Information' + colors.ENDC
         print ''
-        print colors.HEADER_BOLD + '\t Block Devices  :' + colors.ENDC
+        print colors.BHEADER + '\t Block Devices  :' + colors.ENDC
 
         if devList:
             print colors.WHITE + '\t\t\t\t {:^8}\t {:^12}'.format(
@@ -121,7 +120,7 @@ class disk:
             print ''
             print colors.RED + '\t\tBlock device information not found.'
         print ''
-        print colors.HEADER_BOLD + '\t MultiPath Info :' + colors.ENDC
+        print colors.BHEADER + '\t MultiPath Info :' + colors.ENDC
         print colors.WHITE +\
                 '\t\t\t  {:^8}    {:^6}   {:^35}\t{:10}   {:10}'.format(
                         'Device', 'Size', 'LUN ID', 'DM Devs',

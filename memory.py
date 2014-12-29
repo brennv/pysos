@@ -77,7 +77,7 @@ class memory:
     def displayMemGraphs(self):
         """ Use data from getself.memInfo() to display graphed data """
 
-        print colors.HEADER + colors.BOLD\
+        print colors.BHEADER\
                     + '\t Memory Statistics graphed : ' + colors.ENDC
 
         print colors.BLUE + '\t\t Used      : %8.2f GB ' %(
@@ -118,16 +118,16 @@ class memory:
     def displayMemInfo(self):
         """ Display memory statistics from getself.memInfo() """
 
-        print colors.SECTION + colors.BOLD + "Memory " + colors.ENDC
+        print colors.BSECTION + "Memory " + colors.ENDC
         if self.mem == False:
-            print colors.RED + colors.BOLD +\
+            print colors.BRED +\
                 '\t proc/self.memInfo not found - cannot parse'\
                 + colors.ENDC
             return False
 
         self.displayMemGraphs()
 
-        print colors.HEADER + colors.BOLD + '\t RAM  :' + colors.ENDC
+        print colors.BHEADER + '\t RAM  :' + colors.ENDC
         print '\t\t %6.2f GB total memory on system' %(math.ceil(
                                         self.mem.total / 1024))
         print colors.BLUE  + '\t\t %6.2f GB (%.2f %%) used' %((
@@ -146,7 +146,7 @@ class memory:
                 self.mem.dirty, (self.mem.dirty / self.mem.total) 
                 * 100) + colors.ENDC
 
-        print colors.HEADER + colors.BOLD + '\t Swap :' + colors.ENDC
+        print colors.BHEADER + '\t Swap :' + colors.ENDC
         print colors.WHITE + '\t\t %6.2f GB defined  swap space ' %(
                 self.mem.swapTotal / 1024) + colors.ENDC
 
@@ -156,7 +156,7 @@ class memory:
                 self.mem.swapUsed, (self.mem.swapUsed /
                 self.mem.swapTotal) * 100) + colors.ENDC
 
-        print colors.HEADER + colors.BOLD + '\t Misc :'+ colors.ENDC
+        print colors.BHEADER + '\t Misc :'+ colors.ENDC
         print '\t\t %6s MB (%.2f %%) of total memory used for SLAB' %(
                 self.mem.slab, (self.mem.slab / self.mem.total))
 
