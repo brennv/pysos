@@ -99,22 +99,22 @@ class bios:
                     + sysInfo['UUID']
 
         print '\t' + colors.BHEADER + 'CPU' + colors.ENDC
-        if procInfo['sockets'] > 0:
+        if procInfo.sockets > 0:
             print '\t\t' + colors.WHITE +\
             '{} sockets - {} cores - {} threads per core'.format(
-                        procInfo['sockets'], procInfo['cores'],
-                        procInfo['threadsPerCore']) + colors.ENDC
+                        procInfo.sockets, procInfo.cores,
+                        procInfo.threadspercore) + colors.ENDC
             print '\t\t' + colors.WHITE + '{} total cores {} total threads'.format(
-                        procInfo['cores'],
-                        procInfo['processors']) + colors.ENDC
+                        procInfo.cores,
+                        procInfo.processors) + colors.ENDC
         else:
             print colors.WHITE +\
                 '\t\tVirtual Machine with no defined sockets or cores'\
                 + colors.ENDC
         print '\t\t' + colors.BLUE + 'Family  : ' + colors.ENDC\
-                + procInfo['vendor'] + ' ' + procInfo['family']
+                + procInfo.vendor + ' ' + procInfo.family
         print '\t\t' + colors.BLUE + 'Model   : ' + colors.ENDC\
-                + procInfo['model'].strip()
+                + procInfo.model.strip()
 
         print '\t' + colors.BHEADER + 'Memory' + colors.ENDC
         print '\t\t' + colors.WHITE + '{} of {} DIMMs populated'.format(

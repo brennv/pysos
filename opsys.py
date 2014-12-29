@@ -6,6 +6,9 @@ import pysosutils
 import os
 from colors import *
 
+class Object(object):
+    pass
+
 class opsys:
     """ Capture general information about the OS in the sosreport """
 
@@ -63,7 +66,7 @@ class opsys:
     def formatLoadAvg(self):
         """ Format getLoadAvg() into string with percentages """
         loads = self.getLoadAvg()
-        cpus = self.getCpuInfo()['processors']
+        cpus = self.getCpuInfo().processors
         percs = []
         for item in loads:
             index = loads.index(item)
@@ -81,23 +84,23 @@ class opsys:
         
     def getProcStat(self):
         """ Get boottime, number of processes and running procs """
-        procStat = {}
+        procStat = Object()
         with open(self.target+'proc/stat', 'r') as pfile:
             for line in pfile:
                 if line.startswith('btime'):
                     btime = line.split()[1]
-                    procStat['boottime'] = (
+                    procStat.boottime = (
                     datetime.datetime.fromtimestamp(
                     int(btime)).strftime('%a %b %d %H:%M:%S UTC %Y'))
                 if line.startswith('processes'):
-                    procStat['processes'] = line.split()[1]
+                    procStat.processes = line.split()[1]
                 if line.startswith('procs_running'):
-                    procStat['procs_running'] = line.split()[1]
+                    procStat.procsrun = line.split()[1]
         return procStat
 
     def getCpuInfo(self):
         """ Get data from /proc/cpuinfo """
-        cpuInfo = {}
+        cpuInfo = Object()
         with open(self.target+'proc/cpuinfo') as cfile:
             # we read in reverse since the cpu info output is the same
             # no need to iterate over dozens of the same template
@@ -107,42 +110,49 @@ class opsys:
                 line = line.rstrip('\n')
                 index = line.find(':')
                 if line.startswith('flags'):
-                    cpuInfo['flags'] = line[index+2:len(line)]
+                    cpuInfo.flags = line[index+2:len(line)]
                 # number of physical cores
                 elif line.startswith('cpu cores'):
-                    cpuInfo['cores'] = int(line[index+2:len(line)])
+                    cpuInfo.cores = int(line[index+2:len(line)])
                 # number of threads per physical core
                 elif line.startswith('siblings'):
-                    cpuInfo['threadsPerCore'] = int(
+                    cpuInfo.threadspercore = int(
                                                 line[index+2:len(line)])
                 # number of physical sockets
                 elif line.startswith('physical id'):
-                    cpuInfo['sockets'] = int(line[index+2:len(line)]) +1
+                    cpuInfo.sockets = int(line[index+2:len(line)]) +1
                 # proc model
                 elif line.startswith('model name'):
-                    cpuInfo['model'] = line[index+2:len(line)]
+                    cpuInfo.model = line[index+2:len(line)]
                 # proc family
                 elif line.startswith('cpu family'):
-                    cpuInfo['family'] = line[index+2:len(line)]
+                    cpuInfo.family = line[index+2:len(line)]
                 # proc vendor
                 elif line.startswith('vendor_id'):
-                    cpuInfo['vendor'] = line[index+2:len(line)]
+                    cpuInfo.vendor = line[index+2:len(line)]
                 # finally, total number of CPUs
                 elif line.startswith('processor'):
-                    cpuInfo['processors'] = int(line[index+2:
+                    cpuInfo.processors = int(line[index+2:
                                                         len(line)])+1
                     break
 
         importantFlags = ['vmx', ' svm ', 'nx', ' lm ']
         for flag in importantFlags:
             pattern = re.compile(flag)
-            cpuInfo['flags'] = pattern.sub(colors.WHITE + flag + 
-                                        colors.ENDC, cpuInfo['flags'])
-        if 'sockets' not in cpuInfo:
-            cpuInfo['sockets'] = 0
-            cpuInfo['cores'] = 0
-            cpuInfo['threadsPerCore'] = 0
+            cpuInfo.flags = pattern.sub(colors.WHITE + flag + 
+                                        colors.ENDC, cpuInfo.flags)
+        
+        try:
+            cpuiInfo.sockets
+        except:
+            cpuInfo.sockets = 0
+            cpuInfo.cores = 0
+            cpuInfo.threadspercore = 0
         return cpuInfo
+
+
+    def getAllOpsys(self):
+        op = Object()
 
     def displayOpSys(self):
         """ Display general OS data """
@@ -180,39 +190,39 @@ class opsys:
 
         print '\t ' + colors.BGREEN + '~ ' * 20 + colors.ENDC
         print colors.BHEADER  + '\t Boot time : ' + colors.ENDC +\
-                                                    procStat['boottime']
+                                                    procStat.boottime
         print colors.BHEADER  + '\t Sys time  : ' + colors.ENDC +\
                                                     self.getSosDate()
         print colors.BHEADER + '\t Uptime    : ' + colors.ENDC +\
                                                     self.getUptime()
         print colors.BHEADER + '\t Load Avg  : ' + colors.WHITE +\
                 '[%s CPUs] ' %(
-                        cpuInfo['processors']) + colors.ENDC + loadAvg
+                        cpuInfo.processors) + colors.ENDC + loadAvg
 
         print colors.BHEADER + '\t /proc/stat: ' + colors.ENDC
-        print '\t   ' + colors.BBLUE + 'procs_running : '\
-        + colors.ENDC + procStat['procs_running']  + colors.BLUE +\
+        print '\t   ' + colors.BBLUE + 'procs running : '\
+        + colors.ENDC + procStat.procsrun  + colors.BLUE +\
         colors.BOLD + '   processes (since boot) : ' + colors.ENDC +\
-        procStat['processes']
+        procStat.processes
 
     def displayCpuInfo(self):
         """ Display CPU detail information including flags """
         cpuInfo = self.getCpuInfo()
         print colors.BSECTION + 'CPU' + colors.ENDC
         print colors.WHITE + colors.BOLD + '\t\t ' + str(
-            cpuInfo['processors']) +' logical processors' + colors.ENDC
+            cpuInfo.processors) +' logical processors' + colors.ENDC
 
-        if cpuInfo['sockets'] > 0:
-            print '\t\t ' + str(cpuInfo['sockets']) + ' ' + cpuInfo[
-                                        'model'].strip() + ' processors'
+        if cpuInfo.sockets > 0:
+            print '\t\t ' + str(cpuInfo.sockets) + ' ' +\
+                                cpuInfo.model.strip() + ' processors'
             print '\t\t %s cores / %s threads per physical processor' %(
-                            cpuInfo['cores'], cpuInfo['threadsPerCore'])
+                            cpuInfo.cores, cpuInfo.threadspercore)
         else:
             print colors.BLUE +'\t\t ' +\
             'Virtual Machine with no defined sockets, cores or threads'\
             + colors.ENDC
         print '\t\t flags : ' + textwrap.fill(
-                    cpuInfo['flags'], 90, subsequent_indent='\t\t\t ')
+                    cpuInfo.flags, 90, subsequent_indent='\t\t\t ')
 
 if __name__ == '__main__':
     target = sys.argv[1]
