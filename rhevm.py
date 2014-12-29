@@ -28,6 +28,7 @@ class rhevm():
         rhevm.ver = self.getRhevmVer()
         rhevm.reports = self.getReportsVer()
         rhevm.dwh = self.getDwhVer()
+        return rhevm
 
     def _rhevmSimpleVer(self):
         rhevm = self.getRhevmVer()
