@@ -100,6 +100,16 @@ class procInfo:
                 badProcs.append(value)
         return badProcs
 
+    def getAllPsInfo(self):
+        proc = Object()
+        proc.psinfo = self.psInfo
+        proc.numprocs = self.getNumProcs()
+        proc.topuserreport = self.getUserReport()
+        proc.topmemreport = self.getTopMem()
+        proc.topcpureport = self.getTopCpu()
+        proc.defunct = self.getDefunctProcs()
+        return proc
+
     def displayReport(self, report):
 
         print '\t' + colors.BBLUE +\

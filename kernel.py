@@ -75,6 +75,14 @@ class kernel:
         crashInfo.memrequired = int(mem.getMemInfo().total)
         return crashInfo
 
+    def getAllKernelInfo(self):
+        kernel = Object()
+        kernel.crash = self.getCrashInfo()
+        kernel.kdumpconfig = self.getKdumpConfig()
+        kernel.kdumpstate = self.getKdumpState()
+        kernel.kdumpver = self.getKdumpVersion()
+        return kernel
+
     def displayKernelInfo(self):
         """ Display kernel and kdump information """
         kernel = pysosutils.getKernelVersion(self.target)

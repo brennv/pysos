@@ -81,7 +81,7 @@ class opsys:
                 loads[index] = (loads[index] + colors.BRED
                                 + '(%.2f%%)' + colors.ENDC) %loadperc
         return str(loads[0] + loads[1] + loads[2])
-        
+
     def getProcStat(self):
         """ Get boottime, number of processes and running procs """
         procStat = Object()
@@ -141,7 +141,6 @@ class opsys:
             pattern = re.compile(flag)
             cpuInfo.flags = pattern.sub(colors.WHITE + flag + 
                                         colors.ENDC, cpuInfo.flags)
-        
         try:
             cpuiInfo.sockets
         except:
@@ -150,9 +149,20 @@ class opsys:
             cpuInfo.threadspercore = 0
         return cpuInfo
 
-
     def getAllOpsys(self):
         op = Object()
+        op.cpu = self.getCpuInfo()
+        op.procs = self.getProcStat()
+        op.selinux = pysosutils.getSeLinux(self.target)
+        op.loadavg = self.getLoadAvg()
+        op.loadavgform = self.formatLoadAvg()
+        op.taint = pysosutils.getTaintCodes(self.target)
+        op.hostname = self.getHostName()
+        op.runlevel = self.getRunLevel()
+        op.sosdat = self.getSosDate()
+        op.uptime = self.getUptime()
+        op.uname = self.getUname()
+        return op
 
     def displayOpSys(self):
         """ Display general OS data """

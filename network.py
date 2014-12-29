@@ -84,6 +84,8 @@ class network():
                         dev.speed = dev.speed.split('M')[0]
                 except:
                     pass
+                dev.ipaddr = self.getIpAddr(dev.name)
+                dev.macaddr = self.getMacAddr(dev.name)
             devInfo.append(dev)
         return devInfo
 
@@ -378,6 +380,13 @@ class network():
                 setattr(device, item, '?')
             return device
 
+    def getAllNetInfo(self):
+        net = Object()
+        net.devices = self.devList
+        net.devinfo = self.getAllIntInfo()
+        net.bondinfo = self.getBondInfo()
+        return net
+
     def displayEthtoolInfo(self):
         """ Display formatted ethtool information for all devices """
         devInfo = self.getAllIntInfo()
@@ -445,8 +454,7 @@ class network():
             dev = self.getIfcfgInfo(dev)
             devInfo.append(dev)
             if dev:
-                dev.ipaddr = self.getIpAddr(dev.name)
-                dev.macaddr = self.getMacAddr(dev.name)
+                pass
             else:
                 devInfo.remove(dev)
         print colors.BSECTION + 'IP Info' + colors.ENDC

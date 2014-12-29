@@ -73,6 +73,13 @@ class bios:
         proc = opsys.opsys(target=self.target)
         return proc.getCpuInfo()
 
+    def getAllBiosInfo(self):
+        bios = Object()
+        bios.dimm = self.getDimmInfo()
+        bios.biosdmi = self.getBiosInfo()
+        bios.sysdmi = self.getSysInfo()
+        return bios
+
     def displayBiosInfo(self):
         """ Display bios and dmidecode related data """
         biosInfo = self.getBiosInfo()
