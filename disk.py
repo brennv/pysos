@@ -18,17 +18,19 @@ class disk:
         """
         if len(luns) == 1:
             state = luns[0].replace('[', '').replace(']', ' ').split()
-            if state[0] == 'active':
-                state[0] = colors.BGREEN + state[0] + colors.ENDC
+            if 'active' in state[0]:
+                state[0] = colors.BGREEN + 'active' + colors.ENDC
             else:
                 state[0] = colors.RED + state[0] + colors.ENDC
-            if state[1] == 'ready':
-                state[1] = colors.BGREEN + state[1] + colors.ENDC
-            else:
-                state[1] = colors.RED + state[1] + colors.ENDC
-
-        state = ' '.join([x for x in state])
-        return state
+            try:
+                if 'ready' in state[1]:
+                    state[1] = colors.BGREEN + state[1] + colors.ENDC
+                else:
+                    state[1] = colors.RED + state[1] + colors.ENDC
+            except IndexError:
+                pass
+            state = ' '.join([x for x in state])
+            return state
 
     def getBlockDevs(self):
         """ Get block devices on this system """
@@ -70,9 +72,9 @@ class disk:
                         dev.dm = line[2]
                         dev.dType = line[3]
                         x += 1
-                        line = lines[x].split(']')
+                        line = lines[x].split()
                         dev.size = line[0].split('=')[1]
-                        dev.state = line[3].strip('[')
+                        # dev.state = line[3].strip('[')
                         dev.lunDevs = []
                         dev.lunDevStats = []
                         x += 1
@@ -80,10 +82,14 @@ class disk:
                         while True:
                             if len(line) == 4:
                                 dev.pathType = line[1]
-                            elif len(line) == 5:
-                                dev.lunDevs.append(line[2])
-                                dev.lunDevStats.append(line[4])
-                            else:
+                            elif (len(line) >= 5 and len(line) <= 7):
+                                print line
+                                for item in line:
+                                    if 'sd' in item:
+                                        dev.lunDevs.append(item)
+                                        dev.lunDevStats.append(line[
+                                                line.index(item)+2])
+                            elif len(line) > 8:
                                 break
                             try:
                                 x += 1
