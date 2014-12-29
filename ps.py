@@ -21,7 +21,7 @@ class procInfo:
                 self.target + 'sos_commands/process/ps_auxwww'):
             psInfo = []
             stats = ['user', 'pid', 'cpu', 'mem', 'vsz', 'rss',
-                            'tty', 'stat', 'start', 'time', 'command']
+                            'tty', 'stat', 'start', 'time']
             with open(self.target +
                     'sos_commands/process/ps_auxwww', 'r') as psfile:
                 psfile.next()
@@ -30,6 +30,7 @@ class procInfo:
                     line = line.split()
                     for x, stat in enumerate(stats):
                         setattr(proc, stat, line[x])
+                    proc.command = ' '.join(line[10:-1])
                     psInfo.append(proc)
             return psInfo
         else:
@@ -111,7 +112,7 @@ class procInfo:
                     proc.user, proc.pid,
                     proc.cpu, proc.mem, proc.vsz, proc.rss, proc.tty,
                     proc.stat, proc.start, proc.time,
-                    proc.command[0:65].strip())
+                    proc.command[0:45].strip())
 
     def displayTopReport(self):
         """ Display report from getUserReport() """
