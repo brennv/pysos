@@ -108,13 +108,18 @@ class disk:
                         'Disk and MultiPath Information' + colors.ENDC
         print ''
         print colors.HEADER_BOLD + '\t Block Devices  :' + colors.ENDC
-        print colors.WHITE + '\t\t\t\t {:^8}\t {:^12}'.format('Device',
-                                            'Size (GB)') + colors.ENDC
-        print colors.WHITE + '\t\t\t\t ' + '=' * 8 + '\t ' + '=' * 11\
-                + colors.ENDC
-        for dev in devList:
-            print '\t\t\t\t {:>6}\t      {:>10}'.format(dev.dev, 
+
+        if devList:
+            print colors.WHITE + '\t\t\t\t {:^8}\t {:^12}'.format(
+                                    'Device', 'Size (GB)') + colors.ENDC
+            print colors.WHITE + '\t\t\t\t ' + '=' * 8 + '\t ' +\
+                                                '=' * 11 + colors.ENDC
+            for dev in devList:
+                print '\t\t\t\t {:>6}\t      {:>10}'.format(dev.dev, 
                                                 int(dev.size) / 1048576)
+        else:
+            print ''
+            print colors.RED + '\t\tBlock device information not found.'
         print ''
         print colors.HEADER_BOLD + '\t MultiPath Info :' + colors.ENDC
         print colors.WHITE +\
