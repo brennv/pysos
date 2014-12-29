@@ -17,6 +17,7 @@ class yum():
 
     def __init__(self, target):
         self.target = target
+        self.plugins = ''
 
     def getLastUpdate(self):
         """ Get the last package updated """
@@ -24,7 +25,10 @@ class yum():
             with open(self.target + 'var/log/yum.log', 'r') as yfile:
                 # this is horribly ineffecient. Need a better way.  
                 lines = yfile.readlines()
-                return lines[-1]
+                try:
+                    return lines[-1]
+                except IndexError:
+                    return False
 
         else:
             return False
@@ -32,7 +36,10 @@ class yum():
     def getLastUpdateDate(self):
         """ Get the last date an update was performed """
         lastUpdate = self.getLastUpdate()
-        return lastUpdate[:15]
+        if lastUpdate:
+            return lastUpdate[:15]
+        else:
+            return ' Unknown'
 
     def getRepoList(self):
         """ Compile a list of all repos the system is using """
@@ -99,8 +106,12 @@ class yum():
             print colors.BHEADER + '\t Last Update :  ' + \
                 colors.ENDC + lastUpdate
         print colors.BHEADER + '\t Repos       : ' + colors.ENDC
-        for repo in yumInfo:
-            print '\t\t\t' + repo.repo
+        if yumInfo:
+            for repo in yumInfo:
+                print '\t\t\t' + repo.repo
+        else:
+            print '\t\t\t ' + colors.BRED + 'Repolist file not found'\
+                    + colors.ENDC
 
     def displaySubInfo(self):
         """ Display subscription related information """
