@@ -4,12 +4,22 @@ import pysosutils
 import re
 from colors import *
 
+class Object(object):
+    pass
+
 class yum():
+    """ 
+    Capture and optionally display yum and subscription data
+    for RPM based systems.
     
+    Note that subscription information is RHEL specific.
+    """
+
     def __init__(self, target):
         self.target = target
 
     def getLastUpdate(self):
+        """ Get the last package updated """
         if os.path.isfile(self.target + 'var/log/yum.log'):
             with open(self.target + 'var/log/yum.log', 'r') as yfile:
                 # this is horribly ineffecient. Need a better way.  
@@ -20,84 +30,99 @@ class yum():
             return False
 
     def getLastUpdateDate(self):
+        """ Get the last date an update was performed """
         lastUpdate = self.getLastUpdate()
         return lastUpdate[:15]
 
     def getRepoList(self):
-        if os.path.isfile(self.target + 'sos_commands/yum/yum_-C_repolist'):
-            yumInfo = {}
+        """ Compile a list of all repos the system is using """
+        if os.path.isfile(
+                    self.target + 'sos_commands/yum/yum_-C_repolist'):
+            yumInfo = []
             with open(self.target + 'sos_commands/yum/yum_-C_repolist'\
                         , 'r') as yfile:
                 for line in yfile:
                     if line.startswith('Loaded plugins:'):
-                        yumInfo['plugins'] = line.split(':')[1].strip('\n')
+                        self.plugins = line.split(':')[1].strip('\n')
                     elif not line.startswith('repo id') and not \
                              line.startswith('repolist:') and not \
                              line.startswith('This') and not \
                              line.startswith(' '):
-                        line = line.split()
-                        repo = line[0]
-                        repoName = line[1]
-                        repoStatus = line[2]
-                        yumInfo[repo] = {'repo': repo, 
-                            'repoName': repoName, 'repoStatus': repoStatus}
+                        repo = Object()
+                        repo.repo = line.split()[0]
+                        repo.name = line.strip(repo.repo).strip(
+                                                    line.split()[-1])
+                        yumInfo.append(repo)
             return yumInfo
         else:
             return False
 
     def getSubMgrInst(self):
+        """ Get subscription information from subscription manager """
         if os.path.isfile(self.target + 
-                'sos_commands/yum/subscription-manager_list_--installed'):
+            'sos_commands/general/subscription-manager_list_--installed'):
             prodToParse = []
-            prodInfo = {}
+            prodInfo = []
             with open(self.target + 
-                    'sos_commands/yum/subscription-manager_list_--installed',
+                    'sos_commands/general/subscription-manager_list_--installed',
                     'r') as sfile:
                 for line in sfile:
                     if line.startswith('Product Name:'):
-                        prodToParse.append(line.strip('\n'))
-            for item in prodToParse:
-                prodInfo[item.strip('Product Name:')] = pysosutils.parseOutputSection(
+                        prod = Object()
+                        prod.header = line.strip('\n')
+                        prodToParse.append(prod)
+            for prod in prodToParse:
+                 prod.data = pysosutils.parseOutputSection(
                     self.target + 
-                    'sos_commands/yum/subscription-manager_list_--installed',
-                    item)
+                    'sos_commands/general/subscription-manager_list_--installed',
+                    prod.header)
+                 for k in prod.data:
+                     setattr(prod, str(k).lower().strip().replace(
+                                                ' ', ''), prod.data[k])
+                 prod.name = prod.header.replace('Product Name:',
+                                                            '').strip()
+                 prodInfo.append(prod)
             return prodInfo
         else:
             return False
 
     def displayYumInfo(self):
+        """ Display gathered yum related information """
         yumInfo = self.getRepoList()
-        prodInfo = self.getSubMgrInst()
         lastUpdate = self.getLastUpdateDate()
         print colors.BSECTION + "Package Information"\
             + colors.ENDC
         print colors.BHEADER + '\t Plugins     : ' + colors.ENDC + \
-            yumInfo['plugins']
-        del yumInfo['plugins']
+            self.plugins
+
         if lastUpdate:
             print colors.BHEADER + '\t Last Update :  ' + \
                 colors.ENDC + lastUpdate
         print colors.BHEADER + '\t Repos       : ' + colors.ENDC
         for repo in yumInfo:
-            print '\t\t\t' + yumInfo[repo]['repo']
+            print '\t\t\t' + repo.repo
 
+    def displaySubInfo(self):
+        """ Display subscription related information """
+        prodInfo = self.getSubMgrInst()
         print ''
         if prodInfo:
             print colors.BHEADER + '\t Products    :  ' + \
                 colors.ENDC + str(len(prodInfo))
             for prod in prodInfo:
-                print '\t\t\t' + prod
-                print '\t\t\t' + prodInfo[prod]['Version'] + ' ' + \
-                    prodInfo[prod]['Arch']
-                if prodInfo[prod]['Status'] == 'Subscribed':
-                    print '\t\t\tSubscribed until ' + prodInfo[prod]['Ends']
+                print '\t\t\t' + prod.name
+                print '\t\t\t' + prod.version + ' ' + prod.arch
+                if prod.status == 'Subscribed':
+                    print '\t\t\tSubscribed until ' + prod.ends
                 else:
-                    print '\t\t\t' + prodInfo[prod]['Status']
+                    print '\t\t\tStatus ' + prod.status
                 print ''
 
-
+    def displayAllYumInfo(self):
+        self.displayYumInfo()
+        self.displaySubInfo()
 
 if __name__ == '__main__':
     target = sys.argv[1]
     test = yum(target)
-    test.displayYumInfo()
+    test.displayAllYumInfo()

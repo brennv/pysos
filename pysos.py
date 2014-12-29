@@ -141,7 +141,7 @@ def doStuff(**args):
         obj.displayPsInfo()
     if args['yum']:
         obj = yum.yum(target)
-        obj.displayYumInfo()
+        obj.displayAllYumInfo()
     # Need to figure out how to do this without needing target argument  
     if args['update']:
         currentDir = os.getcwd()
