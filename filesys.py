@@ -12,6 +12,10 @@ class filesys():
     def __init__(self, target, showFsOpts=False):
         self.target = target
         self.showFsOpts = showFsOpts
+        self.excludes = ['cgroup', 'tmpfs', 'none', 'sunrpc', 'debugfs',
+            'configfs', 'fusectl', 'hugetlbfs', 'devpts', 'sysfs',
+            'mqueue', 'systemd', 'proc', 'devtmpfs', 'securityfs',
+            'pstore', 'binfmt_misc']
 
     def getFsMounts(self):
         """ Get a list of all mounts from sosreport """
@@ -21,10 +25,7 @@ class filesys():
             with open(self.target + 'sos_commands/filesys/mount_-l',
                         'r') as mfile:
                 for line in mfile:
-                    if (line.startswith('cgroup') or
-                        line.startswith('tmpfs') or
-                        line.startswith('none') or
-                        line.startswith('sunrpc')):
+                    if line.startswith(tuple(self.excludes)):
                         pass
                     else:
                         mount = Object()
@@ -108,10 +109,10 @@ class filesys():
         print colors.BSECTION + 'File System Information' + colors.ENDC
         print ''
         print colors.WHITE +\
-                '\t {:^30}\t {:^20}\t  {:^7}    {:^7}\t  {:>11}'.format(
+                '\t {:^25}\t{:^20}\t  {:^7}    {:^7}\t  {:>11}'.format(
                 'Device', 'Mount Point', 'Size', 'Used',
                 'Available') + colors.ENDC
-        print colors.WHITE + '\t ' + '=' * 30 +'\t ' + '=' * 19 + '\t'\
+        print colors.WHITE + '\t ' + '=' * 25 +'\t ' + '=' * 19 + '\t'\
                 + '=' * 9 + '  ' + '=' * 9 + '    ' + '=' * 18\
                 + colors.ENDC
         for mount in mounts:
@@ -122,13 +123,13 @@ class filesys():
             except:
                 pass
             try:
-                print '\t {:<30}\t  {:<12} {:<6}   {:>6.2f} GB'.format(
+                print '\t {:<25}\t {:<15} {:<6} {:>7.2f} GB'.format(
                 mount.dev, mount.mountpoint, mount.fstype,
-                mount.size) + ' {:>6.2f} GB\t{:>6.2f} GB'.format(
+                mount.size) + ' {:>7.2f} GB\t{:>7.2f} GB'.format(
                 mount.used, mount.avail) + ' ({:^2}%)'.format(
                 mount.percavail)
             except:
-                print '\t {:<30}\t  {:<12} {:<6}'.format(mount.dev,
+                print '\t {:<25}\t {:<15} {:<6}'.format(mount.dev,
                                         mount.mountpoint, mount.fstype)
                 
             if self.showFsOpts:
