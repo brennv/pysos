@@ -1,4 +1,7 @@
-import sys, pysosutils, math, ps
+import sys
+import pysosutils
+import math
+import ps
 from colors import *
 from rhevm import rhevm
 
@@ -70,10 +73,11 @@ class virt():
     def getRunningVms(self):
         psObj = ps.procInfo(self.target)
         procs = psObj.parseProcFile()
-        vms = {}
+        vms = []
         for proc in procs:
-            if '/usr/libexec/qemu-kvm' in proc:
-                vms[proc[12]] = {'name': proc[12], 'cpu': proc[2], 'vsz': int(proc[4]), 'rss': int(proc[5]), 'memory': int(proc[20]) }
+            if '/usr/libexec/qemu-kvm' in proc.command:
+                proc.name = proc.command[12]
+                vms.append(proc)
         return vms
         
         
@@ -118,18 +122,18 @@ class virt():
     def displayRunningVms(self):
         vms = self.getRunningVms()
         print colors.HEADER_BOLD + '\t Running VMs on this host : ' +colors.ENDC + str(len(vms)) + '\t CPU/RSS GB usage in ()'
-        virtList = sorted([ vms[vm] for vm in vms ])
-        for i in range(0, (len(virtList) / 4) +1):
+        for i in range(0, (len(vms) / 4) +1):
             vmLine = '\t '
             for x in range(0, 4):
                 try:
-                    nameLength = len(virtList[0]['name'])+1
+                    proc = vms[0]
+                    nameLength = len(proc.name)+1
                     if nameLength > 15:
                         nameLength = 15
-                    vmInfo = ' {0:{1}} ({2:<{3}} /{4:>{5}})'.format(virtList[0]['name'][:nameLength].strip('.'),\
-                        nameLength, virtList[0]['cpu'], 4, int(math.ceil(float(virtList[0]['rss']) / 1000 / 1000)),\
+                    vmInfo = ' {0:{1}} ({2:<{3}} /{4:>{5}})'.format(proc.name[:nameLength].strip('.'),\
+                        nameLength, proc.cpu, 4, int(math.ceil(float(proc.rss) / 1000 / 1000)),\
                         3)
-                    virtList.pop(0)
+                    vms.pop(0)
                     vmLine += vmInfo
                 except:
                     pass
