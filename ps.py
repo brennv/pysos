@@ -1,6 +1,5 @@
 import sys
 import os
-from collections import OrderedDict
 from colors import *
 
 class Object(object):
@@ -12,10 +11,6 @@ class procInfo:
     def __init__(self, target):
         self.target = target
         self.psInfo = self.parseProcFile()
-        self.psHeader = '\t' + colors.BLUE + colors.BOLD +\
-        '{:^6}\t{:^6}\t{:^5} {:^5}  {:^7}  {:^7}  {:^4} {:^4}  {:^5}{:^8}  {:<8}'\
-        .format('USER', 'PID', '%CPU', '%MEM', 'VSZ-MB', 'RSS-MB',
-            'TTY', 'STAT', 'START', 'TIME', 'COMMAND') + colors.ENDC
 
     def parseProcFile(self):
         """ 
@@ -46,18 +41,24 @@ class procInfo:
 
     def getUserReport(self):
         """ Get a report on CPU and RSS usage by user """
-        usage = OrderedDict()
+        usage = []
         for proc in self.psInfo:
-            if usage.has_key(proc.user):
-                usage[proc.user]['cpu'] += float(proc.cpu)
-                usage[proc.user]['mem'] += float(proc.mem)
-                usage[proc.user]['rss'] += float(proc.rss)
-            else:    
-                usage[proc.user] = {'cpu': float(proc.cpu),
-                                    'mem': float(proc.mem),
-                                    'rss': float(proc.rss)}
-        userReport = sorted(usage.items(), reverse=True, 
-                            key=lambda x: x[1]['cpu'])
+            newProc = True
+            if len(usage) > 0 :
+                for p in usage:
+                    if p.user == proc.user:
+                        p.cpu += float(proc.cpu)
+                        p.mem += float(proc.mem)
+                        p.rss += int(proc.rss)
+                        newProc = False
+                        break
+            if newProc:
+                proc.cpu = float(proc.cpu)
+                proc.mem = float(proc.mem)
+                proc.rss = int(proc.rss)
+                usage.append(proc)
+        userReport = sorted(usage, reverse=True, 
+                            key=lambda x: x.cpu)
         return userReport
 
     def _formatTopReport(self, psInfo, reportNum=5):
@@ -98,9 +99,13 @@ class procInfo:
                 badProcs.append(value)
         return badProcs
 
-    def _displayReport(self, report):
+    def displayReport(self, report):
 
-        print self.psHeader
+        print '\t' + colors.BLUE + colors.BOLD +\
+        '{:^6}\t{:^6}\t{:^5} {:^5}  {:^7}  {:^7}  {:^4} {:^4}  {:^5}{:^8}  {:<8}'\
+        .format('USER', 'PID', '%CPU', '%MEM', 'VSZ-MB', 'RSS-MB',
+            'TTY', 'STAT', 'START', 'TIME', 'COMMAND') + colors.ENDC
+
         for proc in report:
             print '\t{:^8} {:^6}\t{:^5} {:^5}  {:<7.0f}  {:<7.0f}  {:^5} {:^4} {:^6} {:<9}{}'.format(
                     proc.user, proc.pid,
@@ -124,8 +129,8 @@ class procInfo:
         for i in xrange(0, 4):
             proc = usageReport[i]
             print '\t {:<10}  {:^6.2f}  {:^6.2f}  {:>3.2f} GB'.format(
-                    proc[0], proc[1]['cpu'], proc[1]['mem'],
-                    int(proc[1]['rss']) / 1048576)
+                    proc.user, proc.cpu, proc.mem,
+                    int(proc.rss) / 1048576)
         print ''
 
     def displayCpuReport(self):
@@ -133,7 +138,7 @@ class procInfo:
         cpuReport = self.getTopCpu()
         print '\t' + colors.WHITE + 'Top CPU Consuming Processes : '\
                 + colors.ENDC
-        self._displayReport(cpuReport)
+        self.displayReport(cpuReport)
         print ''
 
     def displayMemReport(self):
@@ -141,7 +146,7 @@ class procInfo:
         memReport = self.getTopMem()
         print '\t' + colors.WHITE + 'Top Memory Consuming Processes : '\
                 + colors.ENDC
-        self._displayReport(memReport)
+        self.displayReport(memReport)
         print ''
 
     def displayDefunctReport(self):
@@ -153,7 +158,7 @@ class procInfo:
                     + colors.ENDC
             defunctReport = self._formatTopReport(defunctReport, 
                                         reportNum=len(defunctReport))
-            self._displayReport(defunctReport)
+            self.displayReport(defunctReport)
             print ''
 
     def displayPsInfo(self):
