@@ -97,7 +97,7 @@ class procInfo:
             if ('<defunct>' in proc.command or
                     'D' in proc.stat or
                     'Ds' in proc.stat):
-                badProcs.append(value)
+                badProcs.append(proc)
         return badProcs
 
     def getAllPsInfo(self):
