@@ -36,10 +36,6 @@ class kernel:
                                         line.split()[0])[1].strip('\n'))
         else:
             kdump = False
-        try:
-            kdump['path']
-        except KeyError:
-            kdump['path'] = '/var/crash'
         return kdump
 
     def getCrashInfo(self):
@@ -50,8 +46,10 @@ class kernel:
                         self.target).split('crashkernel=')[1].split()[0]
         except IndexError:
             crashInfo.memreserve = 'Not Defined'
-
-        crashInfo.path = self.getKdumpConfig()['path']
+        try:
+            crashInfo.path = self.getKdumpConfig()['path']
+        except:
+            crashInfo.path = False
         if crashInfo.path:
             fs = filesys.filesys(self.target)
             mounts = fs.getFsMounts()
