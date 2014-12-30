@@ -162,6 +162,7 @@ class opsys:
         op.sosdat = self.getSosDate()
         op.uptime = self.getUptime()
         op.uname = self.getUname()
+        op.release = pysosutils.getRelease(self.target)
         return op
 
     def displayOpSys(self):
