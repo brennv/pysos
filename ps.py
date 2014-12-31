@@ -33,8 +33,8 @@ class procInfo:
                             setattr(proc, stat, line[x])
                         proc.command = ' '.join(line[10:-1])
                         proc.shortcmd = proc.command.split()[0]
-                        proc.vszmb = float(proc.vsz) / 1024
-                        proc.rssmb = float(proc.rss) / 1024
+                        proc.vszmb = int(proc.vsz) / 1024
+                        proc.rssmb = int(proc.rss) / 1024
                         psInfo.append(proc)
                     except:
                         pass
