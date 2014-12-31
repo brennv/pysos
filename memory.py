@@ -2,6 +2,7 @@ import sys
 import os
 import re
 import math
+import pysosutils
 from colors import *
 
 class Object(object):
@@ -76,8 +77,18 @@ class memory:
 
     def getMemSysCtls(self):
         sysctls = Object()
-        sysctls.oom = pysosutils.getSysctl(self.target, 'oom')  
-        sysctls.mem = pysosutils.getSysctl(self.target, 'mem')
+        oom = Object()
+        mem = Object()
+        ooms = pysosutils.getSysctl(self.target, 'oom')  
+        mems = pysosutils.getSysctl(self.target, 'mem')
+        for key in ooms:
+            setattr(oom, key[key.find('.')+1:len(key)], ooms[key])
+        for key in mems:
+            setattr(mem, key[key.find('.')+1:len(key)], mems[key])
+        mem.swappiness = pysosutils.getSysctl(self.target,
+                        'swappiness')['vm.swappiness']
+        sysctls.oom = oom
+        sysctls.mem = mem
         return sysctls
         
     def getAllMemInfo(self):
