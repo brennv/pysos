@@ -32,7 +32,7 @@ class procInfo:
                         for x, stat in enumerate(stats):
                             setattr(proc, stat, line[x])
                         proc.command = ' '.join(line[10:-1])
-                        proc.shortcmd = proc.command.split()[0:3]
+                        proc.shortcmd = proc.command.split()[0]
                         proc.vszmb = float(proc.vsz) / 1024
                         proc.rssmb = float(proc.rss) / 1024
                         psInfo.append(proc)
