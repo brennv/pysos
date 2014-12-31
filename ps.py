@@ -32,7 +32,9 @@ class procInfo:
                         for x, stat in enumerate(stats):
                             setattr(proc, stat, line[x])
                         proc.command = ' '.join(line[10:-1])
-                        proc.shortcmd = proc.command.split()[0]
+                        proc.shortcmd = proc.command.split()[0:3]
+                        proc.vszmb = float(proc.vsz) / 1024
+                        proc.rssmb = float(proc.rss) / 1024
                         psInfo.append(proc)
                     except:
                         pass
@@ -70,8 +72,6 @@ class procInfo:
         report = []
         for i in xrange(0, int(reportNum)):
             proc = self.psInfo[i]
-            proc.vsz = int(proc.vsz) / 1024
-            proc.rss = int(proc.rss) / 1024
             cmd = ''
             for i in xrange(10, 13):
                 try:
@@ -124,7 +124,7 @@ class procInfo:
         for proc in report:
             print '\t{:^8} {:^6}\t{:^5} {:^5}  {:<7.0f}  {:<7.0f}  {:^5} {:^4} {:^6} {:<9}{}'.format(
                     proc.user, proc.pid,
-                    proc.cpu, proc.mem, proc.vsz, proc.rss, proc.tty,
+                    proc.cpu, proc.mem, proc.vszmb, proc.rssmb, proc.tty,
                     proc.stat, proc.start, proc.time,
                     proc.command[0:45].strip())
 
