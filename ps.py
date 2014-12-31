@@ -28,10 +28,14 @@ class procInfo:
                 for line in psfile:
                     proc = Object()
                     line = line.split()
-                    for x, stat in enumerate(stats):
-                        setattr(proc, stat, line[x])
-                    proc.command = ' '.join(line[10:-1])
-                    psInfo.append(proc)
+                    try:
+                        for x, stat in enumerate(stats):
+                            setattr(proc, stat, line[x])
+                        proc.command = ' '.join(line[10:-1])
+                        proc.shortcmd = proc.command.split()[0]
+                        psInfo.append(proc)
+                    except:
+                        pass
             return psInfo
         else:
             return False
