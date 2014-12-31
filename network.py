@@ -136,13 +136,14 @@ class network():
             try:
                 if devInfo['inet addr']:
                     return devInfo['inet addr']
-            except KeyError:
-                return ''
+            except:
+                return ' '
         # if that fails try ip_address which may or may not be present
         if os.path.isfile(self.target +
                     'sos_commands/networking/ip_address'):
             with open(self.target +
                     'sos_commands/networking/ip_address', 'r') as ifile:
+                print 'ip'
                 for n, line in enumerate(ifile):
                     if device in line:
                         for i in range(3):
@@ -452,6 +453,8 @@ class network():
             dev = Object()
             dev.name = device
             dev = self.getIfcfgInfo(dev)
+            dev.ipaddr = self.getIpAddr(dev.name)
+            dev.macaddr = self.getMacAddr(dev.name)
             devInfo.append(dev)
             if dev:
                 pass
@@ -465,11 +468,14 @@ class network():
                         ' ' * 4 + '=' * 11 + ' ' * 5 + '=' * 5 + '\t' +\
                         '=' * 19 + colors.ENDC
         for dev in sorted(devInfo):
-            linecolor = self._setLineColor(dev.name)
-            print linecolor + \
-            '\t {:^10}\t {:^15}     {:^10}\t    {:^5} \t {:<5}'.format(
-            dev.name, dev.ipaddr, dev.master, dev.mtu, 
-            dev.macaddr) + colors.ENDC
+            try:
+                linecolor = self._setLineColor(dev.name)
+                print linecolor + \
+                '\t {:^10}\t {:^15}     {:^10}\t    {:^5} \t {:<5}'.format(
+                dev.name, dev.ipaddr, dev.master, dev.mtu, 
+                dev.macaddr) + colors.ENDC
+            except Exception as e:
+                print e
 
     def displayNetDevInfo(self):
         """ Display formatted /proc/net/dev stats for all devices """
