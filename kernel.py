@@ -79,6 +79,7 @@ class kernel:
         kernel.kdumpconfig = self.getKdumpConfig()
         kernel.kdumpstate = self.getKdumpState()
         kernel.kdumpver = self.getKdumpVersion()
+        kernel.panicsysctls = pysosutils.getSysctl(self.target, 'panic')
         return kernel
 
     def displayKernelInfo(self):

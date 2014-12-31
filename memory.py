@@ -74,6 +74,18 @@ class memory:
         else:
             return False
 
+    def getMemSysCtls(self):
+        sysctls = Object()
+        sysctls.oom = pysosutils.getSysctl(self.target, 'oom')  
+        sysctls.mem = pysosutils.getSysctl(self.target, 'mem')
+        return sysctls
+        
+    def getAllMemInfo(self):
+        mem = Object()
+        mem.mem = self.getMemInfo()
+        mem.sysctls = self.getMemSysCtls()
+        return mem
+
     def displayMemGraphs(self):
         """ Use data from getself.memInfo() to display graphed data """
 
