@@ -52,9 +52,17 @@ class memory:
                         mem.cached = round(
                                     (int(line.split()[1]) / 1024), 2)
                     elif 'HugePages_Total:' in line:
-                        mem.hugepages = int(line.split()[1]) / 1024
+                        mem.hugepages = int(line.split()[1])
                     elif 'HugePages_Free' in line:
-                        mem.hugepagesFree = int(line.split()[1]) / 1024
+                        mem.hugepagesfree = int(line.split()[1])
+                        mem.hugepagesused = (mem.hugepages -\
+                                                mem.hugepagesfree)
+                    elif 'HugePages_Rsvd' in line:
+                        mem.hugepagesrsvd = int(line.split()[1])
+                    elif 'Hugepagesize' in line:
+                        mem.hugepagesize = int(line.split()[1])
+                        mem.hugepagesallocation = (mem.hugepagesize *\
+                                                        mem.hugepages)
                     elif 'Dirty:' in line:
                         mem.dirty = round(
                                     (int(line.split()[1]) / 1024), 2)
@@ -68,9 +76,19 @@ class memory:
                         mem.swapFree = round(
                                     int(line.split()[1]) / 1024, 2)
 
+            try:
+                mem.hugepagesperc = round(((float(mem.hugepagesused)\
+                                    / float(mem.hugepages)) * 100), 2)
+            except:
+                pass
             mem.used = mem.total - mem.free
-            mem.inUse = mem.used - mem.cached
+            mem.inuse = mem.used - mem.cached
             mem.swapUsed = mem.swapTotal - mem.swapFree
+            mem.usedperc = round(((mem.used / mem.total) * 100), 2)
+            mem.cachedperc = round(((mem.cached / mem.total) * 100), 2)
+            mem.freeperc = round(((mem.free / mem.total) * 100), 2)
+            mem.bufferedperc = round(((mem.buffered / mem.total) * 100), 2)
+            mem.inuseperc = round(((mem.inuse / mem.total) * 100), 2)
             return mem
         else:
             return False
@@ -104,19 +122,16 @@ class memory:
                     + '\t Memory Statistics graphed : ' + colors.ENDC
 
         print colors.BLUE + '\t\t Used      : %8.2f GB ' %(
-                self.mem.used / 1024) + self._graph(round((
-                (self.mem.used / self.mem.total) * 100),
-                2)) + colors.ENDC
+                self.mem.inuse / 1024) + self._graph(self.mem.inuseperc
+                ) + colors.ENDC
 
         print colors.CYAN + '\t\t Cached    : %8.2f GB ' %(
-                self.mem.cached / 1024) + self._graph(round((
-                (self.mem.cached / self.mem.total) * 100),
-                2)) + colors.ENDC
+                self.mem.cached / 1024) + self._graph(
+                                    self.mem.cachedperc) + colors.ENDC
 
         print colors.PURPLE + '\t\t Buffered  : %8.2f GB ' %(
-                self.mem.buffered / 1024) + self._graph(round((
-                (self.mem.buffered / self.mem.total) * 100),
-                2)) + colors.ENDC
+                self.mem.buffered / 1024) + self._graph(
+                                    self.mem.bufferedperc) + colors.ENDC
 
         if self.mem.swapTotal > 0:
             print colors.WHITE + '\t\t Swap      : %8.2f MB ' %(
@@ -126,9 +141,8 @@ class memory:
 
         if self.mem.hugepages > 0:
             print colors.GREEN + '\t\t Hugepages : %8s    ' %(
-                self.mem.hugepages) +  self._graph((
-                self.mem.hugepagesFree / int(self.mem.hugepages))
-                * 100) + colors.ENDC
+                self.mem.hugepagesused) +  self._graph(
+                    self.mem.hugepagesperc) + colors.ENDC
 
         print colors.RED + '\t\t Dirty     : %8s MB ' %(
                 self.mem.dirty) + self._graph(round(((
@@ -154,7 +168,7 @@ class memory:
         print '\t\t %6.2f GB total memory on system' %(math.ceil(
                                         self.mem.total / 1024))
         print colors.BLUE  + '\t\t %6.2f GB (%.2f %%) used' %((
-                self.mem.used / 1024), (self.mem.used /
+                self.mem.inuse / 1024), (self.mem.used /
                 self.mem.total) * 100) + colors.ENDC
 
         print colors.CYAN + '\t\t %6.2f GB (%.2f %%) cached' %((
@@ -179,13 +193,17 @@ class memory:
                 self.mem.swapUsed, (self.mem.swapUsed /
                 self.mem.swapTotal) * 100) + colors.ENDC
 
-        print colors.BHEADER + '\t Misc :'+ colors.ENDC
-        print '\t\t %6s MB (%.2f %%) of total memory used for SLAB' %(
-                self.mem.slab, (self.mem.slab / self.mem.total))
-
         if self.mem.hugepages > 0:
+            print colors.BHEADER + '\t HugePages :' + colors.ENDC
             print colors.GREEN + '\t\t %6s total hugepages allocated' %(
                 self.mem.hugepages) + colors.ENDC
+            print colors.GREEN + '\t\t %6s (%2.2f %%) hugepages in use'\
+                %(self.mem.hugepagesused, self.mem.hugepagesperc
+                    ) + colors.ENDC
+
+        print colors.BHEADER + '\t Misc :' + colors.ENDC
+        print '\t\t %6s MB (%.2f %%) of total memory used for SLAB' %(
+                self.mem.slab, (self.mem.slab / self.mem.total))
 
 if __name__ == '__main__':
     target = sys.argv[1]

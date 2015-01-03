@@ -54,10 +54,13 @@ class kernel:
             fs = filesys.filesys(self.target)
             mounts = fs.getFsMounts()
             for mount in mounts:
-                if mount.mountpoint == crashInfo.path.strip():
-                    crashInfo.pathfreespace = fs.getFsSize(
-                                mount.mountpoint).avail / 1048576
-                    crashInfo.pathdevice = mount.dev
+                try:
+                    if mount.mountpoint == crashInfo.path.strip():
+                        crashInfo.pathfreespace = fs.getFsSize(
+                                    mount.mountpoint).avail / 1048576
+                        crashInfo.pathdevice = mount.dev
+                except:
+                    pass
             # Hit this if no explicit mount point for crashpath.
             # Assume root fs.
             if not hasattr(crashInfo, 'pathfreespace'):

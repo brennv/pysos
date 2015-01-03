@@ -96,8 +96,11 @@ class filesys():
         """ Compile all data for all mounts in sosreport """
         mounts = self.getFsMounts()
         for mount in mounts:
-            dev = self.getFsSize(mount.mountpoint)
-            mount.__dict__.update(dev.__dict__)
+            try:
+                dev = self.getFsSize(mount.mountpoint)
+                mount.__dict__.update(dev.__dict__)
+            except AttributeError:
+                mounts.remove(mount)
         return mounts
 
     def displayFsInfo(self):
