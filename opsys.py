@@ -142,7 +142,7 @@ class opsys:
             cpuInfo.flags = pattern.sub(colors.WHITE + flag + 
                                         colors.ENDC, cpuInfo.flags)
         try:
-            cpuiInfo.sockets
+            cpuInfo.sockets
         except:
             cpuInfo.sockets = 0
             cpuInfo.cores = 0
