@@ -78,6 +78,8 @@ class kernel:
 
     def getAllKernelInfo(self):
         kernel = Object()
+        kernel.booted = pysosutils.getKernelVersion(self.target)
+        kernel.cmdline = pysosutils.getCmdLine(self.target)
         kernel.crash = self.getCrashInfo()
         kernel.kdumpconfig = self.getKdumpConfig()
         kernel.kdumpstate = self.getKdumpState()
