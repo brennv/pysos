@@ -114,15 +114,18 @@ class kernel:
         print ''
         print colors.BHEADER + '\t kdump.conf          : '\
                 + colors.ENDC
-
-        for key in kdump:
-            print '\t\t\t\t%s  %s' %(key, kdump[key])
-        print colors.BBLUE + '\t\t Crash Path   : '\
-                + colors.ENDC + crashInfo.path + '  ({})'.format(
-                                                crashInfo.pathdevice)
-        print colors.BBLUE + '\t\t Space Needed : '\
-                + colors.ENDC + '{:>6.2f} GB'.format(math.ceil(
-                                float(crashInfo.memrequired) / 1000))
+        if kdump:
+            for key in kdump:
+                print '\t\t\t\t%s  %s' %(key, kdump[key])
+            print colors.BBLUE + '\t\t Crash Path   : '\
+                    + colors.ENDC + crashInfo.path + '  ({})'.format(
+                                                    crashInfo.pathdevice)
+            print colors.BBLUE + '\t\t Space Needed : '\
+                    + colors.ENDC + '{:>6.2f} GB'.format(math.ceil(
+                                    float(crashInfo.memrequired) / 1000))
+        else:
+            print '\t\t\t\t' + colors.BRED + 'Unable to parse config' +\
+                        colors.ENDC
 
         if type(crashInfo.pathfreespace) is int:
             print colors.BBLUE + '\t\t Free Space   : '\
