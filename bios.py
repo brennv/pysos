@@ -75,9 +75,17 @@ class bios:
 
     def getAllBiosInfo(self):
         bios = Object()
+        biosdmi = Object()
+        sysdmi = Object()
         bios.dimm = self.getDimmInfo()
-        bios.biosdmi = self.getBiosInfo()
-        bios.sysdmi = self.getSysInfo()
+        biosDmiInfo = self.getBiosInfo()
+        for key in biosDmiInfo:
+            setattr(biosdmi, key.replace(" ", '').lower(), biosDmiInfo[key])
+        bios.biosdmi = biosdmi
+        sysDmiInfo = self.getSysInfo()
+        for key in sysDmiInfo:
+            setattr(sysdmi, key.replace(" ", '').lower(), sysDmiInfo[key])
+        bios.sysdmi = sysdmi
         return bios
 
     def displayBiosInfo(self):
