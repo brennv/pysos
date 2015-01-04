@@ -98,7 +98,7 @@ class opsys:
                     procStat.procsrun = line.split()[1]
         return procStat
 
-    def getCpuInfo(self):
+    def getCpuInfo(self, formatFlags=True):
         """ Get data from /proc/cpuinfo """
         cpuInfo = Object()
         with open(self.target+'proc/cpuinfo') as cfile:
@@ -136,14 +136,17 @@ class opsys:
                                                         len(line)])+1
                     break
 
-        importantFlags = ['vmx', ' svm ', 'nx', ' lm ']
-        for flag in importantFlags:
-            pattern = re.compile(flag)
-            cpuInfo.flags = pattern.sub(colors.WHITE + flag + 
-                                        colors.ENDC, cpuInfo.flags)
+        if formatFlags:
+            importantFlags = ['vmx', ' svm ', 'nx', ' lm ']
+            for flag in importantFlags:
+                pattern = re.compile(flag)
+                cpuInfo.flags = pattern.sub(colors.WHITE + flag + 
+                                            colors.ENDC, cpuInfo.flags)
         try:
             cpuInfo.sockets
+            cpuInfo.undefinedvm = False
         except:
+            cpuInfo.undefinedvm = True
             cpuInfo.sockets = 0
             cpuInfo.cores = 0
             cpuInfo.threadspercore = 0
@@ -151,7 +154,7 @@ class opsys:
 
     def getAllOpsys(self):
         op = Object()
-        op.cpu = self.getCpuInfo()
+        op.cpu = self.getCpuInfo(formatFlags=False)
         op.procs = self.getProcStat()
         op.selinux = pysosutils.getSeLinux(self.target)
         op.loadavg = self.getLoadAvg()
