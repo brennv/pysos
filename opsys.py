@@ -159,7 +159,7 @@ class opsys:
         op.taint = pysosutils.getTaintCodes(self.target)
         op.hostname = self.getHostName()
         op.runlevel = self.getRunLevel()
-        op.sosdat = self.getSosDate()
+        op.sosdate = self.getSosDate()
         op.uptime = self.getUptime()
         op.uname = self.getUname()
         op.release = pysosutils.getRelease(self.target)
