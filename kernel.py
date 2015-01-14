@@ -150,7 +150,7 @@ class kernel:
             elif panicSysctls[item] == '1':
                 ctl = ' = 1 ' + colors.BOLD + '[enabled]' + colors.ENDC
             else:
-                ctl = ' = %s ' %item.split()[2]
+                ctl = ' = %s ' % panicSysctls[item]
             print '\t\t\t\t {:<31} {}'.format(item, ctl)
 
 if __name__ == '__main__':
