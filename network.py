@@ -452,14 +452,17 @@ class network():
         for device in self.devList:
             dev = Object()
             dev.name = device
-            dev = self.getIfcfgInfo(dev)
-            dev.ipaddr = self.getIpAddr(dev.name)
-            dev.macaddr = self.getMacAddr(dev.name)
-            devInfo.append(dev)
-            if dev:
+            try:
+                dev = self.getIfcfgInfo(dev)
+                dev.ipaddr = self.getIpAddr(dev.name)
+                dev.macaddr = self.getMacAddr(dev.name)
+                devInfo.append(dev)
+                if dev:
+                    pass
+                else:
+                    devInfo.remove(dev)
+            except:
                 pass
-            else:
-                devInfo.remove(dev)
         print colors.BSECTION + 'IP Info' + colors.ENDC
         print colors.WHITE +\
         '\t   Device\t     IP Addr\t     Member Of\t     MTU\t      HW Addr'\
