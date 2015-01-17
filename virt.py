@@ -38,10 +38,30 @@ class virt():
         return pysosutils.getRpmVer(self.target, 'qemu-kvm-rhev-tools')
 
     def checkIsRhevm(self):
-        return pysosutils.getRpm(self.target, 'rhevm', boolean=True)
+        return pysosutils.getRpm(self.target, 'rhevm', boolean = True)
 
     def checkIsRhev(self):
-        return pysosutils.getRpm(self.target, 'vdsm', boolean=True)
+        return pysosutils.getRpm(self.target, 'vdsm', boolean = True)
+
+    def checkHostedEngine(self):
+        hosted = Object()
+        if pysosutils.getRpm(self.target, 'ovirt-hosted-engine-ha',
+                                            boolean = True):
+            hosted.hosted = True
+            hosted.version = pysosutils.getRpmVer(self.target,
+                                            'ovirt-hosted-engine-ha')
+            hosted.broker = self.getBrokerStatus()
+            hosted.agent = self.getAgentStatus()
+            hosted.host = 'Coming'
+        else:
+            hosted.hosted = False
+        return hosted
+
+    def getBrokerStatus(self):
+        pass
+
+    def getAgentStatus(self):
+        pass
 
     def getHyperInfo(self):
         hyper = Object()
@@ -52,6 +72,7 @@ class virt():
             hyper.spice = self.getSpiceVer()
             hyper.tools = self.getRhevToolsVer()
             hyper.spm = self.checkSpm()
+            hyper.hosted = self.checkHostedEngine()
 
         hyper.qemukvm = self.getQemuKvm()
         hyper.qemuimg = self.getQemuImg()
@@ -140,7 +161,9 @@ class virt():
                     +'{:22}'.format(self.hyper.tools)
         print ''
         print colors.WHITE + '\t SPM Status : ' + colors.ENDC +\
-                '{}'.format(self.hyper.spm)
+                '{}'.format(self.hyper.spm) + colors.WHITE +\
+                '\t Hosted Engine : ' + colors.ENDC + '{}'.format(
+                                                self.hyper.hosted.hosted)
         print ''
         self.displayRunningVms()
 
