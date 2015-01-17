@@ -118,23 +118,29 @@ class disk:
                                                 int(dev.size) / 1048576)
         else:
             print ''
-            print colors.RED + '\t\tBlock device information not found.'
+            print colors.BRED + '\t\t\t Block device information not found.'\
+                + colors.ENDC
         print ''
         print colors.BHEADER + '\t MultiPath Info :' + colors.ENDC
-        print colors.WHITE +\
-                '\t\t\t  {:^8}    {:^6}   {:^35}\t{:10}   {:10}'.format(
-                        'Device', 'Size', 'LUN ID', 'DM Devs',
-                        'Status') + colors.ENDC
-        print colors.WHITE + '\t\t\t  ' + '=' * 8 + '   ' + '=' * 8 +\
-                '  ' + '=' * 35 + '     ' + '=' * 9 + '  ' + '=' * 14 +\
-                colors.ENDC
-        for dev in sorted(mpathInfo):
-            dmDevs = ' '.join([x for x in dev.lunDevs])
-            lunState = self._formatLunState(list(set(dev.lunDevStats)))
-            
-            print '\t\t\t  {:^8}    {:>6}   {:^36} '.format(
-                dev.mpathDev, dev.size, dev.lun) + '   {:^10}'.format(
-                    dmDevs) + '  {:^10}'.format(lunState)
+        if mpathInfo:
+            print colors.WHITE +\
+                    '\t\t\t  {:^8}    {:^6}   {:^35}\t{:10}   {:10}'.format(
+                            'Device', 'Size', 'LUN ID', 'DM Devs',
+                            'Status') + colors.ENDC
+            print colors.WHITE + '\t\t\t  ' + '=' * 8 + '   ' + '=' * 8 +\
+                    '  ' + '=' * 35 + '     ' + '=' * 9 + '  ' + '=' * 14 +\
+                    colors.ENDC
+            for dev in sorted(mpathInfo):
+                dmDevs = ' '.join([x for x in dev.lunDevs])
+                lunState = self._formatLunState(list(set(
+                                                    dev.lunDevStats)))
+                
+                print '\t\t\t  {:^8}    {:>6}   {:^36} '.format(
+                    dev.mpathDev, dev.size, dev.lun) + '   {:^10}'.format(
+                        dmDevs) + '  {:^10}'.format(lunState)
+        else:
+            print colors.BRED + '\t\t\t Multipath information not found'\
+                + colors.ENDC
 
 if __name__ == '__main__':
     target = sys.argv[1]
