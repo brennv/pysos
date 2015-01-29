@@ -211,6 +211,9 @@ def parseOutputSection(fname, section):
                             info[key] = value.strip()
                         except:
                             pass
-        return info
+        try:
+            return info
+        except UnboundLocalError:
+            return False
     else:
         return False
