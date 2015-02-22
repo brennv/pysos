@@ -38,6 +38,12 @@ class StorageDomain():
         "storage_type": 4,
         "master": 3,
     }
+    schema35 = {
+        "uuid": 0,
+        "name": 2,
+        "storage_type": 4,
+        "master": 3,
+    }
 
     def __init__(self, csvList, dbVersion):
         '''
@@ -54,6 +60,8 @@ class StorageDomain():
             current_schema = self.schema33
         elif dbVersion == "3.4":
             current_schema = self.schema34
+        elif dbVersion == "3.5":
+            current_schema = self.schema35
 
         if len(details) > 2:
             self.uuid = details[current_schema['uuid']]

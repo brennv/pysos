@@ -46,7 +46,7 @@ class virt():
     def checkHostedEngine(self):
         hosted = Object()
         if pysosutils.getRpm(self.target, 'ovirt-hosted-engine-ha',
-                                            boolean = True):
+                                boolean = True):
             hosted.hosted = True
             hosted.version = pysosutils.getRpmVer(self.target,
                                             'ovirt-hosted-engine-ha')
@@ -163,7 +163,7 @@ class virt():
         print colors.WHITE + '\t SPM Status : ' + colors.ENDC +\
                 '{}'.format(self.hyper.spm) + colors.WHITE +\
                 '\t Hosted Engine : ' + colors.ENDC + '{}'.format(
-                                                self.hyper.hosted.hosted)
+                                            self.hyper.hosted.hosted)
         print ''
         self.displayRunningVms()
 

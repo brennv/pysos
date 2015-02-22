@@ -79,6 +79,19 @@ class Host():
         "spice_ver": 27,
         "kernel_ver": 28
     }
+    schema35 = {
+        "uuid": 0,
+        "name": 1,
+        "host_dc_uuid": 6,
+        "ip_addr": 2,
+        "host_name": 4,
+        "host_type": 8,
+        "vdsm_ver": 35,
+        "host_os": 24,
+        "kvm_ver": 25,
+        "spice_ver": 26,
+        "kernel_ver": 27
+    }
 
     def __init__(self, csvList, dbVersion):
         """
@@ -96,6 +109,8 @@ class Host():
                 self.current_schema = self.schema33
             elif dbVersion == "3.4":
                 self.current_schema = self.schema34
+            elif dbVersion == "3.5":
+                self.current_schema = self.schema35
 
             self.uuid = details[self.current_schema['uuid']]
             self.name = details[self.current_schema['name']]

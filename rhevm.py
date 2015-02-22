@@ -42,6 +42,8 @@ class rhevm():
             simpleVer = "3.3"
         elif "3.4" in rhevm:
             simpleVer = "3.4"
+        elif "3.5" in rhevm:
+            simpleVer = "3.5"
         else:
             simpleVer = "Could not be found"
         return simpleVer
@@ -60,7 +62,8 @@ class rhevm():
         simpleVer = self._rhevmSimpleVer()
         if db:
             if (simpleVer == "3.1" or simpleVer == "3.2" or
-                simpleVer == "3.3" or simpleVer == "3.4"):
+                simpleVer == "3.3" or simpleVer == "3.4" or
+                simpleVer == "3.5"):
                 self.displayDbEval(db, simpleVer)
             elif simpleVer == "3.0":
                 print colors.WARN + "\t 3.0 parsing not implemented"\
