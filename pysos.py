@@ -13,6 +13,7 @@ import virt
 import kernel
 import network
 import lspci
+import lvm
 import filesys
 import disk
 import yum
@@ -35,7 +36,7 @@ parser.add_argument('-c', "--cpu", action = "store_true",
 parser.add_argument('-m', "--memory", action = "store_true",
                                 help = "Print memory information")
 parser.add_argument('-d', "--disk", action = "store_true",
-                help = 'Print block device and multipath information')
+                help = 'Print LVM information information')
 parser.add_argument('-f', "--filesys", action = "store_true",
                                 help = "Print filesystem information")
 parser.add_argument("--fso", action = "store_true",
@@ -111,8 +112,8 @@ def doStuff(**args):
         obj = opsys.opsys(target)
         obj.displayCpuInfo()
     if args['disk']:
-        obj = disk.disk(target)
-        obj.displayMultiPathInfo()
+        obj = lvm.lvm(target)
+        obj.displayVgInfo()
     if args['filesys']:
         obj = filesys.filesys(target, showFsOpts = args['fso'])
         obj.displayFsInfo()
