@@ -1,21 +1,20 @@
 #!/usr/bin/env python
 
 import argparse
-import sys
-import os
-import subprocess
-import pysosutils
-import opsys
 import bios
-import memory
-import ps
-import virt
+import filesys
 import kernel
-import network
 import lspci
 import lvm
-import filesys
-import disk
+import memory
+import network
+import opsys
+import os
+import ps
+import pysosutils
+import subprocess
+import sys
+import virt
 import yum
 
 parser = argparse.ArgumentParser(description =
@@ -36,7 +35,7 @@ parser.add_argument('-c', "--cpu", action = "store_true",
 parser.add_argument('-m', "--memory", action = "store_true",
                                 help = "Print memory information")
 parser.add_argument('-d', "--disk", action = "store_true",
-                help = 'Print LVM information information')
+                help = 'Print disk and LVM information')
 parser.add_argument('-f', "--filesys", action = "store_true",
                                 help = "Print filesystem information")
 parser.add_argument("--fso", action = "store_true",
