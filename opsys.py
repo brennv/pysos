@@ -132,8 +132,19 @@ class opsys:
                     cpuInfo.vendor = line[index+2:len(line)]
                 # finally, total number of CPUs
                 elif line.startswith('processor'):
-                    cpuInfo.processors = int(line[index+2:
+                    try:
+                        cpuInfo.processors = int(line[index+2:
                                                         len(line)])+1
+                    except ValueError:
+                        # implies we're not on x86
+                        cpuInfo.processors = int(
+                            line.split()[1].strip(':')
+                        ) + 1
+                        cpuInfo.flags = 'Undeterminable'
+                        cpuInfo.model = 'Undefined'
+                        cpuInfo.sockets = 'Undefined'
+                        cpuInfo.cores = 'Undefined'
+                        cpuInfo.threadspercore = 'Undefined'
                     break
 
         if formatFlags:
