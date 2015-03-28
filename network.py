@@ -143,7 +143,6 @@ class network():
                     'sos_commands/networking/ip_address'):
             with open(self.target +
                     'sos_commands/networking/ip_address', 'r') as ifile:
-                print 'ip'
                 for n, line in enumerate(ifile):
                     if device in line:
                         for i in range(3):
