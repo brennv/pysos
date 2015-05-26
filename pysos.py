@@ -2,6 +2,7 @@
 
 import argparse
 import bios
+import docker
 import filesys
 import kernel
 import lspci
@@ -36,6 +37,8 @@ parser.add_argument('-m', "--memory", action = "store_true",
                                 help = "Print memory information")
 parser.add_argument('-d', "--disk", action = "store_true",
                 help = 'Print disk and LVM information')
+parser.add_argument('--docker', action = "store_true",
+                help = "Printer docker and container related information") 
 parser.add_argument('-f', "--filesys", action = "store_true",
                                 help = "Print filesystem information")
 parser.add_argument("--fso", action = "store_true",
@@ -113,6 +116,9 @@ def doStuff(**args):
     if args['disk']:
         obj = lvm.lvm(target)
         obj.displayVgInfo()
+    if args['docker']:
+        obj = docker.docker(target)
+        obj.displayDockerInfo()
     if args['filesys']:
         obj = filesys.filesys(target, showFsOpts = args['fso'])
         obj.displayFsInfo()
