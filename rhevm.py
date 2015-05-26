@@ -1,7 +1,7 @@
 import sys
 import pysosutils
 import os
-from colors import *
+from colors import Color as c
 from rhevlcbridge import Database, Cluster, Table, Host, StorageDomain
 
 class Object(object):
@@ -13,6 +13,7 @@ class rhevm():
         self.target = target
         self.db = db
         self.rhevm = self.getRhevmInfo()
+        self.pprint = c()
 
     def getRhevmVer(self):
         return pysosutils.getRpmVer(self.target, 'rhevm')
@@ -66,14 +67,13 @@ class rhevm():
                 simpleVer == "3.5"):
                 self.displayDbEval(db, simpleVer)
             elif simpleVer == "3.0":
-                print colors.WARN + "\t 3.0 parsing not implemented"\
-                    + colors.ENDC
+                self.pprint.warn("\t 3.0 parsing not implemented")
             else:
-                print colors.WARN +\
-                    "\t Database version needed for proper analysis"\
-                    + colors.ENDC
+                self.pprint.warn(
+                        "\t Database version needed for proper analysis"
+                    )
         else:
-            print colors.WARN + "Database not found" + colors.ENDC
+            self.pprint.warn("Database not found")
 
     def parseEngineLog(self):
         logFile = open(self.target + 'var/log/ovirt-engine/engine.log',
@@ -98,10 +98,12 @@ class rhevm():
                 3 - Command run
                 7+ - Message
                 '''
-                print colors.BHEADER + "\t Time Stamp: " + colors.ENDC\
-                        + errorProperties[0] + " " + errorProperties[1]
-                print colors.BHEADER + "\t Command: " + colors.ENDC\
-                            + errorProperties[3].lstrip("[").rstrip("]")
+                self.pprint.bheader("\t Time Stamp: ",
+                            errorProperties[0] + " " + errorProperties[1]
+                        )
+                self.pprint.bheader("\t Command: ",
+                            errorProperties[3].lstrip("[").rstrip("]")
+                        )
                 # Trying to hack this since messages varies in length
                 # basing on last capital letter. deal with it
                 errMessParts =  errorProperties[7:]
@@ -116,8 +118,7 @@ class rhevm():
                                                     ).replace("\n","")
                             #print errorMessage
 
-                print colors.BHEADER + "\t Message: " + colors.ENDC\
-                        + errorMessage
+                self.pprint.bheader("\t Message: ", errorMessage)
                 singleOccurance = True
                 occurances = 0
                 for line in lines:
@@ -127,38 +128,34 @@ class rhevm():
                     singleOccurance = False
 
                 if singleOccurance:
-                    print colors.BHEADER +\
-                        "\t Only occurance of this error: " +\
-                        colors.WHITE + "Yes" + colors.ENDC
+                    self.pprint.bheader(
+                            "\t Only occurance of this error: ",
+                            "Yes"
+                        )
                 else:
-                    print colors.BHEADER +\
-                        "\t Only occurance of this error: " +\
-                        colors.ENDC + colors.RED + "No. Errors appear "\
-                        + str(occurances) +\
-                        " times in engine.log starting at " + ' '.join(
-                            errorLines[0].split(" ")[0:2]) + colors.ENDC
+                    self.pprint.bheader(
+                            "\t Only occurance of this error: ",
+                            "No. Errors appear " + str(occurances),
+                            " times in engine.log starting at ",
+                            ' '.join(errorLines[0].split(" ")[0:2])
+                        )
                 print ""
             except:
                 pass
         logFile.close()
 
     def displayRhevmInfo(self):
-        print colors.BBLUE + '\t\t This is a RHEV Manager' + colors.ENDC
+        self.pprint.bblue('\t\t This is a RHEV Manager')
         print ''
-        print colors.BHEADER + '\t RHEV-M Version : ' + colors.CYAN +\
-                        self.rhevm.ver + colors.ENDC
-        print colors.BHEADER + '\t RHEV-M Reports : ' + colors.CYAN +\
-                        self.rhevm.reports + colors.ENDC
-        print colors.BHEADER + '\t RHEV-M DWH     : ' + colors.CYAN +\
-                        self.rhevm.dwh + colors.ENDC
+        self.pprint.bheader('\t RHEV-M Version : ', self.rhevm.ver)
+        self.pprint.bheader('\t RHEV-M Reports : ', self.rhevm.reports)
+        self.pprint.bheader('\t RHEV-M DWH     : ', self.rhevm.dwh)
         print ''
         dbPresent = self.checkForDb()
         if dbPresent:
-            print colors.BLUE + '\t Database found. Can parse.'\
-                        + colors.ENDC
+            self.pprint.blue('\t Database found. Can parse.')
         else:
-            print colors.RED + "\t Database not found. Can't parse."\
-                        + colors.ENDC
+            self.pprint.red("\t Database not found. Can't parse.")
         print ''
         print '\t Most recent errors in engine.log : '
         self.parseEngineLog()
@@ -184,18 +181,15 @@ class rhevm():
         # create DC list
         dcList = self.getDcList()
         print ""
-        print colors.BSECTION + "RHEV Database Information"\
-                    + colors.ENDC
+        self.pprint.bsection("RHEV Database Information")
         print ""
-        print '\n\t' + colors.BGREEN +\
-                '[Data Centers Managed By RHEV-M]' + colors.ENDC
+        self.pprint.bgreen('\n\t[Data Centers Managed By RHEV-M]')
         dc_table = Table(dcList,"name","uuid","compat")
         dc_table.display()
 
     def displayRhevStorageInfo(self):
         masterDB = self.getMasterDbObj()
-        print '\n\t' + colors.BGREEN +\
-                '[Storage Domains In All Data Centers]' + colors.ENDC
+        self.pprint.breen('\n\t[Storage Domains In All Data Centers]')
         sd_list = masterDB.get_storage_domains()
         sd_list.sort(key=lambda x: x.storage_type)
         sd_table = Table(sd_list,"name","uuid","storage_type","master")
@@ -203,8 +197,7 @@ class rhevm():
 
     def displayRhevClusterInfo(self):
         masterDB = self.getMasterDbObj()
-        print '\n\t' + colors.BGREEN + '[Clusters In All Data Centers]'\
-                + colors.ENDC
+        self.pprint.bgreen('\n\t[Clusters In All Data Centers]')
         clusterList = self.getClusterList()
         clusterList.sort(key=lambda x: x.dc_uuid)
         cluster_table = Table(clusterList, "name", "uuid", "compat_ver",
@@ -264,14 +257,12 @@ class rhevm():
                                 dbDir + "/../" + dir + '/')['current'])
                 else:
                     pass
-        print '\n\t' + colors.BGREEN +\
-                    '[Hypervisors In All Data Centers]' + colors.ENDC
+        self.pprint.bgreen('\n\t[Hypervisors In All Data Centers]')
         host_table = Table(host_list, "name", "uuid", "host_dc_name",
                                             "type", "spm", "selinux")
         host_table.display()        
 
-        print '\n\t' + colors.BGREEN +\
-                    '[RPM Versions on All Hypervisors]' + colors.ENDC
+        self.pprint.bgreen('\n\t[RPM Versions on All Hypervisors]')
         host_ver_table = Table(host_list, "name", "host_os", "vdsm_ver",
                                 "kvm_ver", "spice_ver", "kernel_ver")
         host_ver_table.display()

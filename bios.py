@@ -3,7 +3,7 @@ import os
 import re
 import opsys
 import pysosutils
-from colors import *
+from colors import Color as c
 
 class Object(object):
     pass
@@ -18,6 +18,7 @@ class bios:
         else:
             print 'No dmidecode file present'
             return False
+        self.pprint = c()
 
     def getDimmInfo(self):
         """ Get information about populated and empty dimms.
@@ -95,57 +96,66 @@ class bios:
         procInfo = self.getProcInfo()
         dimm = self.getDimmInfo()
         if biosInfo:
-            print colors.BSECTION + 'DMI Decode' + colors.ENDC
-            print '\t' + colors.BHEADER + 'BIOS' + colors.ENDC
-            print '\t\t' + colors.BLUE + 'Vendor  : ' + colors.ENDC\
-                        + biosInfo['Vendor']
-            print '\t\t' + colors.BLUE + 'Version : ' + colors.ENDC\
-                        + biosInfo['Version']
-            print '\t\t' + colors.BLUE + 'Release : ' + colors.ENDC\
-                        + biosInfo['Release Date']
+            self.pprint.bsection('DMI Decode')
+            self.pprint.bheader('\tBIOS')
+            self.pprint.blue('\t\tVendor  : ', biosInfo['Vendor'])
+            self.pprint.blue('\t\tVersion : ', biosInfo['Version'])
+            self.pprint.blue('\t\tRelease : ', biosInfo['Release Date'])
         else:
-            print colors.BRED + '\t\t Could not parse dmidecode' + colors.ENDC
+            self.pprint.bred('\t\t Could not parse dmidecode')
+
         if sysInfo:
-            print '\t' + colors.BHEADER + 'System' + colors.ENDC
-            print '\t\t' + colors.BLUE + 'Vendor  : ' + colors.ENDC\
-                        + sysInfo['Manufacturer']
-            print '\t\t' + colors.BLUE + 'Server  : ' + colors.ENDC\
-                        + sysInfo['Product Name']
-            print '\t\t' + colors.BLUE + 'Serial  : ' + colors.ENDC\
-                        + sysInfo['Serial Number']
-            print '\t\t' + colors.BLUE + 'UUID    : ' + colors.ENDC\
-                        + sysInfo['UUID']
+            self.pprint.bheader('\tSystem')
+            self.pprint.blue('\t\tVendor  : ', sysInfo['Manufacturer'])
+            self.pprint.blue('\t\tServer  : ', sysInfo['Product Name'])
+            self.pprint.blue('\t\tSerial  : ', sysInfo['Serial Number'])
+            self.pprint.blue('\t\tUUID    : ', sysInfo['UUID'])
 
-        print '\t' + colors.BHEADER + 'CPU' + colors.ENDC
+        self.pprint.bheader('\tCPU')
+
         if procInfo.sockets > 0:
-            print '\t\t' + colors.WHITE +\
-            '{} sockets - {} cores - {} threads per core'.format(
+            self.pprint.white(
+                    '\t\t{} sockets - {} cores - {} threads per core'.format(
                         procInfo.sockets, procInfo.cores,
-                        procInfo.threadspercore) + colors.ENDC
-            print '\t\t' + colors.WHITE + '{} total cores {} total threads'.format(
+                        procInfo.threadspercore
+                        )
+                    )
+            self.pprint.white('\t\t{} total cores {} total threads'.format(
                         procInfo.cores,
-                        procInfo.processors) + colors.ENDC
+                        procInfo.processors
+                        )
+                    )
         else:
-            print colors.WHITE +\
-                '\t\tVirtual Machine with no defined sockets or cores'\
-                + colors.ENDC
-        print '\t\t' + colors.BLUE + 'Family  : ' + colors.ENDC\
-                + procInfo.vendor + ' ' + procInfo.family
-        print '\t\t' + colors.BLUE + 'Model   : ' + colors.ENDC\
-                + procInfo.model.strip()
-
-        print '\t' + colors.BHEADER + 'Memory' + colors.ENDC
-        print '\t\t' + colors.WHITE + '{} of {} DIMMs populated'.format(
-                (dimm.dimmCount - dimm.emptyDimms),
-                dimm.dimmCount) + colors.ENDC
-        print '\t\t' + colors.BLUE + 'Total   : ' + colors.ENDC + str(
-                dimm.totalMem) + ' MB' + '  ({} GB)'.format((
-                dimm.totalMem / 1024))
-        print '\t\t' + colors.BLUE + 'Max Mem : ' + colors.ENDC\
-                + '{} GB'.format(dimm.maxMem)
-        print '\t\t' + colors.GREEN +\
-        '{} total controllers {} GB maximum per controller'.format(
-        dimm.memArrays, dimm.maxMem) + colors.ENDC 
+            self.pprint.white(
+                '\t\tVirtual Machine with no defined sockets or cores'
+            )
+        self.pprint.blue('\t\tFamily  : ',
+                procInfo.vendor,
+                ' ',
+                procInfo.family
+            )
+        self.pprint.blue('\t\tModel   : ', procInfo.model.strip())
+        self.pprint.bheader('\tMemory')
+        self.pprint.white('\t\t{} of {} DIMMs populated'.format(
+                            (dimm.dimmCount - dimm.emptyDimms),
+                            dimm.dimmCount
+                            )
+                        )
+        self.pprint.blue('\t\tTotal   : ',
+                        str(dimm.totalMem),
+                        ' MB',
+                        '  ({} GB)'.format(
+                                (dimm.totalMem / 1024)
+                            )
+                        )
+        self.pprint.blue('\t\tMax Mem : ',
+                        '{} GB'.format(dimm.maxMem)
+                        )
+        self.pprint.green(
+            '\t\t{} total controllers {} GB maximum per controller'.format(
+                dimm.memArrays, dimm.maxMem
+                )
+            )
 
 if __name__ == '__main__':
     target = sys.argv[1]

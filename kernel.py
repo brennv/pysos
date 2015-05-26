@@ -5,7 +5,7 @@ import opsys
 import filesys
 import memory
 import math
-from colors import *
+from colors import Color as c
 
 class Object(object):
     pass
@@ -15,6 +15,7 @@ class kernel:
 
     def __init__(self, target):
         self.target = target
+        self.pprint = c()
 
     def getKdumpState(self):
         """ Get chkconfig state of kdump service """
@@ -97,53 +98,57 @@ class kernel:
         crashInfo = self.getCrashInfo()
         taintCodes = pysosutils.getTaintCodes(self.target)
 
-        print colors.BSECTION + 'Kernel ' + colors.ENDC
-        print colors.BHEADER + '\t Running Kernel      :  '\
-                + colors.ENDC + kernel
-        print colors.BHEADER + '\t Kernel Taint State  : '\
-                + colors.ENDC + taintCodes[0]
+        self.pprint.bsection('Kernel ')
+        self.pprint.bheader('\t Running Kernel     : ', kernel)
+        self.pprint.bheader('\t Kernel Taint State  : ', taintCodes[0])
         if len(taintCodes) > 1:
             taintCodes.pop(0)
             for item in taintCodes:
                 print '\t\t\t       ' + item
-        print colors.BHEADER + '\t kexec-tools version :  '\
-                + colors.ENDC + kdumpVer
-        print colors.BHEADER + '\t Service enablement  :  '\
-                + colors.ENDC + kdumpState
-        print colors.BHEADER + '\t Memory Reservation  :  '\
-                + colors.ENDC + crashInfo.memreserve
+        self.pprint.bheader('\t kexec-tools version :  ', kdumpVer) 
+        self.pprint.bheader('\t Service enablement  :  ', kdumpState)
+        self.pprint.bheader('\t Memory Reservation  :  ',
+                            crashInfo.memreserve
+                        )
 
         print ''
-        print colors.BHEADER + '\t kdump.conf          : '\
-                + colors.ENDC
+        self.pprint.bheader('\t kdump.conf          : ')
         if kdump:
             for key in kdump:
                 print '\t\t\t\t%s  %s' %(key, kdump[key])
-            print colors.BBLUE + '\t\t Crash Path   : '\
-                    + colors.ENDC + crashInfo.path + '  ({})'.format(
-                                                    crashInfo.pathdevice)
-            print colors.BBLUE + '\t\t Space Needed : '\
-                    + colors.ENDC + '{:>6.2f} GB'.format(math.ceil(
-                                    float(crashInfo.memrequired) / 1000))
+            self.pprint.bblue('\t\t Crash Path   : ',
+                            crashInfo.path,
+                            '  ({})'.format(
+                                crashInfo.pathdevice
+                            )
+                        )
+            self.pprint.bblue('\t\t Space Needed : ',
+                                '{:>6.2f} GB'.format(
+                                    math.ceil(float(
+                                        crashInfo.memrequired
+                                        ) / 1000
+                                    )
+                                )
+                            )
+
         else:
-            print '\t\t\t\t' + colors.BRED + 'Unable to parse config' +\
-                        colors.ENDC
+            self.pprint.bred('\t\t\t\t Unable to parse config')
 
         if type(crashInfo.pathfreespace) is int:
-            print colors.BBLUE + '\t\t Free Space   : '\
-                + colors.ENDC + '{:>6.2f} GB'.format(
-                                            crashInfo.pathfreespace)
+            self.pprint.bblue('\t\t Free Space   : ',
+                                '{:>6.2f} GB'.format(
+                                    crashInfo.pathfreespace
+                                )
+                            )
         else:
-            print colors.BBLUE + '\t\t Free Space   : '\
-                + colors.ENDC + 'Unknown'
+            self.pprint.bblue('\t\t Free Space   : ', 'Unknown')
 
         if crashInfo.memrequired / 1000 > crashInfo.pathfreespace:
-            print '\t\t\t ' + colors.WARN \
-                    + '\tNOT ENOUGH SPACE FOR VMCORE DUMP' + colors.ENDC
+            self.pprint.warn('\t\t\t\t NOT ENOUGH SPACE FOR VMCORE DUMP')
         print ''
 
-        print colors.BHEADER + '\t Kernel Panic Sysctl : '\
-                    + colors.ENDC
+        self.pprint.bheader('\t Kernel Panic Sysctl : ')
+        colors = c()
         for item in panicSysctls:
             if panicSysctls[item] == '0':
                 ctl = ' = 0 ' + '[disabled]' + colors.ENDC

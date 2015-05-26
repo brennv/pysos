@@ -2,7 +2,7 @@ import sys
 import pysosutils
 import math
 import ps
-from colors import *
+from colors import Color as c
 from rhevm import rhevm
 
 class Object(object):
@@ -12,6 +12,7 @@ class virt():
 
     def __init__(self, target):
         self.target = target
+        self.pprint = c()
 
     def getVdsmVer(self):
         return pysosutils.getRpmVer(self.target, 'vdsm')
@@ -94,7 +95,7 @@ class virt():
         return pysosutils.getRpm(self.target, 'qemu-kvm', boolean=True)
 
     def showVirtPlat(self, db=False):
-        print colors.BSECTION + 'Virtualization' + colors.ENDC
+        self.pprint.bsection('Virtualization')
         if self.checkIsRhev():
             self.hyper = self.getHyperInfo()
             self.displayRhevInfo()
@@ -133,14 +134,17 @@ class virt():
                             'sos_commands/vdsm/etc.init.d.vdsmd_status')
 
     def displayHyperInfo(self):
+        colors = c()
         try:
             self.hyper
         except:
             self.hyper = self.getHyperInfo()
-        print colors.BHEADER + '\t Release    : ' + colors.ENDC +\
+        self.pprint.bheader('\t Release    : ',
                             pysosutils.getRelease(self.target)
-        print colors.BHEADER + '\t Kernel     : ' + colors.ENDC +\
+                        )
+        self.pprint.bheader('\t Kernel     : ',
                             pysosutils.getKernelVersion(self.target)
+                        )
         print ''
 
         print colors.BLUE + '\t vdsm\t    : '+ colors.ENDC +'{:22}'\
@@ -155,6 +159,7 @@ class virt():
 
     def displayRhevInfo(self):
         self.displayHyperInfo()
+        colors = c()
         print colors.BLUE + '\t SPICE\t    : ' + colors.ENDC +\
                     '{:22}'.format(self.hyper.spice) + ' \t ' \
                     + colors.BLUE + 'RHEV Tools  : ' + colors.ENDC\
@@ -174,8 +179,10 @@ class virt():
 
     def displayRunningVms(self):
         vms = self.getRunningVms()
-        print colors.BHEADER + '\t Running VMs on this host : ' +\
-                colors.ENDC + str(len(vms)) + '\t CPU/RSS GB usage in ()'
+        self.pprint.bheader('\t Running VMs on this host : ',
+                            str(len(vms)),
+                            '\t CPU/RSS GB usage in ()'
+                        )
         for i in range(0, (len(vms) / 4) +1):
             vmLine = '\t '
             for x in range(0, 4):

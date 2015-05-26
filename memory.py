@@ -3,7 +3,7 @@ import os
 import re
 import math
 import pysosutils
-from colors import *
+from colors import Color as c
 
 class Object(object):
     pass
@@ -14,6 +14,7 @@ class memory:
     def __init__(self, target):
         self.target = target
         self.mem = self.getMemInfo()
+        self.pprint = c()
 
     def _graph(self, perc):
         """ 
@@ -118,92 +119,115 @@ class memory:
     def displayMemGraphs(self):
         """ Use data from getself.memInfo() to display graphed data """
 
-        print colors.BHEADER\
-                    + '\t Memory Statistics graphed : ' + colors.ENDC
+        self.pprint.bheader('\t Memory Statistics graphed')
+        self.pprint.blue('\t\t Used      : %8.2f GB ' %(
+                            self.mem.inuse / 1024) + self._graph(
+                                self.mem.inuseperc
+                            )
+                        )
 
-        print colors.BLUE + '\t\t Used      : %8.2f GB ' %(
-                self.mem.inuse / 1024) + self._graph(self.mem.inuseperc
-                ) + colors.ENDC
+        self.pprint.cyan('\t\t Cached    : %8.2f GB ' %(
+                            self.mem.cached / 1024) + self._graph(
+                                self.mem.cachedperc
+                            )
+                        )
 
-        print colors.CYAN + '\t\t Cached    : %8.2f GB ' %(
-                self.mem.cached / 1024) + self._graph(
-                                    self.mem.cachedperc) + colors.ENDC
-
-        print colors.PURPLE + '\t\t Buffered  : %8.2f GB ' %(
-                self.mem.buffered / 1024) + self._graph(
-                                    self.mem.bufferedperc) + colors.ENDC
+        self.pprint.purple('\t\t Buffered  : %8.2f GB ' %(
+                            self.mem.buffered / 1024) + self._graph(
+                                self.mem.bufferedperc
+                            )
+                        )
 
         if self.mem.swapTotal > 0:
-            print colors.WHITE + '\t\t Swap      : %8.2f MB ' %(
-                self.mem.swapUsed) + self._graph(round(((
-                self.mem.swapUsed / self.mem.swapTotal) * 100),
-                2)) + colors.ENDC
+            self.pprint.white('\t\t Swap      : %8.2f MB ' %(
+                        self.mem.swapUsed) + self._graph(round(((
+                        self.mem.swapUsed / self.mem.swapTotal) * 100),
+                        2)
+                    )
+                )
 
         if self.mem.hugepages > 0:
-            print colors.GREEN + '\t\t Hugepages : %8s    ' %(
-                self.mem.hugepagesused) +  self._graph(
-                    self.mem.hugepagesperc) + colors.ENDC
+            self.pprint.green('\t\t Hugepages : %8s    ' %(
+                                self.mem.hugepagesused) +  self._graph(
+                                    self.mem.hugepagesperc
+                                )
+                            )
 
-        print colors.RED + '\t\t Dirty     : %8s MB ' %(
-                self.mem.dirty) + self._graph(round(((
-                self.mem.dirty / self.mem.total) * 100),
-                2)) + colors.ENDC
+        self.pprint.red('\t\t Dirty     : %8s MB ' %(
+                        self.mem.dirty) + self._graph(round(((
+                            self.mem.dirty / self.mem.total) * 100), 2)
+                        )
+                    )
 
-        print '\t\t SLAB      : %8s MB ' %self.mem.slab + self._graph(
-                round(((self.mem.slab / self.mem.total) * 100), 2))
+        self.pprint.grey('\t\t SLAB      : %8.2f MB ' %(
+                        self.mem.slab) + self._graph(round(((
+                            self.mem.slab / self.mem.total) * 100), 2)
+                        )
+                    )
 
     def displayMemInfo(self):
         """ Display memory statistics from getself.memInfo() """
 
-        print colors.BSECTION + "Memory " + colors.ENDC
+        self.pprint.bsection('Memory')
         if self.mem == False:
-            print colors.BRED +\
-                '\t proc/self.memInfo not found - cannot parse'\
-                + colors.ENDC
+            self.pprint.bred(
+                '\t proc/self.memInfo not found - cannot parse'
+            )
             return False
 
         self.displayMemGraphs()
 
-        print colors.BHEADER + '\t RAM  :' + colors.ENDC
+        print ''
+        self.pprint.bheader('\t RAM  :')
         print '\t\t %6.2f GB total memory on system' %(math.ceil(
                                         self.mem.total / 1024))
-        print colors.BLUE  + '\t\t %6.2f GB (%.2f %%) used' %((
+        self.pprint.blue('\t\t %6.2f GB (%.2f %%) used' %((
                 self.mem.inuse / 1024), (self.mem.used /
-                self.mem.total) * 100) + colors.ENDC
+                self.mem.total) * 100)
+            )
 
-        print colors.CYAN + '\t\t %6.2f GB (%.2f %%) cached' %((
+        self.pprint.cyan('\t\t %6.2f GB (%.2f %%) cached' %((
                 self.mem.cached / 1024), (self.mem.cached /
-                self.mem.total) * 100) + colors.ENDC
+                self.mem.total) * 100)
+            )
 
-        print colors.PURPLE + '\t\t %6.2f GB (%.2f %%) buffered' %((
+        self.pprint.purple('\t\t %6.2f GB (%.2f %%) buffered' %((
                 self.mem.buffered / 1024), ((self.mem.buffered / 
-                self.mem.total) * 100)) + colors.ENDC
+                self.mem.total) * 100))
+            )
 
-        print colors.RED + '\t\t %6.2f MB (%.2f %%) dirty' %(
+        self.pprint.red('\t\t %6.2f MB (%.2f %%) dirty' %(
                 self.mem.dirty, (self.mem.dirty / self.mem.total) 
-                * 100) + colors.ENDC
+                * 100)
+            )
 
-        print colors.BHEADER + '\t Swap :' + colors.ENDC
-        print colors.WHITE + '\t\t %6.2f GB defined  swap space ' %(
-                self.mem.swapTotal / 1024) + colors.ENDC
+        self.pprint.bheader('\t Swap :')
+        self.pprint.grey('\t\t %6.2f GB defined  swap space ' %(
+                self.mem.swapTotal / 1024)
+            )
 
         if self.mem.swapTotal > 0:
-            print colors.WHITE +\
+            self.pprint.white(
                 '\t\t %6.2f MB (%.2f %%) swap space used ' %(
                 self.mem.swapUsed, (self.mem.swapUsed /
-                self.mem.swapTotal) * 100) + colors.ENDC
+                self.mem.swapTotal) * 100)
+            )
 
         if self.mem.hugepages > 0:
-            print colors.BHEADER + '\t HugePages :' + colors.ENDC
-            print colors.GREEN + '\t\t %6s total hugepages allocated' %(
-                self.mem.hugepages) + colors.ENDC
-            print colors.GREEN + '\t\t %6s (%2.2f %%) hugepages in use'\
+            self.pprint.bheader('\t HugePages :')
+            self.pprint.green('\t\t %6s total hugepages allocated' %(
+                self.mem.hugepages)
+            )
+            self.pprint.green('\t\t %6s (%2.2f %%) hugepages in use'\
                 %(self.mem.hugepagesused, self.mem.hugepagesperc
-                    ) + colors.ENDC
+                    )
+                )
 
-        print colors.BHEADER + '\t Misc :' + colors.ENDC
-        print '\t\t %6s MB (%.2f %%) of total memory used for SLAB' %(
+        self.pprint.bheader('\t Misc :')
+        self.pprint.grey(
+            '\t\t %6s MB (%.2f %%) of total memory used for SLAB' %(
                 self.mem.slab, (self.mem.slab / self.mem.total))
+            )
 
 if __name__ == '__main__':
     target = sys.argv[1]

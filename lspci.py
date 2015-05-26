@@ -1,6 +1,6 @@
 import sys
 import os
-from colors import *
+from colors import Color as c
 
 class Object(object):
     pass
@@ -11,6 +11,7 @@ class lspci():
     def __init__(self, target):
         self.target = target
         self.lspciInfo = self._getLspciInfo()
+        self.pprint = c()
 
     def _getLspciInfo(self):
         if os.path.isfile(self.target + 'sos_commands/hardware/lspci'):
@@ -59,20 +60,22 @@ class lspci():
         for dev in self.lspciInfo:
             if chkType in dev.devtype:
                 if dev.count > 1:
-                    print colors.BHEADER + '\t\t {:10} : '.format(
-                        dev.devtype) + colors.ENDC + colors.WHITE +\
-                        '[{} ports]'.format(dev.count)+ colors.ENDC +\
-                        ' {}'.format(dev.name)
+                    self.pprint.bheader(
+                        '\t\t {:10} : '.format(dev.devtype),
+                        '[{} ports] '.format(dev.count),
+                        dev.name
+                    )
                 else:
-                    print colors.BHEADER + '\t\t {:10} : '.format(
-                    dev.devtype) + colors.ENDC + '{}'.format(dev.name)
+                    self.pprint.bheader(
+                        '\t\t {:10} : '.format(dev.devtype),
+                        '{}'.format(dev.name)
+                    )
 
     def displayAllLspciInfo(self):
         """ Helper for displaying the most common device types """
-        print colors.BSECTION + 'LSPCI' + colors.ENDC
+        self.pprint.bsection('LSPCI')
         if self.lspciInfo:
-            print colors.BHEADER + '\t Physical Devices'\
-                    + colors.ENDC
+            self.pprint.bheader('\t Physical Devices')
             # Not really *all*, just all we're interesting in
             self.displayLspciInfo('Ethernet')
             self.displayLspciInfo('Network')
@@ -81,8 +84,7 @@ class lspci():
             self.displayLspciInfo('SCSI')
             self.displayLspciInfo('Fibre')
         else:
-            print colors.BRED +\
-                    '\t LSPCI Information Not Found' + colors.ENDC
+            self.pprint.bred('\t LSPCI Information Not Found')
 
 if __name__ == '__main__':
     target = sys.argv[1]

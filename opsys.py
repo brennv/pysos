@@ -4,7 +4,7 @@ import textwrap
 import re
 import pysosutils
 import os
-from colors import *
+from colors import Color as c
 
 class Object(object):
     pass
@@ -14,6 +14,7 @@ class opsys:
 
     def __init__(self, target):
         self.target = target
+        self.pprint = c()
 
     def getHostName(self):
         """ Get the hostname of the system """
@@ -65,6 +66,7 @@ class opsys:
 
     def formatLoadAvg(self):
         """ Format getLoadAvg() into string with percentages """
+        colors = c()
         loads = self.getLoadAvg()
         cpus = self.getCpuInfo().processors
         percs = []
@@ -148,11 +150,12 @@ class opsys:
                     break
 
         if formatFlags:
+            color = c()
             importantFlags = ['vmx', ' svm ', 'nx', ' lm ']
             for flag in importantFlags:
                 pattern = re.compile(flag)
-                cpuInfo.flags = pattern.sub(colors.WHITE + flag + 
-                                            colors.ENDC, cpuInfo.flags)
+                cpuInfo.flags = pattern.sub(color.WHITE + flag + 
+                                            color.ENDC, cpuInfo.flags)
         try:
             cpuInfo.sockets
             cpuInfo.undefinedvm = False
@@ -187,65 +190,61 @@ class opsys:
         loadAvg = self.formatLoadAvg()
         taintCodes = pysosutils.getTaintCodes(self.target)
 
-        print colors.BSECTION + "OS " + colors.ENDC
-        print colors.BHEADER + '\t Hostname  : ' + colors.ENDC +\
-                                                    self.getHostName()
-        print colors.BHEADER +  '\t Release   : ' + colors.ENDC +\
-                                    pysosutils.getRelease(self.target)
-        print colors.BHEADER + '\t Runlevel  : ' + colors.ENDC +\
-                                                    self.getRunLevel()
-        print colors.BHEADER +  '\t SELinux   : ' + colors.ENDC +\
-                    selStatus['current'] + ' ( config: ' + selStatus[
-                                                        'config'] + ' )'
-
-        print colors.BHEADER + '\t Kernel    : ' + colors.ENDC
-        print '\t   ' + colors.BBLUE + 'Booted kernel  : '\
-                + colors.ENDC + pysosutils.getKernelVersion(self.target)
-        print '\t   ' + colors.BBLUE + 'Booted cmdline : '\
-                + colors.ENDC
+        self.pprint.bsection('OS')
+        self.pprint.bheader('\t Hostname  : ', self.getHostName())
+        self.pprint.bheader('\t Release   : ',
+                            pysosutils.getRelease(self.target))
+        self.pprint.bheader('\t Runlevel  : ', self.getRunLevel())
+        self.pprint.bheader('\t SELinux   : ',
+                            selStatus['current'],
+                            ' ( config: ' + selStatus['config'] + ' )'
+                        )
+        self.pprint.bheader('\t Kernel    : ')
+        self.pprint.bblue('\t   Booted Kernel  : ',
+                            pysosutils.getKernelVersion(self.target)
+                        )
+        self.pprint.bblue('\t   Booted cmdline : ')
+        
         print '%15s' % ' ' + textwrap.fill(pysosutils.getCmdLine(
                 self.target), 90, subsequent_indent='%15s' % ' ')
-        print colors.BHEADER + '\t Taints    :' + colors.ENDC +\
-                                                        taintCodes[0]
+        self.pprint.bheader('\t Taints    :', taintCodes[0])
 
         if len(taintCodes) > 1:
             taintCodes.pop(0)
             for item in taintCodes:
                 print '\t\t    ' + item
 
-        print '\t ' + colors.BGREEN + '~ ' * 20 + colors.ENDC
-        print colors.BHEADER  + '\t Boot time : ' + colors.ENDC +\
-                                                    procStat.boottime
-        print colors.BHEADER  + '\t Sys time  : ' + colors.ENDC +\
-                                                    self.getSosDate()
-        print colors.BHEADER + '\t Uptime    : ' + colors.ENDC +\
-                                                    self.getUptime()
-        print colors.BHEADER + '\t Load Avg  : ' + colors.WHITE +\
-                '[%s CPUs] ' %(
-                        cpuInfo.processors) + colors.ENDC + loadAvg
+        sep = '\t' + '~ ' * 20
+        self.pprint.bgreen(sep)
+        self.pprint.bheader('\t Boot time : ', procStat.boottime)
+        self.pprint.bheader('\t Sys time  : ', self.getSosDate())
+        self.pprint.bheader('\t Uptime    : ', self.getUptime())
+        self.pprint.bheader('\t Load Avg  : ',
+                            '[%s CPUs]' %(cpuInfo.processors),
+                            loadAvg
+                        )
 
-        print colors.BHEADER + '\t /proc/stat: ' + colors.ENDC
-        print '\t   ' + colors.BBLUE + 'procs running : '\
-        + colors.ENDC + procStat.procsrun  + colors.BLUE +\
-        colors.BOLD + '   processes (since boot) : ' + colors.ENDC +\
-        procStat.processes
+        self.pprint.bheader('\t /proc/stat: ')
+        self.pprint.bblue('\t   Running    : ', procStat.procsrun)
+        self.pprint.bblue('\t   Since Boot : ', procStat.processes)
+
 
     def displayCpuInfo(self):
         """ Display CPU detail information including flags """
         cpuInfo = self.getCpuInfo()
-        print colors.BSECTION + 'CPU' + colors.ENDC
-        print colors.WHITE + colors.BOLD + '\t\t ' + str(
-            cpuInfo.processors) +' logical processors' + colors.ENDC
-
+        self.pprint.bsection('CPU')
+        self.pprint.white(
+                    '\t\t %s logical processors' %cpuInfo.processors
+                )
         if cpuInfo.sockets > 0:
             print '\t\t ' + str(cpuInfo.sockets) + ' ' +\
                                 cpuInfo.model.strip() + ' processors'
             print '\t\t %s cores / %s threads per physical processor' %(
                             cpuInfo.cores, cpuInfo.threadspercore)
         else:
-            print colors.BLUE +'\t\t ' +\
-            'Virtual Machine with no defined sockets, cores or threads'\
-            + colors.ENDC
+            self.pprint.blue(
+                '\t\tVirtual Machine with no defined sockets or cores'
+            )
         print '\t\t flags : ' + textwrap.fill(
                     cpuInfo.flags, 90, subsequent_indent='\t\t\t ')
 

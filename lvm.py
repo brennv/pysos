@@ -1,4 +1,4 @@
-from colors import *
+from colors import Color as c
 
 class VolumeGroup:
   def __init__(self, rawdata):
@@ -8,11 +8,11 @@ class VolumeGroup:
     self.status = None
     self.size = None
     self.status = None
-
     vglvdata, pvdata = [x.split('+++') for x in '+++'.join(self.rawdata).split('--- Physical volumes ---')]
     self.getvgdata(vglvdata)
     self.lvs = self.getlvs(vglvdata)
     self.pvs = self.getpvs(pvdata)
+    self.pprint = c()
 
   def getvgdata(self, vglvdata):
     self.vgdata =  [x for x in '+++'.join(vglvdata).split('--- Logical volume ---')[0].split('+++') if x]
@@ -77,37 +77,47 @@ class lvm:
 
     def __init__(self, target):
         self.target = target + 'sos_commands/devicemapper/vgdisplay_-vv'
+        self.pprint = c()
 
     def getLvmInfo(self):
-        data = [l.strip() for l in open(self.target).readlines()
-            if l.strip() and (l.strip().startswith('---') or
-                l.strip().startswith('VG') or
-                l.strip().startswith('LV') or
-                l.strip().startswith('PV'))]
-        vgs = []
-        for x in  [i for i in '+++'.join(data).split(
-            '--- Volume group ---') if i]:
-            vg = VolumeGroup(x.split('+++'))
-            vgs.append(vg)
+        try:
+            data = [l.strip() for l in open(self.target).readlines()
+                if l.strip() and (l.strip().startswith('---') or
+                    l.strip().startswith('VG') or
+                    l.strip().startswith('LV') or
+                    l.strip().startswith('PV'))]
+            vgs = []
+            for x in  [i for i in '+++'.join(data).split(
+                '--- Volume group ---') if i]:
+                vg = VolumeGroup(x.split('+++'))
+                vgs.append(vg)
+        except IOError:
+            vgs = False
+            self.pprint.bred(
+                '\tCould not find %s. Unable to parse' %self.target
+            )
         return vgs
 
     def displayVgInfo(self):
-        print colors.BSECTION + 'Disk and LVM Information'\
-            + colors.ENDC
+        self.pprint.bsection('Disk and LVM Information')
         print ''
         vgs = self.getLvmInfo()
-        if len(vgs) > 0:
-            for vg in vgs:
-                print colors.BHEADER + '\t VG Name: ' + colors.ENDC\
-                    + vg.name
-                print colors.WHITE +  '\t\t {:^15} {:^12}'.format(
-                    'LV NAME',
-                    'SIZE') + colors.ENDC
-                for lv in vg.lvs:
-                    print '\t\t {:^15} {:>12}'.format(lv.name, lv.size)
-                print ''
-                print '\t\t  PVs in this VG: ' + ' '.join(
-                    pv.name for pv in vg.pvs)
+        if vgs:
+            if len(vgs) > 0:
+                for vg in vgs:
+                    self.pprint.bheader('\t VG Name:  ', vg.name)
+                    print ''
+                    self.pprint.white(
+                            '\t\t {:^15} {:^12}'.format(
+                                'LV NAME',
+                                'SIZE'
+                            )
+                        )
+                    for lv in vg.lvs:
+                        print '\t\t  {:^15} {:>12}'.format(lv.name, lv.size)
+                    print ''
+                    print '\t\t  PVs in this VG: ' + ' '.join(
+                        pv.name for pv in vg.pvs)
 
 if __name__ == '__main__':
   for vg in vgs:

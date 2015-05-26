@@ -1,6 +1,6 @@
 import sys
 import os
-from colors import *
+from colors import Color as c
 
 class Object(object):
     pass
@@ -11,6 +11,7 @@ class procInfo:
     def __init__(self, target):
         self.target = target
         self.psInfo = self.parseProcFile()
+        self.pprint = c()
 
     def parseProcFile(self):
         """ 
@@ -116,13 +117,15 @@ class procInfo:
 
     def displayReport(self, report):
 
-        print '\t' + colors.BBLUE +\
-        '{:^6}\t{:^6}\t{:^5} {:^5}  {:^7}  {:^7}  {:^4} {:^4}  {:^5}{:^8}  {:<8}'\
-        .format('USER', 'PID', '%CPU', '%MEM', 'VSZ-MB', 'RSS-MB',
-            'TTY', 'STAT', 'START', 'TIME', 'COMMAND') + colors.ENDC
+        self.pprint.bblue(
+            '\t {:^6}\t{:^6}\t{:^5} {:^5}  {:^7}  {:^7}  {:^4} {:^4}  {:^5}{:^8}  {:<8}'.format(
+                'USER', 'PID', '%CPU', '%MEM', 'VSZ-MB', 'RSS-MB',
+                'TTY', 'STAT', 'START', 'TIME', 'COMMAND'
+            )
+        )
 
         for proc in report:
-            print '\t{:^8} {:^6}\t{:^5} {:^5}  {:<7.0f}  {:<7.0f}  {:^5} {:^4} {:^6} {:<9}{}'.format(
+            print '\t{:^8} {:<6}\t{:^5} {:^5}  {:<7.0f}  {:<7.0f}  {:^5} {:4} {:^6} {:<9}{}'.format(
                     proc.user, proc.pid,
                     proc.cpu, proc.mem, proc.vszmb, proc.rssmb, proc.tty,
                     proc.stat, proc.start, proc.time,
@@ -132,14 +135,13 @@ class procInfo:
         """ Display report from getUserReport() """
         numProcs = self.getNumProcs()
         usageReport = self.getUserReport()
-        print '\t' + colors.WHITE + 'Total Processes : ' + colors.ENDC \
-                + str(numProcs) +'\n'
+        self.pprint.white('\tTotal Processes : ', str(numProcs), '\n')
 
-        print '\t' + colors.WHITE + 'Top Users of CPU and Memory : ' + \
-                colors.ENDC
-        print '\t ' + colors.BBLUE + \
-            '{:10}  {:6}  {:6}  {:8}'.format('USER', '%CPU', '%MEM', 
-                                                'RSS') + colors.ENDC
+        self.pprint.white('\tTop Users of CPU and Memory : ')
+        self.pprint.bblue('\t{:10}  {:6}  {:6}  {:8}'.format(
+                            'USER', '%CPU', '%MEM', 'RSS'
+                        )
+                    )
 
         for i in xrange(0, 4):
             proc = usageReport[i]
@@ -151,16 +153,14 @@ class procInfo:
     def displayCpuReport(self):
         """ Display report from getTopCpu() """
         cpuReport = self.getTopCpu()
-        print '\t' + colors.WHITE + 'Top CPU Consuming Processes : '\
-                + colors.ENDC
+        self.pprint.white('\tTop CPU Consuming Processes : ')
         self.displayReport(cpuReport)
         print ''
 
     def displayMemReport(self):
         """ Display report from getTopMem() """
         memReport = self.getTopMem()
-        print '\t' + colors.WHITE + 'Top Memory Consuming Processes : '\
-                + colors.ENDC
+        self.pprint.white('\tTop Memory Consuming Processes : ')
         self.displayReport(memReport)
         print ''
 
@@ -168,9 +168,9 @@ class procInfo:
         """ Display report from getDefunctProcs() """
         defunctReport = self.getDefunctProcs()
         if defunctReport:
-            print '\t' + colors.RED + \
-                    'Uninterruptable Sleep and Defunct Processes : ' \
-                    + colors.ENDC
+            self.pprint.bred(
+                '\tUninterruptable Sleep and Defunct Processes : '
+            )
             defunctReport = self._formatTopReport(defunctReport, 
                                         reportNum=len(defunctReport))
             self.displayReport(defunctReport)
@@ -179,15 +179,15 @@ class procInfo:
     def displayPsInfo(self):
         """ display ps information for top consumers, CPU, memory and
         defunct process, if any """
-        print colors.BSECTION + 'PS' + colors.ENDC
+        self.pprint.bsection('PS')
         if self.psInfo:
             self.displayTopReport()
             self.displayDefunctReport()
             self.displayCpuReport()
             self.displayMemReport()
         else:
-            print colors.RED + colors.WARN + 'No PS information found' \
-                + colors.ENDC
+            self.pprint.BRED('No PS information found')
+
 
 if __name__ == '__main__':
     target = sys.argv[1]

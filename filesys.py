@@ -2,7 +2,7 @@ import sys
 import os
 import textwrap
 from collections import OrderedDict
-from colors import *
+from colors import Color as c
 
 class Object(object):
     pass
@@ -11,6 +11,7 @@ class filesys():
     """ Capture and optionally display filesystem data """
     def __init__(self, target, showFsOpts=False):
         self.target = target
+        self.pprint = c()
         self.showFsOpts = showFsOpts
         self.excludes = ['cgroup', 'tmpfs', 'none', 'sunrpc', 'debugfs',
             'configfs', 'fusectl', 'hugetlbfs', 'devpts', 'sysfs',
@@ -109,15 +110,16 @@ class filesys():
         for mount in mounts:
             if mount.size < 1 or 'tmpfs' in mount.dev:
                 del mount
-        print colors.BSECTION + 'File System Information' + colors.ENDC
+        self.pprint.bsection('File System Information')
         print ''
-        print colors.WHITE +\
+        self.pprint.white(
                 '\t {:^25}\t{:^20}\t  {:^7}    {:^7}\t  {:>11}'.format(
-                'Device', 'Mount Point', 'Size', 'Used',
-                'Available') + colors.ENDC
-        print colors.WHITE + '\t ' + '=' * 25 +'\t ' + '=' * 19 + '\t'\
-                + '=' * 9 + '  ' + '=' * 9 + '    ' + '=' * 18\
-                + colors.ENDC
+                    'Device', 'Mount Point', 'Size', 'Used','Available'
+                    )
+                )
+        sep = '\t ' + '=' * 25 +'\t ' + '=' * 19 + '\t'\
+                + '=' * 9 + '  ' + '=' * 9 + '    ' + '=' * 18
+        self.pprint.white(sep)
         for mount in mounts:
             try:
                 mount.size = float(mount.size) / 1048576

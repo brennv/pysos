@@ -2,7 +2,7 @@ import sys
 import os
 import pysosutils
 import math
-from colors import *
+from colors import Color as c
 
 class Object(object):
     pass
@@ -15,19 +15,20 @@ class network():
         self.vnetDisplay = vnetDisplay
         self.vlanDisplay = vlanDisplay
         self.devList = self.getIntList()
+        self.pprint = c()
 
-    def _setLineColor(self, dev):
+    def displayDev(self, dev, line):
         if ('eth' in dev or 'em' in dev or 'enp' in dev or 
                                                 dev.startswith('p')):
-            return colors.BLUE
+            self.pprint.blue(line)
         elif 'vlan' in dev:
-            return colors.CYAN
+            self.pprint.cyan(line)
         elif 'bond' in dev:
-            return colors.GREEN
+            self.pprint.green(line)
         elif 'vnet' in dev:
-            return colors.WHITE
+            self.pprint.white(line)
         else:
-            return colors.PURPLE
+            self.pprint.purple(line)
 
     def getIntList(self, devFilter=False):
         """ Get list of interfaces """
@@ -398,18 +399,19 @@ class network():
                 devInfo.remove(dev)
             except:
                 pass
-        print colors.BSECTION +  'Ethtool' + colors.ENDC
-        print colors.WHITE + colors.BOLD +\
+        self.pprint.bsection('Ethtool')
+        self.pprint.white(
                     '\t {:^10}    {:^20}  {:^8}  {:^15}{:^15}'.format(
                     'Device', 'Link', 'Auto-Neg', 'Ring R/T', 
                     'Driver Info')
+                )
         # this is ugly, need to do this better
-        print '\t ' + '=' * 10 + '\t ' + '=' * 17 + '  ' + '=' * 10 +\
-                    '\t ' + '=' * 10 + '   ' + '=' * 15 + colors.ENDC
+        sep = '\t ' + '=' * 10 + '\t ' + '=' * 17 + '  ' + '=' * 10 +\
+                    '\t ' + '=' * 10 + '   ' + '=' * 15
+        self.pprint.white(sep)
         for dev in devInfo:
             try:
-                linecolor = self._setLineColor(dev.name)
-                print '\t' + linecolor + '  {:^7}'.format(
+                self.displayDev(dev.name, '\t  {:^7}'.format(
                         dev.name) + '\t{:>5}'.format(
                         dev.linkdetected.upper()) + '{:^10} '.format(
                         dev.speed) + '\t{:^4}'.format(
@@ -417,25 +419,30 @@ class network():
                         '\t {:>4}/{:<4}'.format(dev.currentrx,
                         dev.currenttx) +'   {:<7}{:<10} fw:{:8}'.format(
                         dev.driver, dev.driverversion, 
-                        dev.firmware) + colors.ENDC
+                        dev.firmware)
+                    )
             except:
                 pass
 
     def displayBondInfo(self):
         """ Display formatted bonding information for all bonds """
         bondInfo = self.getBondInfo()
-        print colors.BSECTION + 'Bonding' + colors.ENDC
-        print colors.WHITE + colors.BOLD +\
-        '\t {:^10}    {:^20}    {:^30}{:^31}'.format('Device', 'Mode',
-                                    'Slave Interfaces', 'Bonding Opts')
-        print '\t ' + '=' * 10 + '\t' + '=' * 19 + '\t  ' + '=' * 25 +\
-                                    '\t' + '=' * 24 + colors.ENDC
+        self.pprint.bsection('Bonding')
+        self.pprint.white(
+            '\t {:^10}    {:^20}    {:^30}{:^31}'.format('Device', 'Mode',
+            'Slave Interfaces', 'Bonding Opts')
+        )
+        sep = '\t ' + '=' * 10 + '\t' + '=' * 19 + '\t  ' + '=' * 25 +\
+                '\t' + '=' * 24
+        self.pprint.white(sep)
         for bond in sorted(bondInfo):
             try:
-                print colors.GREEN + '\t {:<10}'.format(
-                    bond.name) + colors.ENDC + '     {:^20}'.format(
-                    bond.mode) + '\t   {:6}{:<6}'.format(bond.slaves[0],
-                    bond.macaddrs[0]) + '\t{}'.format(bond.bondingopts)
+                self.pprint.green(
+                    '\t {:<10}'.format(bond.name),
+                    '     {:^20}'.format(bond.mode),
+                    '\t   {:6}{:<6}'.format(bond.slaves[0],
+                        bond.macaddrs[0]) + '\t{}'.format(bond.bondingopts)
+                )
 
                 bond.slaves.pop(0)
                 bond.macaddrs.pop(0)
@@ -462,20 +469,24 @@ class network():
                     devInfo.remove(dev)
             except:
                 pass
-        print colors.BSECTION + 'IP Info' + colors.ENDC
-        print colors.WHITE +\
-        '\t   Device\t     IP Addr\t     Member Of\t     MTU\t      HW Addr'\
-        + colors.ENDC
-        print colors.WHITE + '\t ' + '=' * 10 + ' ' * 6 + '=' * 15 +\
-                        ' ' * 4 + '=' * 11 + ' ' * 5 + '=' * 5 + '\t' +\
-                        '=' * 19 + colors.ENDC
+        self.pprint.bsection('IP Info')
+        self.pprint.white(
+        '\t   Device\t     IP Addr\t     Member Of\t     MTU\t      HW Addr'
+        )
+        sep = '\t ' + '=' * 10 + ' ' * 6 + '=' * 15 +\
+                ' ' * 4 + '=' * 11 + ' ' * 5 + '=' * 5 + '\t' + '=' * 19
+        self.pprint.white(sep)
         for dev in sorted(devInfo):
             try:
-                linecolor = self._setLineColor(dev.name)
-                print linecolor + \
+                self.displayDev(dev.name,
                 '\t {:^10}\t {:^15}     {:^10}\t    {:^5} \t {:<5}'.format(
-                dev.name, dev.ipaddr, dev.master, dev.mtu, 
-                dev.macaddr) + colors.ENDC
+                    dev.name,
+                    dev.ipaddr,
+                    dev.master,
+                    dev.mtu, 
+                    dev.macaddr
+                    )
+                )
             except Exception as e:
                 print e
 
@@ -484,27 +495,27 @@ class network():
         netStats = []
         for dev in self.devList:
             netStats.append(self.getNetDevInfo(dev))
-        print colors.BSECTION + 'NetDev Stats'\
-                + colors.ENDC
-        print colors.WHITE + '\t   {}       {}     {}'.format(
-            'Device', 'RxGbytes', 'RxPkts') + '\t {}\t    {}'.format(
-            'RxErrs', 'RxDrops') + '\t{}     {}\t{}\t  {}'.format(
-            'TxGbytes', 'TxPkts', 'TxErrs', 'TxDrops') + colors.ENDC
-        print colors.WHITE + '\t '+'='* 10 + '   ' + '=' * 10 + '   ' +\
+        self.pprint.bsection('NetDev Stats')
+        self.pprint.white('\t   {}       {}     {}'.format(
+                'Device', 'RxGbytes', 'RxPkts') + '\t {}\t    {}'.format(
+                'RxErrs', 'RxDrops') + '\t{}     {}\t{}\t  {}'.format(
+                'TxGbytes', 'TxPkts', 'TxErrs', 'TxDrops')
+            )
+        sep = '\t '+'='* 10 + '   ' + '=' * 10 + '   ' +\
          '=' * 9 + '   ' + '=' * 9 + '   ' + '=' * 9 + '   ' + '=' * 10\
-         + '   ' + '=' * 8 + '   ' + '=' * 8 + '  ' + '=' * 9 +\
-         colors.ENDC
+         + '   ' + '=' * 8 + '   ' + '=' * 8 + '  ' + '=' * 9
+        self.pprint.white(sep)
         for dev in sorted(netStats):
-            linecolor = self._setLineColor(dev.name)
             try:
-                print linecolor +\
+                self.displayDev(dev.name,
                 '\t {:^10}     {:>7.2f}\t    {:^5}m     {:>5}'.format(
                 dev.name, math.ceil(float(dev.rxbytes)/ 1073741824),
                 (dev.rxpkts / 1000000),
                 dev.rxerrs) + '\t    {:>4}   \t{:>7.2f}'.format(
                 dev.rxdrop, math.ceil(float(dev.txbytes) / 1073741824)
                 ) + '\t     {:^5}m     {:^5}\t {:>4}'.format((dev.txpkts
-                / 1000000), dev.txerrs, dev.txdrop) + colors.ENDC  
+                / 1000000), dev.txerrs, dev.txdrop)
+                )
             except Exception as e:
                 print e
 
@@ -516,8 +527,7 @@ class network():
             self.displayBondInfo()
             self.displayNetDevInfo()
         else:
-            print colors.BRED +\
-                'Could not parse interface information' + colors.ENDC
+            self.pprint.bred('Could not parse interface information')
 
 if __name__ == '__main__':
     target = sys.argv[1]
