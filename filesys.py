@@ -4,19 +4,23 @@ import textwrap
 from collections import OrderedDict
 from colors import Color as c
 
+
 class Object(object):
     pass
 
+
 class filesys():
+
     """ Capture and optionally display filesystem data """
+
     def __init__(self, target, showFsOpts=False):
         self.target = target
         self.pprint = c()
         self.showFsOpts = showFsOpts
         self.excludes = ['cgroup', 'tmpfs', 'none', 'sunrpc', 'debugfs',
-            'configfs', 'fusectl', 'hugetlbfs', 'devpts', 'sysfs',
-            'mqueue', 'systemd', 'proc', 'devtmpfs', 'securityfs',
-            'pstore', 'binfmt_misc']
+                         'configfs', 'fusectl', 'hugetlbfs', 'devpts', 'sysfs',
+                         'mqueue', 'systemd', 'proc', 'devtmpfs', 'securityfs',
+                         'pstore', 'binfmt_misc']
 
     def getFsMounts(self):
         """ Get a list of all mounts from sosreport """
@@ -24,7 +28,7 @@ class filesys():
                 self.target + 'sos_commands/filesys/mount_-l'):
             mounts = []
             with open(self.target + 'sos_commands/filesys/mount_-l',
-                        'r') as mfile:
+                      'r') as mfile:
                 for line in mfile:
                     if line.startswith(tuple(self.excludes)):
                         pass
@@ -34,11 +38,11 @@ class filesys():
                         try:
                             mount.name = line2[0]
                             mount.dev = line2[0].replace("/dev/mapper/",
-                            '').replace("/dev/", '')
+                                                         '').replace("/dev/", '')
                             mount.mountpoint = line2[2].strip()
                             mount.fstype = line2[4]
-                            mount.mountopts = line[line.find('(')+1:
-                                            line.find(')')-2].strip()
+                            mount.mountopts = line[line.find('(') + 1:
+                                                   line.find(')') - 2].strip()
                         except:
                             pass
                         mounts.append(mount)
@@ -47,12 +51,12 @@ class filesys():
             return False
 
     def getFsSize(self, mount):
-        """ Get filesystem size data for a given mount """ 
+        """ Get filesystem size data for a given mount """
         dev = Object()
         if os.path.isfile(self.target + 'sos_commands/filesys/df_-al'):
             mount = mount.strip()
             with open(self.target + 'sos_commands/filesys/df_-al',
-                        'r') as mfile:
+                      'r') as mfile:
                 for line in mfile:
                     line = line.split()
                     try:
@@ -83,7 +87,7 @@ class filesys():
         """ Get the backing device for a given mountpoint """
         if os.path.isfile(self.target + 'sos_commands/filesys/mount_-l'):
             with open(self.target + 'sos_commands/filesys/mount_-l',
-                        'r') as mfile:
+                      'r') as mfile:
                 for line in mfile:
                     if line.split()[2] == mount:
                         return line.split()[0]
@@ -91,7 +95,6 @@ class filesys():
             return 'Unknown Mount Device'
         else:
             return 'Cannot find mount file'
-        
 
     def getAllMountInfo(self):
         """ Compile all data for all mounts in sosreport """
@@ -113,12 +116,12 @@ class filesys():
         self.pprint.bsection('File System Information')
         print ''
         self.pprint.white(
-                '\t {:^25}\t{:^20}\t  {:^7}    {:^7}\t  {:>11}'.format(
-                    'Device', 'Mount Point', 'Size', 'Used','Available'
-                    )
-                )
-        sep = '\t ' + '=' * 25 +'\t ' + '=' * 19 + '\t'\
-                + '=' * 9 + '  ' + '=' * 9 + '    ' + '=' * 18
+            '\t {:^25}\t{:^20}\t  {:^7}    {:^7}\t  {:>11}'.format(
+                'Device', 'Mount Point', 'Size', 'Used', 'Available'
+            )
+        )
+        sep = '\t ' + '=' * 25 + '\t ' + '=' * 19 + '\t'\
+            + '=' * 9 + '  ' + '=' * 9 + '    ' + '=' * 18
         self.pprint.white(sep)
         for mount in mounts:
             try:
@@ -129,17 +132,17 @@ class filesys():
                 pass
             try:
                 print '\t {:<25}\t {:<15} {:<6} {:>7.2f} GB'.format(
-                mount.dev, mount.mountpoint, mount.fstype,
-                mount.size) + ' {:>7.2f} GB\t{:>7.2f} GB'.format(
-                mount.used, mount.avail) + ' ({:^2}%)'.format(
-                mount.percavail)
+                    mount.dev, mount.mountpoint, mount.fstype,
+                    mount.size) + ' {:>7.2f} GB\t{:>7.2f} GB'.format(
+                    mount.used, mount.avail) + ' ({:^2}%)'.format(
+                    mount.percavail)
             except:
                 print '\t {:<25}\t {:<15} {:<6}'.format(mount.dev,
-                                        mount.mountpoint, mount.fstype)
-                
+                                                        mount.mountpoint, mount.fstype)
+
             if self.showFsOpts:
                 print "\t\t " + u"\u2192" + textwrap.fill(
-                        mount.mountopts, 90, subsequent_indent='\t\t  ')
+                    mount.mountopts, 90, subsequent_indent='\t\t  ')
 
 if __name__ == '__main__':
     target = sys.argv[1]

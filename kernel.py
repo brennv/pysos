@@ -7,10 +7,13 @@ import memory
 import math
 from colors import Color as c
 
+
 class Object(object):
     pass
 
+
 class kernel:
+
     """ Capture and optionally display kernel and dump data """
 
     def __init__(self, target):
@@ -33,8 +36,8 @@ class kernel:
                 for line in kfile:
                     if (not line.startswith("#") and not
                             line.startswith('\n')):
-                            kdump[line.split()[0]] = (line.split(
-                                        line.split()[0])[1].strip('\n'))
+                        kdump[line.split()[0]] = (line.split(
+                            line.split()[0])[1].strip('\n'))
         else:
             kdump = False
         return kdump
@@ -44,7 +47,7 @@ class kernel:
         crashInfo = Object()
         try:
             crashInfo.memreserve = pysosutils.getCmdLine(
-                        self.target).split('crashkernel=')[1].split()[0]
+                self.target).split('crashkernel=')[1].split()[0]
         except IndexError:
             crashInfo.memreserve = 'Not Defined'
         try:
@@ -58,7 +61,7 @@ class kernel:
                 try:
                     if mount.mountpoint == crashInfo.path.strip():
                         crashInfo.pathfreespace = fs.getFsSize(
-                                    mount.mountpoint).avail / 1048576
+                            mount.mountpoint).avail / 1048576
                         crashInfo.pathdevice = mount.dev
                 except:
                     pass
@@ -66,7 +69,7 @@ class kernel:
             # Assume root fs.
             if not hasattr(crashInfo, 'pathfreespace'):
                 crashInfo.pathfreespace = int(fs.getFsSize('/').avail
-                                                            ) / 1048576
+                                              ) / 1048576
                 crashInfo.pathdevice = fs.getFsDev('/')
         else:
             crashInfo.path = 'No kdump.conf file found'
@@ -105,41 +108,41 @@ class kernel:
             taintCodes.pop(0)
             for item in taintCodes:
                 print '\t\t\t       ' + item
-        self.pprint.bheader('\t kexec-tools version :  ', kdumpVer) 
+        self.pprint.bheader('\t kexec-tools version :  ', kdumpVer)
         self.pprint.bheader('\t Service enablement  :  ', kdumpState)
         self.pprint.bheader('\t Memory Reservation  :  ',
                             crashInfo.memreserve
-                        )
+                            )
 
         print ''
         self.pprint.bheader('\t kdump.conf          : ')
         if kdump:
             for key in kdump:
-                print '\t\t\t\t%s  %s' %(key, kdump[key])
+                print '\t\t\t\t%s  %s' % (key, kdump[key])
             self.pprint.bblue('\t\t Crash Path   : ',
-                            crashInfo.path,
-                            '  ({})'.format(
-                                crashInfo.pathdevice
-                            )
-                        )
+                              crashInfo.path,
+                              '  ({})'.format(
+                                  crashInfo.pathdevice
+                              )
+                              )
             self.pprint.bblue('\t\t Space Needed : ',
-                                '{:>6.2f} GB'.format(
-                                    math.ceil(float(
-                                        crashInfo.memrequired
-                                        ) / 1000
-                                    )
-                                )
-                            )
+                              '{:>6.2f} GB'.format(
+                                  math.ceil(float(
+                                      crashInfo.memrequired
+                                  ) / 1000
+                                  )
+                              )
+                              )
 
         else:
             self.pprint.bred('\t\t\t\t Unable to parse config')
 
         if type(crashInfo.pathfreespace) is int:
             self.pprint.bblue('\t\t Free Space   : ',
-                                '{:>6.2f} GB'.format(
-                                    crashInfo.pathfreespace
-                                )
-                            )
+                              '{:>6.2f} GB'.format(
+                                  crashInfo.pathfreespace
+                              )
+                              )
         else:
             self.pprint.bblue('\t\t Free Space   : ', 'Unknown')
 

@@ -2,11 +2,14 @@ import json
 import pysosutils
 import sys
 from colors import Color as c
+
+
 class Object:
     pass
 
 
 class docker:
+
     ''' Obtain docker and container related information '''
 
     def __init__(self, target):
@@ -29,7 +32,7 @@ class docker:
         try:
             images = []
             with open(self.target +
-                        'sos_commands/docker/docker_images') as d:
+                      'sos_commands/docker/docker_images') as d:
                 for line in d:
                     l = line.split()
                     i = Object()
@@ -82,7 +85,7 @@ class docker:
     def getKubeInfo(self):
         kinfo = Object()
         kinfo.version = pysosutils.getRpmVer(self.target, 'kubernetes')
-        if not "Not Installed" in kinfo.version:
+        if "Not Installed" not in kinfo.version:
             try:
                 kinfo.minions = self._parseJson(
                     'sos_commands/kubernetes/kubectl_get_-o_json_minions'
@@ -127,7 +130,6 @@ class docker:
         else:
             return False
 
-
     def getAtomicInfo(self):
         ainfo = Object()
         if self.checkIsAtomic():
@@ -143,22 +145,22 @@ class docker:
         self.pprint.bsection('Containerization')
         self.pprint.bheader('\n\tDocker Version     : ',
                             dinfo.dockerversion
-                        )
+                            )
         self.pprint.bheader('\tKubernetes Version : ', kinfo.version)
         self.pprint.bheader('\tAtomic Information : ', ainfo.info)
         self.pprint.bheader('\tUnique Images      : ',
                             str(len(dinfo.uniqueimages))
-                        )
+                            )
         self.pprint.bheader('\tRunning Containers : ',
                             str(len(dinfo.containers))
-                        )
+                            )
         print ''
         for container in dinfo.containers:
             print '\t\t {id:15} {image:25} {cmd}'.format(
-                    id=container.id,
-                    image=container.image,
-                    cmd=container.cmd
-                )
+                id=container.id,
+                image=container.image,
+                cmd=container.cmd
+            )
 
         if kinfo:
             self.displayKubeInfo(kinfo)
@@ -168,7 +170,7 @@ class docker:
                             'Kubernetes Role'
                             ),
                             kinfo.node
-                        )
+                            )
         if kinfo.node == "Node":
             self.pprint.cyan('\t\t Master Node   : ', kinfo.master)
         if kinfo.minions:
@@ -182,10 +184,10 @@ class docker:
         if kinfo.pods:
             self.pprint.white('\t\t Active Pods   : ')
             self.pprint.white('\t\t\t\t{pod:^15} {host:^12} {st:^12}'.format(
-                    pod='Pod Name',
-                    host='Node',
-                    st='Status'
-                )
+                pod='Pod Name',
+                host='Node',
+                st='Status'
+            )
             )
             for pod in kinfo.pods['items']:
                 print '\t\t\t\t{pod:15} {node:15} {status:15}'.format(
@@ -197,12 +199,12 @@ class docker:
         if kinfo.services:
             self.pprint.red('\t\t Services      : ')
             self.pprint.red('\t\t\t\t{n:^15} {t:5} {p:^5} {c} {i:>11}'.format(
-                    n='Service Name',
-                    t='Type',
-                    p='Port',
-                    c='C.Port',
-                    i='Portal IP'
-                )
+                n='Service Name',
+                t='Type',
+                p='Port',
+                c='C.Port',
+                i='Portal IP'
+            )
             )
             for serv in kinfo.services['items']:
                 print '\t\t\t\t{n:15} {t:5} {p:<5} {c:5}   {i}'.format(
@@ -215,18 +217,20 @@ class docker:
         if kinfo.rc:
             self.pprint.blue('\t\t Controllers   : ')
             self.pprint.blue('\t\t\t\t{n:^15} {c:10} {i:10} {s:10} {r:5}'.format(
-                    n="Controller",
-                    c="Container",
-                    i="Image",
-                    s="Selector",
-                    r="Replicas"
-                )
+                n="Controller",
+                c="Container",
+                i="Image",
+                s="Selector",
+                r="Replicas"
+            )
             )
             for rc in kinfo.rc['items']:
                 print '\t\t\t\t{n:^15} {c:10} {i:10} {s:^10} {r:5}'.format(
                     n=rc['metadata']['name'][:15],
-                    c=rc['spec']['template']['spec']['containers'][0]['name'][:10],
-                    i=rc['spec']['template']['spec']['containers'][0]['image'][:10],
+                    c=rc['spec']['template']['spec'][
+                        'containers'][0]['name'][:10],
+                    i=rc['spec']['template']['spec'][
+                        'containers'][0]['image'][:10],
                     s=rc['spec']['selector']['name'],
                     r=rc['status']['replicas']
                 )

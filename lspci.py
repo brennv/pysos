@@ -2,10 +2,13 @@ import sys
 import os
 from colors import Color as c
 
+
 class Object(object):
     pass
 
+
 class lspci():
+
     """ Capture and optionally display hardware device information """
 
     def __init__(self, target):
@@ -17,12 +20,12 @@ class lspci():
         if os.path.isfile(self.target + 'sos_commands/hardware/lspci'):
             lspciInfo = []
             with open(self.target +
-                        'sos_commands/hardware/lspci', 'r') as lfile:
+                      'sos_commands/hardware/lspci', 'r') as lfile:
                 for line in lfile:
                     if 'lspci -nvv:' in line:
                         break
                     try:
-                        pciaddr = line[0:line.find('.')-1].strip()
+                        pciaddr = line[0:line.find('.') - 1].strip()
                         newDev = True
                         if len(lspciInfo) > 0:
                             for dev in lspciInfo:
@@ -34,10 +37,10 @@ class lspci():
                             dev = Object()
                             dev.pciaddr = pciaddr
                             dev.devtype = line[line.find(pciaddr):
-                                            line.find(': ')+1].strip(
-                                            pciaddr).strip()
-                            dev.name = line[line.find(': ')+2:
-                                        len(line)].strip('\n')
+                                               line.find(': ') + 1].strip(
+                                pciaddr).strip()
+                            dev.name = line[line.find(': ') + 2:
+                                            len(line)].strip('\n')
                             if 'Ethernet' in dev.devtype:
                                 dev.devtype = 'Ethernet'
                             elif 'VGA' in dev.devtype:

@@ -2,10 +2,13 @@ import sys
 import os
 from colors import Color as c
 
+
 class Object(object):
     pass
 
+
 class procInfo:
+
     """ Get and optionally display information from ps output """
 
     def __init__(self, target):
@@ -14,7 +17,7 @@ class procInfo:
         self.pprint = c()
 
     def parseProcFile(self):
-        """ 
+        """
         Parse through a ps output file and return the contents
         as list vaues
         """
@@ -22,9 +25,9 @@ class procInfo:
                 self.target + 'sos_commands/process/ps_auxwww'):
             psInfo = []
             stats = ['user', 'pid', 'cpu', 'mem', 'vsz', 'rss',
-                            'tty', 'stat', 'start', 'time']
+                     'tty', 'stat', 'start', 'time']
             with open(self.target +
-                    'sos_commands/process/ps_auxwww', 'r') as psfile:
+                      'sos_commands/process/ps_auxwww', 'r') as psfile:
                 psfile.next()
                 for line in psfile:
                     proc = Object()
@@ -52,7 +55,7 @@ class procInfo:
         usage = []
         for proc in self.psInfo:
             newProc = True
-            if len(usage) > 0 :
+            if len(usage) > 0:
                 for p in usage:
                     if p.user == proc.user:
                         p.cpu += float(proc.cpu)
@@ -65,7 +68,7 @@ class procInfo:
                 proc.mem = float(proc.mem)
                 proc.rss = int(proc.rss)
                 usage.append(proc)
-        userReport = sorted(usage, reverse=True, 
+        userReport = sorted(usage, reverse=True,
                             key=lambda x: x.cpu)
         return userReport
 
@@ -77,7 +80,7 @@ class procInfo:
             for i in xrange(10, 13):
                 try:
                     cmd = str(proc.command).strip('\n')
-            
+
                 except:
                     pass
             report.append(proc)
@@ -86,13 +89,13 @@ class procInfo:
     def getTopMem(self, reportNum=5):
         """ Get report on top memory consuming processes """
         topMemReport = self._formatTopReport(self.psInfo.sort(
-                            reverse=True, key=lambda x: float(x.rss)))
+            reverse=True, key=lambda x: float(x.rss)))
         return topMemReport
 
     def getTopCpu(self, reportNum=5):
         """ Get report on top CPU consuming processes """
         topCpuReport = self._formatTopReport(self.psInfo.sort(
-                            reverse=True, key=lambda x: float(x.cpu)))
+            reverse=True, key=lambda x: float(x.cpu)))
         return topCpuReport
 
     def getDefunctProcs(self):
@@ -126,10 +129,10 @@ class procInfo:
 
         for proc in report:
             print '\t{:^8} {:<6}\t{:^5} {:^5}  {:<7.0f}  {:<7.0f}  {:^5} {:4} {:^6} {:<9}{}'.format(
-                    proc.user, proc.pid,
-                    proc.cpu, proc.mem, proc.vszmb, proc.rssmb, proc.tty,
-                    proc.stat, proc.start, proc.time,
-                    proc.command[0:45].strip())
+                proc.user, proc.pid,
+                proc.cpu, proc.mem, proc.vszmb, proc.rssmb, proc.tty,
+                proc.stat, proc.start, proc.time,
+                proc.command[0:45].strip())
 
     def displayTopReport(self):
         """ Display report from getUserReport() """
@@ -139,15 +142,15 @@ class procInfo:
 
         self.pprint.white('\tTop Users of CPU and Memory : ')
         self.pprint.bblue('\t{:10}  {:6}  {:6}  {:8}'.format(
-                            'USER', '%CPU', '%MEM', 'RSS'
-                        )
-                    )
+            'USER', '%CPU', '%MEM', 'RSS'
+        )
+        )
 
         for i in xrange(0, 4):
             proc = usageReport[i]
             print '\t {:<10}  {:^6.2f}  {:^6.2f}  {:>3.2f} GB'.format(
-                    proc.user, proc.cpu, proc.mem,
-                    int(proc.rss) / 1048576)
+                proc.user, proc.cpu, proc.mem,
+                int(proc.rss) / 1048576)
         print ''
 
     def displayCpuReport(self):
@@ -171,8 +174,8 @@ class procInfo:
             self.pprint.bred(
                 '\tUninterruptable Sleep and Defunct Processes : '
             )
-            defunctReport = self._formatTopReport(defunctReport, 
-                                        reportNum=len(defunctReport))
+            defunctReport = self._formatTopReport(defunctReport,
+                                                  reportNum=len(defunctReport))
             self.displayReport(defunctReport)
             print ''
 

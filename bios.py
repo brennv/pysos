@@ -5,16 +5,19 @@ import opsys
 import pysosutils
 from colors import Color as c
 
+
 class Object(object):
     pass
 
+
 class bios:
+
     """ Capture and optionally display bios and dmidecode data """
 
     def __init__(self, target):
         self.target = target
-        if os.path.isfile(self.target+'dmidecode'):
-            self.dmifile = self.target+'dmidecode'
+        if os.path.isfile(self.target + 'dmidecode'):
+            self.dmifile = self.target + 'dmidecode'
         else:
             print 'No dmidecode file present'
             return False
@@ -25,16 +28,16 @@ class bios:
         We can then also extract memory support data from this
         """
         props = ['maxMem', 'dimmCount', 'emptyDimms', 'totalMem',
-                    'memArrays']
+                 'memArrays']
         dimm = Object()
         for prop in props:
             setattr(dimm, prop, int())
         with open(self.dmifile, 'r') as dfile:
-        # main iterables that have distinct leading names
+            # main iterables that have distinct leading names
             for line in dfile:
                 if 'Maximum Capacity:' in line:
                     index = line.find(':')
-                    maxmem = line[index+1:len(line)].strip()
+                    maxmem = line[index + 1:len(line)].strip()
                     if 'GB' in maxmem:
                         dimm.maxMem = int(maxmem.strip('GB'))
                     elif 'TB' in maxmem:
@@ -48,18 +51,20 @@ class bios:
                         size = int(line.split()[1])
                         dimm.totalMem += size
                 if 'Physical Memory Array' in line:
-                    dimm.memArrays +=  1
+                    dimm.memArrays += 1
         return dimm
 
     def parseDmi(self, to_check):
-        """ 
+        """
         Parse the given dmidecode file and then parse out
         the section specified by the 'to_check' arg.
 
         The results are then returned as a dictionary
         """
         return pysosutils.parseOutputSection(self.target +
-                            'sos_commands/hardware/dmidecode', to_check)
+                                            'sos_commands/hardware/dmidecode',
+                                            to_check
+                                            )
 
     def getBiosInfo(self):
         return self.parseDmi('BIOS Information')
@@ -69,7 +74,7 @@ class bios:
 
     def getProcInfo(self):
         """
-        Call getCpuInfo() from opsys module to get processor data 
+        Call getCpuInfo() from opsys module to get processor data
         """
         proc = opsys.opsys(target=self.target)
         return proc.getCpuInfo()
@@ -115,47 +120,47 @@ class bios:
 
         if procInfo.sockets > 0:
             self.pprint.white(
-                    '\t\t{} sockets - {} cores - {} threads per core'.format(
-                        procInfo.sockets, procInfo.cores,
-                        procInfo.threadspercore
-                        )
-                    )
+                '\t\t{} sockets - {} cores - {} threads per core'.format(
+                    procInfo.sockets, procInfo.cores,
+                    procInfo.threadspercore
+                )
+            )
             self.pprint.white('\t\t{} total cores {} total threads'.format(
-                        procInfo.cores,
-                        procInfo.processors
-                        )
-                    )
+                procInfo.cores,
+                procInfo.processors
+            )
+            )
         else:
             self.pprint.white(
                 '\t\tVirtual Machine with no defined sockets or cores'
             )
         self.pprint.blue('\t\tFamily  : ',
-                procInfo.vendor,
-                ' ',
-                procInfo.family
-            )
+                         procInfo.vendor,
+                         ' ',
+                         procInfo.family
+                         )
         self.pprint.blue('\t\tModel   : ', procInfo.model.strip())
         self.pprint.bheader('\tMemory')
         self.pprint.white('\t\t{} of {} DIMMs populated'.format(
-                            (dimm.dimmCount - dimm.emptyDimms),
-                            dimm.dimmCount
-                            )
-                        )
+            (dimm.dimmCount - dimm.emptyDimms),
+            dimm.dimmCount
+        )
+        )
         self.pprint.blue('\t\tTotal   : ',
-                        str(dimm.totalMem),
-                        ' MB',
-                        '  ({} GB)'.format(
-                                (dimm.totalMem / 1024)
-                            )
-                        )
+                         str(dimm.totalMem),
+                         ' MB',
+                         '  ({} GB)'.format(
+                             (dimm.totalMem / 1024)
+                         )
+                         )
         self.pprint.blue('\t\tMax Mem : ',
-                        '{} GB'.format(dimm.maxMem)
-                        )
+                         '{} GB'.format(dimm.maxMem)
+                         )
         self.pprint.green(
             '\t\t{} total controllers {} GB maximum per controller'.format(
                 dimm.memArrays, dimm.maxMem
-                )
             )
+        )
 
 if __name__ == '__main__':
     target = sys.argv[1]
