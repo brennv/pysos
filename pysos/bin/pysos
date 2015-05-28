@@ -1,22 +1,27 @@
 #!/usr/bin/env python
 
 import argparse
-import bios
-import docker
-import filesys
-import kernel
-import lspci
-import lvm
-import memory
-import network
-import opsys
 import os
-import ps
-import pysosutils
-import subprocess
 import sys
-import virt
-import yum
+import subprocess
+from pysos import bios, docker, filesys, kernel, lspci, lvm, memory, network, opsys, ps, pysosutils, virt, yum
+#import argparse
+#import bios
+#import docker
+#import filesys
+#import kernel
+#import lspci
+#import lvm
+#import memory
+#import network
+#import opsys
+#import os
+#import ps
+#import pysosutils
+#import subprocess
+#import sys
+#import virt
+#import yum
 
 parser = argparse.ArgumentParser(description="Pysos is used to quickly parse and display information from a\
                 sosreport in a meaningful and human-readable manner")
