@@ -1,3 +1,4 @@
+import os
 from .colors import Color as c
 
 
@@ -86,7 +87,14 @@ class PhysicalVolume:
 class lvm:
 
     def __init__(self, target):
-        self.target = target + 'sos_commands/devicemapper/vgdisplay_-vv'
+        if os.path.isfile(
+                target + 'sos_commands/devicemapper/vgdisplay_-vv'
+                ):
+            self.target = target + 'sos_commands/devicemapper/vgdisplay_-vv'
+        elif os.path.isfile(
+                target + 'sos_commands/lvm2/vgdisplay_-vv_--config_global_locking_type_0'
+                ):
+                self.target = target + 'sos_commands/lvm2/vgdisplay_-vv_--config_global_locking_type_0'
         self.pprint = c()
 
     def getLvmInfo(self):
