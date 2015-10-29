@@ -106,7 +106,7 @@ def doStuff(**args):
         obj.displayVgInfo()
     if args['docker']:
         obj = docker.docker(target)
-        obj.displayDockerInfo()
+        obj.displayContainerInfo()
     if args['filesys']:
         obj = filesys.filesys(target, showFsOpts=args['fso'])
         obj.displayFsInfo()

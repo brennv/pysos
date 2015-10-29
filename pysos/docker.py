@@ -1,6 +1,7 @@
 import json
-from . import pysosutils
+import os
 import sys
+from . import pysosutils
 from .colors import Color as c
 
 
@@ -23,8 +24,15 @@ class docker:
         return json.loads("".join(open(f).readlines()))
 
     def checkIsAtomic(self):
-        if pysosutils.getRpm(self.target, 'atomic'):
-            return True
+        if not os.path.exists("/host/etc/system-release-cpe"):
+            return False
+        cpe = open("/host/etc/system-release-cpe", "r").readlines()
+        return ':atomic-host' in cpe[0]
+
+    def getAtomicInfo(self):
+        ainfo = Object()
+        if self.checkIsAtomic():
+            return "Atomic Host - branch WIP"
         else:
             return False
 
@@ -128,112 +136,118 @@ class docker:
                             kinfo.master = self._fmtNodeName(line)
             return kinfo
         else:
-            return False
+            kinfo.installed = False
+            return kinfo
 
-    def getAtomicInfo(self):
-        ainfo = Object()
-        if self.checkIsAtomic():
-            ainfo.info = "Atomic Host - branch WIP"
-        else:
-            ainfo.info = "Not an Atomic Host"
-        return ainfo
+    def displayContainerInfo(self):
+        self.dinfo = self.getDockerInfo()
+        self.kinfo = self.getKubeInfo()
+        self.ainfo = self.getAtomicInfo()
+
+        self.pprint.bsection('Containerization')
+
+        self.displayDockerInfo()
+        self.displayAtomicInfo()
+        self.displayKubeInfo()
+
+    def displayAtomicInfo(self):
+        if self.ainfo:
+            self.pprint.bheader('\tAtomic Information : ', self.ainfo.info)
 
     def displayDockerInfo(self):
-        dinfo = self.getDockerInfo()
-        kinfo = self.getKubeInfo()
-        ainfo = self.getAtomicInfo()
-        self.pprint.bsection('Containerization')
-        self.pprint.bheader('\n\tDocker Version     : ',
-                            dinfo.dockerversion
-                            )
-        self.pprint.bheader('\tKubernetes Version : ', kinfo.version)
-        self.pprint.bheader('\tAtomic Information : ', ainfo.info)
-        self.pprint.bheader('\tUnique Images      : ',
-                            str(len(dinfo.uniqueimages))
-                            )
-        self.pprint.bheader('\tRunning Containers : ',
-                            str(len(dinfo.containers))
-                            )
-        print('')
-        for container in dinfo.containers:
-            print('\t\t {id:15} {image:25} {cmd}'.format(
-                id=container.id,
-                image=container.image,
-                cmd=container.cmd
-            ))
-
-        if kinfo:
-            self.displayKubeInfo(kinfo)
-
-    def displayKubeInfo(self, kinfo):
-        self.pprint.bheader('\n\t{0:22} : '.format(
-                            'Kubernetes Role'
-                            ),
-                            kinfo.node
-                            )
-        if kinfo.node == "Node":
-            self.pprint.cyan('\t\t Master Node   : ', kinfo.master)
-        if kinfo.minions:
-            self.pprint.cyan('\t\t Kubelet Nodes : ')
-            for minion in kinfo.minions['items']:
-                print('\t\t\t\t{node:20} {st:<10}'.format(
-                    node=minion['spec']['externalID'],
-                    st=minion['status']['conditions'][0]['type']
+        if self.dinfo:
+            self.pprint.bheader('\n\tDocker Version     : ',
+                                self.dinfo.dockerversion
+                                )
+            self.pprint.bheader('\tKubernetes Version : ', self.kinfo.version)
+            self.pprint.bheader('\tUnique Images      : ',
+                                str(len(self.dinfo.uniqueimages))
+                                )
+            self.pprint.bheader('\tRunning Containers : ',
+                                str(len(self.dinfo.containers))
+                                )
+            print('')
+            for container in self.dinfo.containers:
+                print('\t\t {id:15} {image:25} {cmd}'.format(
+                    id=container.id,
+                    image=container.image,
+                    cmd=container.cmd
                 ))
+        else:
+            self.pprint.red(
+                "\t Docker info could not be parsed. Was sos run with docker plugin?"
+            )
 
-        if kinfo.pods:
-            self.pprint.white('\t\t Active Pods   : ')
-            self.pprint.white('\t\t\t\t{pod:^15} {host:^12} {st:^12}'.format(
-                pod='Pod Name',
-                host='Node',
-                st='Status'
-            )
-            )
-            for pod in kinfo.pods['items']:
-                print('\t\t\t\t{pod:15} {node:15} {status:15}'.format(
-                    pod=pod['metadata']['name'][:15],
-                    node=pod['spec']['host'],
-                    status=pod['status']['phase']
-                ))
-
-        if kinfo.services:
-            self.pprint.red('\t\t Services      : ')
-            self.pprint.red('\t\t\t\t{n:^15} {t:5} {p:^5} {c} {i:>11}'.format(
-                n='Service Name',
-                t='Type',
-                p='Port',
-                c='C.Port',
-                i='Portal IP'
-            )
-            )
-            for serv in kinfo.services['items']:
-                print('\t\t\t\t{n:15} {t:5} {p:<5} {c:5}   {i}'.format(
-                    n=serv['metadata']['name'][:15],
-                    t=serv['spec']['ports'][0]['protocol'],
-                    p=serv['spec']['ports'][0]['port'],
-                    c=serv['spec']['ports'][0]['targetPort'],
-                    i=serv['spec']['portalIP']
-                ))
-        if kinfo.rc:
-            self.pprint.blue('\t\t Controllers   : ')
-            self.pprint.blue('\t\t\t\t{n:^15} {c:10} {i:10} {s:10} {r:5}'.format(
-                n="Controller",
-                c="Container",
-                i="Image",
-                s="Selector",
-                r="Replicas"
-            )
-            )
-            for rc in kinfo.rc['items']:
-                print('\t\t\t\t{n:^15} {c:10} {i:10} {s:^10} {r:5}'.format(
-                    n=rc['metadata']['name'][:15],
-                    c=rc['spec']['template']['spec'][
-                        'containers'][0]['name'][:10],
-                    i=rc['spec']['template']['spec'][
-                        'containers'][0]['image'][:10],
-                    s=rc['spec']['selector']['name'],
-                    r=rc['status']['replicas']
-                ))
+    def displayKubeInfo(self):
+        if self.kinfo.installed:
+            self.pprint.bheader('\n\t{0:22} : '.format(
+                                'Kubernetes Role'
+                                ),
+                                kinfo.node
+                                )
+            if kinfo.node == "Node":
+                self.pprint.cyan('\t\t Master Node   : ', kinfo.master)
+            if kinfo.minions:
+                self.pprint.cyan('\t\t Kubelet Nodes : ')
+                for minion in kinfo.minions['items']:
+                    print('\t\t\t\t{node:20} {st:<10}'.format(
+                        node=minion['spec']['externalID'],
+                        st=minion['status']['conditions'][0]['type']
+                    ))
+    
+            if kinfo.pods:
+                self.pprint.white('\t\t Active Pods   : ')
+                self.pprint.white('\t\t\t\t{pod:^15} {host:^12} {st:^12}'.format(
+                    pod='Pod Name',
+                    host='Node',
+                    st='Status'
+                )
+                )
+                for pod in kinfo.pods['items']:
+                    print('\t\t\t\t{pod:15} {node:15} {status:15}'.format(
+                        pod=pod['metadata']['name'][:15],
+                        node=pod['spec']['host'],
+                        status=pod['status']['phase']
+                    ))
+    
+            if kinfo.services:
+                self.pprint.red('\t\t Services      : ')
+                self.pprint.red('\t\t\t\t{n:^15} {t:5} {p:^5} {c} {i:>11}'.format(
+                    n='Service Name',
+                    t='Type',
+                    p='Port',
+                    c='C.Port',
+                    i='Portal IP'
+                )
+                )
+                for serv in kinfo.services['items']:
+                    print('\t\t\t\t{n:15} {t:5} {p:<5} {c:5}   {i}'.format(
+                        n=serv['metadata']['name'][:15],
+                        t=serv['spec']['ports'][0]['protocol'],
+                        p=serv['spec']['ports'][0]['port'],
+                        c=serv['spec']['ports'][0]['targetPort'],
+                        i=serv['spec']['portalIP']
+                    ))
+            if kinfo.rc:
+                self.pprint.blue('\t\t Controllers   : ')
+                self.pprint.blue('\t\t\t\t{n:^15} {c:10} {i:10} {s:10} {r:5}'.format(
+                    n="Controller",
+                    c="Container",
+                    i="Image",
+                    s="Selector",
+                    r="Replicas"
+                )
+                )
+                for rc in kinfo.rc['items']:
+                    print('\t\t\t\t{n:^15} {c:10} {i:10} {s:^10} {r:5}'.format(
+                        n=rc['metadata']['name'][:15],
+                        c=rc['spec']['template']['spec'][
+                            'containers'][0]['name'][:10],
+                        i=rc['spec']['template']['spec'][
+                            'containers'][0]['image'][:10],
+                        s=rc['spec']['selector']['name'],
+                        r=rc['status']['replicas']
+                    ))
 
 if __name__ == '__main__':
     target = sys.argv[1]
