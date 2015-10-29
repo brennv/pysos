@@ -18,9 +18,9 @@ class filesys():
         self.pprint = c()
         self.showFsOpts = showFsOpts
         self.excludes = ['cgroup', 'tmpfs', 'none', 'sunrpc', 'debugfs',
-                         'configfs', 'fusectl', 'hugetlbfs', 'devpts', 'sysfs',
-                         'mqueue', 'systemd', 'proc', 'devtmpfs', 'securityfs',
-                         'pstore', 'binfmt_misc']
+                         'configfs', 'fusectl', 'hugetlbfs', 'devpts',
+                         'sysfs', 'mqueue', 'systemd', 'binfmt_misc',
+                         'devtmpfs', 'securityfs', 'pstore', 'proc']
 
     def getFsMounts(self):
         """ Get a list of all mounts from sosreport """
@@ -76,12 +76,13 @@ class filesys():
                             return dev
                     except:
                         pass
-        dev.size = ''
-        dev.used = ''
-        dev.avail = ''
-        dev.percavail = ''
-        dev.percused = ''
-        return dev
+        else:
+            dev.size = ''
+            dev.used = ''
+            dev.avail = ''
+            dev.percavail = ''
+            dev.percused = ''
+            return dev
 
     def getFsDev(self, mount):
         """ Get the backing device for a given mountpoint """
@@ -141,7 +142,7 @@ class filesys():
                                                         mount.mountpoint, mount.fstype))
 
             if self.showFsOpts:
-                print("\t\t " + "\u2192" + textwrap.fill(
+                print("\t\t " + '→ ' + textwrap.fill(
                     mount.mountopts, 90, subsequent_indent='\t\t  '))
 
 if __name__ == '__main__':
