@@ -25,8 +25,8 @@ class memory:
 
         Needs to be fed a percentage as th 'perc' arg.
         """
-        tick = "\u25C6"
-        empty = "\u25C7"
+        tick = "◆"
+        empty = "◇"
         if perc == 0:
             filled = 0
         else:
