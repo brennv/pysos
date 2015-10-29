@@ -2,7 +2,7 @@ import sys
 import os
 import textwrap
 from collections import OrderedDict
-from colors import Color as c
+from .colors import Color as c
 
 
 class Object(object):
@@ -114,7 +114,7 @@ class filesys():
             if mount.size < 1 or 'tmpfs' in mount.dev:
                 del mount
         self.pprint.bsection('File System Information')
-        print ''
+        print('')
         self.pprint.white(
             '\t {:^25}\t{:^20}\t  {:^7}    {:^7}\t  {:>11}'.format(
                 'Device', 'Mount Point', 'Size', 'Used', 'Available'
@@ -131,18 +131,18 @@ class filesys():
             except:
                 pass
             try:
-                print '\t {:<25}\t {:<15} {:<6} {:>7.2f} GB'.format(
+                print('\t {:<25}\t {:<15} {:<6} {:>7.2f} GB'.format(
                     mount.dev, mount.mountpoint, mount.fstype,
                     mount.size) + ' {:>7.2f} GB\t{:>7.2f} GB'.format(
                     mount.used, mount.avail) + ' ({:^2}%)'.format(
-                    mount.percavail)
+                    mount.percavail))
             except:
-                print '\t {:<25}\t {:<15} {:<6}'.format(mount.dev,
-                                                        mount.mountpoint, mount.fstype)
+                print('\t {:<25}\t {:<15} {:<6}'.format(mount.dev,
+                                                        mount.mountpoint, mount.fstype))
 
             if self.showFsOpts:
-                print "\t\t " + u"\u2192" + textwrap.fill(
-                    mount.mountopts, 90, subsequent_indent='\t\t  ')
+                print("\t\t " + "\u2192" + textwrap.fill(
+                    mount.mountopts, 90, subsequent_indent='\t\t  '))
 
 if __name__ == '__main__':
     target = sys.argv[1]

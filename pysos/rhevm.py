@@ -1,8 +1,8 @@
 import sys
-import pysosutils
+from . import pysosutils
 import os
-from colors import Color as c
-from rhevlcbridge import Database, Cluster, Table, Host, StorageDomain
+from .colors import Color as c
+from .rhevlcbridge import Database, Cluster, Table, Host, StorageDomain
 
 
 class Object(object):
@@ -87,7 +87,7 @@ class rhevm():
             if "ERROR" in line:
 
                 errorLines.append(line)
-        print ''
+        print('')
 
         for x in range(1, 4):
             try:
@@ -142,25 +142,25 @@ class rhevm():
                         " times in engine.log starting at ",
                         ' '.join(errorLines[0].split(" ")[0:2])
                     )
-                print ""
+                print("")
             except:
                 pass
         logFile.close()
 
     def displayRhevmInfo(self):
         self.pprint.bblue('\t\t This is a RHEV Manager')
-        print ''
+        print('')
         self.pprint.bheader('\t RHEV-M Version : ', self.rhevm.ver)
         self.pprint.bheader('\t RHEV-M Reports : ', self.rhevm.reports)
         self.pprint.bheader('\t RHEV-M DWH     : ', self.rhevm.dwh)
-        print ''
+        print('')
         dbPresent = self.checkForDb()
         if dbPresent:
             self.pprint.blue('\t Database found. Can parse.')
         else:
             self.pprint.red("\t Database not found. Can't parse.")
-        print ''
-        print '\t Most recent errors in engine.log : '
+        print('')
+        print('\t Most recent errors in engine.log : ')
         self.parseEngineLog()
         if self.db:
             self.parseDb()
@@ -183,9 +183,9 @@ class rhevm():
         masterDB = self.getMasterDbObj()
         # create DC list
         dcList = self.getDcList()
-        print ""
+        print("")
         self.pprint.bsection("RHEV Database Information")
-        print ""
+        print("")
         self.pprint.bgreen('\n\t[Data Centers Managed By RHEV-M]')
         dc_table = Table(dcList, "name", "uuid", "compat")
         dc_table.display()

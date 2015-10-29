@@ -1,6 +1,6 @@
 import sys
 import os
-from colors import Color as c
+from .colors import Color as c
 
 
 class Object(object):

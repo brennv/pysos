@@ -1,9 +1,9 @@
 import sys
 import os
 import re
-import opsys
-import pysosutils
-from colors import Color as c
+from . import opsys
+from . import pysosutils
+from .colors import Color as c
 
 
 class Object(object):
@@ -19,7 +19,7 @@ class bios:
         if os.path.isfile(self.target + 'dmidecode'):
             self.dmifile = self.target + 'dmidecode'
         else:
-            print 'No dmidecode file present'
+            print('No dmidecode file present')
             return False
         self.pprint = c()
 

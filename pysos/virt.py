@@ -1,9 +1,9 @@
 import sys
-import pysosutils
+from . import pysosutils
 import math
-import ps
-from colors import Color as c
-from rhevm import rhevm
+from . import ps
+from .colors import Color as c
+from .rhevm import rhevm
 
 
 class Object(object):
@@ -107,11 +107,11 @@ class virt():
         elif self.checkIsKvm():
             self.displayKvmInfo()
         elif self.checkKvmCap():
-            print '\tKVM capable but does not appear to be hypervisor'
+            print('\tKVM capable but does not appear to be hypervisor')
         elif not self.checkKvmCap():
-            print '\tSystem does not have any KVM modules loaded.'
+            print('\tSystem does not have any KVM modules loaded.')
         else:
-            print "\tCouldn't determine virt capabilities."
+            print("\tCouldn't determine virt capabilities.")
 
     def getRunningVms(self):
         psObj = ps.procInfo(self.target)
@@ -147,31 +147,31 @@ class virt():
         self.pprint.bheader('\t Kernel     : ',
                             pysosutils.getKernelVersion(self.target)
                             )
-        print ''
+        print('')
 
-        print colors.BLUE + '\t vdsm\t    : ' + colors.ENDC + '{:22}'\
+        print(colors.BLUE + '\t vdsm\t    : ' + colors.ENDC + '{:22}'\
             .format(self.hyper.vdsm) + colors.BLUE +\
             ' \t libvirt     : ' + colors.ENDC + '{:22}'.format(
-                self.hyper.libvirt)
+                self.hyper.libvirt))
 
-        print colors.BLUE + '\t qemu-img   : ' + colors.ENDC +\
+        print(colors.BLUE + '\t qemu-img   : ' + colors.ENDC +\
             '{:22}'.format(self.hyper.qemuimg) + colors.BLUE +\
             ' \t qemu-kvm    : ' + colors.ENDC +\
-            '{:22}'.format(self.hyper.qemukvm)
+            '{:22}'.format(self.hyper.qemukvm))
 
     def displayRhevInfo(self):
         self.displayHyperInfo()
         colors = c()
-        print colors.BLUE + '\t SPICE\t    : ' + colors.ENDC +\
+        print(colors.BLUE + '\t SPICE\t    : ' + colors.ENDC +\
             '{:22}'.format(self.hyper.spice) + ' \t ' \
             + colors.BLUE + 'RHEV Tools  : ' + colors.ENDC\
-            + '{:22}'.format(self.hyper.tools)
-        print ''
-        print colors.WHITE + '\t SPM Status : ' + colors.ENDC +\
+            + '{:22}'.format(self.hyper.tools))
+        print('')
+        print(colors.WHITE + '\t SPM Status : ' + colors.ENDC +\
             '{}'.format(self.hyper.spm) + colors.WHITE +\
             '\t Hosted Engine : ' + colors.ENDC + '{}'.format(
-                self.hyper.hosted.hosted)
-        print ''
+                self.hyper.hosted.hosted))
+        print('')
         self.displayRunningVms()
 
     def displayKvmInfo(self):
@@ -196,8 +196,8 @@ class virt():
                     vmLine += vmInfo
                 except:
                     pass
-            print vmLine
-        print ''
+            print(vmLine)
+        print('')
 
 if __name__ == '__main__':
     target = sys.argv[1]

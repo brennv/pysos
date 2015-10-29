@@ -1,6 +1,6 @@
 import sys
 import os
-from colors import Color as c
+from .colors import Color as c
 
 
 class Object(object):
@@ -28,7 +28,7 @@ class procInfo:
                      'tty', 'stat', 'start', 'time']
             with open(self.target +
                       'sos_commands/process/ps_auxwww', 'r') as psfile:
-                psfile.next()
+                next(psfile)
                 for line in psfile:
                     proc = Object()
                     line = line.split()
@@ -74,10 +74,10 @@ class procInfo:
 
     def _formatTopReport(self, psInfo, reportNum=5):
         report = []
-        for i in xrange(0, int(reportNum)):
+        for i in range(0, int(reportNum)):
             proc = self.psInfo[i]
             cmd = ''
-            for i in xrange(10, 13):
+            for i in range(10, 13):
                 try:
                     cmd = str(proc.command).strip('\n')
 
@@ -128,11 +128,11 @@ class procInfo:
         )
 
         for proc in report:
-            print '\t{:^8} {:<6}\t{:^5} {:^5}  {:<7.0f}  {:<7.0f}  {:^5} {:4} {:^6} {:<9}{}'.format(
+            print('\t{:^8} {:<6}\t{:^5} {:^5}  {:<7.0f}  {:<7.0f}  {:^5} {:4} {:^6} {:<9}{}'.format(
                 proc.user, proc.pid,
                 proc.cpu, proc.mem, proc.vszmb, proc.rssmb, proc.tty,
                 proc.stat, proc.start, proc.time,
-                proc.command[0:45].strip())
+                proc.command[0:45].strip()))
 
     def displayTopReport(self):
         """ Display report from getUserReport() """
@@ -146,26 +146,26 @@ class procInfo:
         )
         )
 
-        for i in xrange(0, 4):
+        for i in range(0, 4):
             proc = usageReport[i]
-            print '\t {:<10}  {:^6.2f}  {:^6.2f}  {:>3.2f} GB'.format(
+            print('\t {:<10}  {:^6.2f}  {:^6.2f}  {:>3.2f} GB'.format(
                 proc.user, proc.cpu, proc.mem,
-                int(proc.rss) / 1048576)
-        print ''
+                int(proc.rss) / 1048576))
+        print('')
 
     def displayCpuReport(self):
         """ Display report from getTopCpu() """
         cpuReport = self.getTopCpu()
         self.pprint.white('\tTop CPU Consuming Processes : ')
         self.displayReport(cpuReport)
-        print ''
+        print('')
 
     def displayMemReport(self):
         """ Display report from getTopMem() """
         memReport = self.getTopMem()
         self.pprint.white('\tTop Memory Consuming Processes : ')
         self.displayReport(memReport)
-        print ''
+        print('')
 
     def displayDefunctReport(self):
         """ Display report from getDefunctProcs() """
@@ -177,7 +177,7 @@ class procInfo:
             defunctReport = self._formatTopReport(defunctReport,
                                                   reportNum=len(defunctReport))
             self.displayReport(defunctReport)
-            print ''
+            print('')
 
     def displayPsInfo(self):
         """ display ps information for top consumers, CPU, memory and

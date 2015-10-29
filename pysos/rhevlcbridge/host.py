@@ -249,8 +249,8 @@ class Host():
         return self.kernel_ver
 
     def __repr__(self):
-        print "Host name: " + self.name
-        print "VDSM Ver: " + self.vdsm_ver
+        print("Host name: " + self.name)
+        print("VDSM Ver: " + self.vdsm_ver)
 
     def updateHostDynamic(self, dynamic_list):
 

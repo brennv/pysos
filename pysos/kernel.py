@@ -1,11 +1,11 @@
 import sys
 import os
-import pysosutils
-import opsys
-import filesys
-import memory
+from . import pysosutils
+from . import opsys
+from . import filesys
+from . import memory
 import math
-from colors import Color as c
+from .colors import Color as c
 
 
 class Object(object):
@@ -107,18 +107,18 @@ class kernel:
         if len(taintCodes) > 1:
             taintCodes.pop(0)
             for item in taintCodes:
-                print '\t\t\t       ' + item
+                print('\t\t\t       ' + item)
         self.pprint.bheader('\t kexec-tools version :  ', kdumpVer)
         self.pprint.bheader('\t Service enablement  :  ', kdumpState)
         self.pprint.bheader('\t Memory Reservation  :  ',
                             crashInfo.memreserve
                             )
 
-        print ''
+        print('')
         self.pprint.bheader('\t kdump.conf          : ')
         if kdump:
             for key in kdump:
-                print '\t\t\t\t%s  %s' % (key, kdump[key])
+                print('\t\t\t\t%s  %s' % (key, kdump[key]))
             self.pprint.bblue('\t\t Crash Path   : ',
                               crashInfo.path,
                               '  ({})'.format(
@@ -148,7 +148,7 @@ class kernel:
 
         if crashInfo.memrequired / 1000 > crashInfo.pathfreespace:
             self.pprint.warn('\t\t\t\t NOT ENOUGH SPACE FOR VMCORE DUMP')
-        print ''
+        print('')
 
         self.pprint.bheader('\t Kernel Panic Sysctl : ')
         colors = c()
@@ -159,7 +159,7 @@ class kernel:
                 ctl = ' = 1 ' + colors.BOLD + '[enabled]' + colors.ENDC
             else:
                 ctl = ' = %s ' % panicSysctls[item]
-            print '\t\t\t\t {:<31} {}'.format(item, ctl)
+            print('\t\t\t\t {:<31} {}'.format(item, ctl))
 
 if __name__ == '__main__':
     target = sys.argv[1]

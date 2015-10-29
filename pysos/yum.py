@@ -1,8 +1,8 @@
 import sys
 import os
-import pysosutils
+from . import pysosutils
 import re
-from colors import *
+from .colors import *
 
 class Object(object):
     pass
@@ -97,37 +97,37 @@ class yum():
         """ Display gathered yum related information """
         yumInfo = self.getRepoList()
         lastUpdate = self.getLastUpdateDate()
-        print colors.BSECTION + "Package Information"\
-            + colors.ENDC
-        print colors.BHEADER + '\t Plugins     : ' + colors.ENDC + \
-            self.plugins
+        print(colors.BSECTION + "Package Information"\
+            + colors.ENDC)
+        print(colors.BHEADER + '\t Plugins     : ' + colors.ENDC + \
+            self.plugins)
 
         if lastUpdate:
-            print colors.BHEADER + '\t Last Update :  ' + \
-                colors.ENDC + lastUpdate
-        print colors.BHEADER + '\t Repos       : ' + colors.ENDC
+            print(colors.BHEADER + '\t Last Update :  ' + \
+                colors.ENDC + lastUpdate)
+        print(colors.BHEADER + '\t Repos       : ' + colors.ENDC)
         if yumInfo:
             for repo in yumInfo:
-                print '\t\t\t' + repo.repo
+                print('\t\t\t' + repo.repo)
         else:
-            print '\t\t\t ' + colors.BRED + 'Repolist file not found'\
-                    + colors.ENDC
+            print('\t\t\t ' + colors.BRED + 'Repolist file not found'\
+                    + colors.ENDC)
 
     def displaySubInfo(self):
         """ Display subscription related information """
         prodInfo = self.getSubMgrInst()
-        print ''
+        print('')
         if prodInfo:
-            print colors.BHEADER + '\t Products    :  ' + \
-                colors.ENDC + str(len(prodInfo))
+            print(colors.BHEADER + '\t Products    :  ' + \
+                colors.ENDC + str(len(prodInfo)))
             for prod in prodInfo:
-                print '\t\t\t' + prod.name
-                print '\t\t\t' + prod.version + ' ' + prod.arch
+                print('\t\t\t' + prod.name)
+                print('\t\t\t' + prod.version + ' ' + prod.arch)
                 if prod.status == 'Subscribed':
-                    print '\t\t\tSubscribed until ' + prod.ends
+                    print('\t\t\tSubscribed until ' + prod.ends)
                 else:
-                    print '\t\t\tStatus ' + prod.status
-                print ''
+                    print('\t\t\tStatus ' + prod.status)
+                print('')
 
     def displayAllYumInfo(self):
         self.displayYumInfo()

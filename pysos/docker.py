@@ -1,7 +1,7 @@
 import json
-import pysosutils
+from . import pysosutils
 import sys
-from colors import Color as c
+from .colors import Color as c
 
 
 class Object:
@@ -99,8 +99,8 @@ class docker:
             except Exception as e:
                 kinfo.minions = False
                 kinfo.node = "Unknown"
-                print "Unhandled exception, please report this"
-                print e
+                print("Unhandled exception, please report this")
+                print(e)
             try:
                 kinfo.pods = self._parseJson(
                     'sos_commands/kubernetes/kubectl_get_-o_json_pods'
@@ -154,13 +154,13 @@ class docker:
         self.pprint.bheader('\tRunning Containers : ',
                             str(len(dinfo.containers))
                             )
-        print ''
+        print('')
         for container in dinfo.containers:
-            print '\t\t {id:15} {image:25} {cmd}'.format(
+            print('\t\t {id:15} {image:25} {cmd}'.format(
                 id=container.id,
                 image=container.image,
                 cmd=container.cmd
-            )
+            ))
 
         if kinfo:
             self.displayKubeInfo(kinfo)
@@ -176,10 +176,10 @@ class docker:
         if kinfo.minions:
             self.pprint.cyan('\t\t Kubelet Nodes : ')
             for minion in kinfo.minions['items']:
-                print '\t\t\t\t{node:20} {st:<10}'.format(
+                print('\t\t\t\t{node:20} {st:<10}'.format(
                     node=minion['spec']['externalID'],
                     st=minion['status']['conditions'][0]['type']
-                )
+                ))
 
         if kinfo.pods:
             self.pprint.white('\t\t Active Pods   : ')
@@ -190,11 +190,11 @@ class docker:
             )
             )
             for pod in kinfo.pods['items']:
-                print '\t\t\t\t{pod:15} {node:15} {status:15}'.format(
+                print('\t\t\t\t{pod:15} {node:15} {status:15}'.format(
                     pod=pod['metadata']['name'][:15],
                     node=pod['spec']['host'],
                     status=pod['status']['phase']
-                )
+                ))
 
         if kinfo.services:
             self.pprint.red('\t\t Services      : ')
@@ -207,13 +207,13 @@ class docker:
             )
             )
             for serv in kinfo.services['items']:
-                print '\t\t\t\t{n:15} {t:5} {p:<5} {c:5}   {i}'.format(
+                print('\t\t\t\t{n:15} {t:5} {p:<5} {c:5}   {i}'.format(
                     n=serv['metadata']['name'][:15],
                     t=serv['spec']['ports'][0]['protocol'],
                     p=serv['spec']['ports'][0]['port'],
                     c=serv['spec']['ports'][0]['targetPort'],
                     i=serv['spec']['portalIP']
-                )
+                ))
         if kinfo.rc:
             self.pprint.blue('\t\t Controllers   : ')
             self.pprint.blue('\t\t\t\t{n:^15} {c:10} {i:10} {s:10} {r:5}'.format(
@@ -225,7 +225,7 @@ class docker:
             )
             )
             for rc in kinfo.rc['items']:
-                print '\t\t\t\t{n:^15} {c:10} {i:10} {s:^10} {r:5}'.format(
+                print('\t\t\t\t{n:^15} {c:10} {i:10} {s:^10} {r:5}'.format(
                     n=rc['metadata']['name'][:15],
                     c=rc['spec']['template']['spec'][
                         'containers'][0]['name'][:10],
@@ -233,7 +233,7 @@ class docker:
                         'containers'][0]['image'][:10],
                     s=rc['spec']['selector']['name'],
                     r=rc['status']['replicas']
-                )
+                ))
 
 if __name__ == '__main__':
     target = sys.argv[1]

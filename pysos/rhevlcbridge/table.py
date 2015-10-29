@@ -110,10 +110,10 @@ class Table(object):
 
 
         # Print the table header
-        print ""
+        print("")
         headerStr = "\"" + widthStr.rstrip("\t") + "\".format(" + contentStr.rstrip(",") + ")"
-        print "\t" + colors.WHITE + eval(headerStr)
-        print "\t" + sepStr + colors.ENDC
+        print("\t" + colors.WHITE + eval(headerStr))
+        print("\t" + sepStr + colors.ENDC)
 
         # Start creating and displaying data
         for e in self.tableEnts:
@@ -140,10 +140,10 @@ class Table(object):
                 index = index + 1
 
             entStr = "\"" + dataFmtStr.rstrip("\t") + "\".format(" + dataStr.rstrip(",") + ")"
-            print "\t" + linecolor + eval(entStr) + colors.ENDC
+            print("\t" + linecolor + eval(entStr) + colors.ENDC)
 
         # Finishing the table
-        print ""
+        print("")
 
     # print "Checking to make sure we have as many widths as we do columns (" + str(len(colWidths)) + " widths, " + str(len(self.tableCols)) + " columns)"
     # if len(colWidths) == len(self.tableCols):
@@ -158,7 +158,7 @@ class Table(object):
         '''
         # Check for valid list object
         if len(self.tableEnts) == 0:
-            print "No list object for entities provided"
+            print("No list object for entities provided")
             return False
 
         # just for debugging
@@ -196,7 +196,7 @@ class Table(object):
             return True
 
     def messDEBUG(self, message):
-        print colors.WARN + message
+        print(colors.WARN + message)
 
 
 

@@ -2,9 +2,9 @@ import sys
 import datetime
 import textwrap
 import re
-import pysosutils
+from . import pysosutils
 import os
-from colors import Color as c
+from .colors import Color as c
 
 
 class Object(object):
@@ -208,14 +208,14 @@ class opsys:
                           )
         self.pprint.bblue('\t   Booted cmdline : ')
 
-        print '%15s' % ' ' + textwrap.fill(pysosutils.getCmdLine(
-            self.target), 90, subsequent_indent='%15s' % ' ')
+        print('%15s' % ' ' + textwrap.fill(pysosutils.getCmdLine(
+            self.target), 90, subsequent_indent='%15s' % ' '))
         self.pprint.bheader('\t Taints    :', taintCodes[0])
 
         if len(taintCodes) > 1:
             taintCodes.pop(0)
             for item in taintCodes:
-                print '\t\t    ' + item
+                print('\t\t    ' + item)
 
         sep = '\t' + '~ ' * 20
         self.pprint.bgreen(sep)
@@ -239,16 +239,16 @@ class opsys:
             '\t\t %s logical processors' % cpuInfo.processors
         )
         if cpuInfo.sockets > 0:
-            print '\t\t ' + str(cpuInfo.sockets) + ' ' +\
-                cpuInfo.model.strip() + ' processors'
-            print '\t\t %s cores / %s threads per physical processor' % (
-                cpuInfo.cores, cpuInfo.threadspercore)
+            print('\t\t ' + str(cpuInfo.sockets) + ' ' +\
+                cpuInfo.model.strip() + ' processors')
+            print('\t\t %s cores / %s threads per physical processor' % (
+                cpuInfo.cores, cpuInfo.threadspercore))
         else:
             self.pprint.blue(
                 '\t\tVirtual Machine with no defined sockets or cores'
             )
-        print '\t\t flags : ' + textwrap.fill(
-            cpuInfo.flags, 90, subsequent_indent='\t\t\t ')
+        print('\t\t flags : ' + textwrap.fill(
+            cpuInfo.flags, 90, subsequent_indent='\t\t\t '))
 
 if __name__ == '__main__':
     target = sys.argv[1]

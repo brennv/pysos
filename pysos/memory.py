@@ -2,8 +2,8 @@ import sys
 import os
 import re
 import math
-import pysosutils
-from colors import Color as c
+from . import pysosutils
+from .colors import Color as c
 
 
 class Object(object):
@@ -25,8 +25,8 @@ class memory:
 
         Needs to be fed a percentage as th 'perc' arg.
         """
-        tick = u"\u25C6"
-        empty = u"\u25C7"
+        tick = "\u25C6"
+        empty = "\u25C7"
         if perc == 0:
             filled = 0
         else:
@@ -180,10 +180,10 @@ class memory:
 
         self.displayMemGraphs()
 
-        print ''
+        print('')
         self.pprint.bheader('\t RAM  :')
-        print '\t\t %6.2f GB total memory on system' % (math.ceil(
-            self.mem.total / 1024))
+        print('\t\t %6.2f GB total memory on system' % (math.ceil(
+            self.mem.total / 1024)))
         self.pprint.blue('\t\t %6.2f GB (%.2f %%) used' % ((
             self.mem.inuse / 1024), (self.mem.used /
                                      self.mem.total) * 100)

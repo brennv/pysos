@@ -1,4 +1,4 @@
-from colors import Color as c
+from .colors import Color as c
 
 
 class VolumeGroup:
@@ -57,14 +57,14 @@ class VolumeGroup:
         for l in self.pvdata:
             if 'PV Name' in l:
                 name = l.split()[-1]
-                if name not in pvsdict.keys():
+                if name not in list(pvsdict.keys()):
                     pvsdict[name] = {}
                     pvsdict[name]['name'] = name
             elif name:
                 attr = l.split()[-2].lower()
                 pvsdict[name][attr] = l.split()[-1]
         pvs = []
-        for pv in pvsdict.values():
+        for pv in list(pvsdict.values()):
             pvs.append(PhysicalVolume(pv))
         return pvs
 
@@ -72,14 +72,14 @@ class VolumeGroup:
 class LogicalVolume:
 
     def __init__(self, lvdict):
-        for k, v in lvdict.iteritems():
+        for k, v in lvdict.items():
             self.__dict__[k] = v
 
 
 class PhysicalVolume:
 
     def __init__(self, pvdict):
-        for k, v in pvdict.iteritems():
+        for k, v in pvdict.items():
             self.__dict__[k] = v
 
 
@@ -110,13 +110,13 @@ class lvm:
 
     def displayVgInfo(self):
         self.pprint.bsection('Disk and LVM Information')
-        print ''
+        print('')
         vgs = self.getLvmInfo()
         if vgs:
             if len(vgs) > 0:
                 for vg in vgs:
                     self.pprint.bheader('\t VG Name:  ', vg.name)
-                    print ''
+                    print('')
                     self.pprint.white(
                         '\t\t {:^15} {:^12}'.format(
                             'LV NAME',
@@ -124,15 +124,15 @@ class lvm:
                         )
                     )
                     for lv in vg.lvs:
-                        print '\t\t  {:^15} {:>12}'.format(lv.name, lv.size)
-                    print ''
-                    print '\t\t  PVs in this VG: ' + ' '.join(
-                        pv.name for pv in vg.pvs)
+                        print('\t\t  {:^15} {:>12}'.format(lv.name, lv.size))
+                    print('')
+                    print('\t\t  PVs in this VG: ' + ' '.join(
+                        pv.name for pv in vg.pvs))
 
 if __name__ == '__main__':
     for vg in vgs:
-        print "VG %s:" % vg.name
+        print("VG %s:" % vg.name)
         for lv in vg.lvs:
-            print "\tLV %s (%s)" % (lv.name, lv.size)
+            print("\tLV %s (%s)" % (lv.name, lv.size))
         for pv in vg.pvs:
-            print "\tPV %s" % pv.name
+            print("\tPV %s" % pv.name)

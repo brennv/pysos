@@ -1,8 +1,8 @@
 import sys
 import os
-import pysosutils
+from . import pysosutils
 import math
-from colors import Color as c
+from .colors import Color as c
 
 
 class Object(object):
@@ -152,7 +152,7 @@ class network():
                 for n, line in enumerate(ifile):
                     if device in line:
                         for i in range(3):
-                            line = ifile.next()
+                            line = next(ifile)
                             if 'inet ' in line:
                                 return line[line.find('inet') + 4:
                                             line.find('/') - 1].strip()
@@ -220,7 +220,7 @@ class network():
                             line[0] = line[0].split(':')[1].strip()
                             if line[0] == '':
                                 line.pop(0)
-                        line = map(int, line)
+                        line = list(map(int, line))
                         x = 0
                         for stat in stats:
                             setattr(dev, stat, line[x])
@@ -315,7 +315,7 @@ class network():
         except:
             pass
 
-        for key, value in devSettings.items():
+        for key, value in list(devSettings.items()):
             setattr(device,
                     key.replace(' ', '').replace('-', '').lower(),
                     value)
@@ -452,8 +452,8 @@ class network():
                 bond.slaves.pop(0)
                 bond.macaddrs.pop(0)
                 for i in range(len(bond.slaves)):
-                    print '{:<51}{:6}{:<10}'.format(' ', bond.slaves[i],
-                                                    bond.macaddrs[i])
+                    print('{:<51}{:6}{:<10}'.format(' ', bond.slaves[i],
+                                                    bond.macaddrs[i]))
             except:
                 pass
 
@@ -493,7 +493,7 @@ class network():
                                 )
                                 )
             except Exception as e:
-                print e
+                print(e)
 
     def displayNetDevInfo(self):
         """ Display formatted /proc/net/dev stats for all devices """
@@ -527,7 +527,7 @@ class network():
                                                 )
                                 )
             except Exception as e:
-                print e
+                print(e)
 
     def displayAllNetInfo(self):
         """ Display ethtool, IP, bond and net stat information """

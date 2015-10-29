@@ -21,7 +21,7 @@ class Color:
         self.colors['BPURPLE'] = self.colors['PURPLE'] + self.colors['BOLD']
         self.colors['CYAN'] = '\033[36m'
         self.colors['DBLUE'] = '\033[34m'
-        for k, v in self.colors.iteritems():
+        for k, v in self.colors.items():
             self.__dict__[k] = v
 
     def fmt(self, color, text):
@@ -29,11 +29,11 @@ class Color:
 
     def __getattr__(self, name):
         def trapit(*args):
-            if name.upper() not in self.colors.keys():
+            if name.upper() not in list(self.colors.keys()):
                 color = 'endc'
             else:
                 color = name
             if not args:
                 return
-            print self.fmt(self.colors[color.upper()], args)
+            print(self.fmt(self.colors[color.upper()], args))
         return trapit

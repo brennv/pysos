@@ -22,42 +22,42 @@ testHosts = database.get_hosts()
 spmHost = testHosts[0]
 spmHost.set_spm_status("*")
 
-print "TESTING table.py"
-print ""
-print "Creating 3 test tables..."
-print ""
-print "Testing with Table(testHosts,name,uuid,host_dc_name,spm_status)"
+print("TESTING table.py")
+print("")
+print("Creating 3 test tables...")
+print("")
+print("Testing with Table(testHosts,name,uuid,host_dc_name,spm_status)")
 testTable = Table(testHosts,"name","spm_status","uuid","uuid")
-print "-----------------------------"
-print "Testing with Table (testHosts)"
+print("-----------------------------")
+print("Testing with Table (testHosts)")
 testTable2 = Table(testHosts)
-print "-----------------------------"
-print "Testing with no data Table('name')"
+print("-----------------------------")
+print("Testing with no data Table('name')")
 testTable3 = Table("name")
-print ""
+print("")
 
-print "Validating the tables..."
-print "------------------------------"
+print("Validating the tables...")
+print("------------------------------")
 if testTable.validate():
-	print "TEST 1 PASSES!!!!!"
+	print("TEST 1 PASSES!!!!!")
 else:
-	print "TEST 1 FAILED!!!!!"
-print "------------------------------"
+	print("TEST 1 FAILED!!!!!")
+print("------------------------------")
 if testTable2.validate():
-	print "TEST 2 PASSES!!!!!"
+	print("TEST 2 PASSES!!!!!")
 else:
-	print "TEST 2 FAILED!!!!!"
-print "------------------------------"
+	print("TEST 2 FAILED!!!!!")
+print("------------------------------")
 if testTable3.validate():
-	print "TEST 3 PASSES!!!!!"
+	print("TEST 3 PASSES!!!!!")
 else:
-	print "TEST 3 FAILED!!!!!"
+	print("TEST 3 FAILED!!!!!")
 	
-print ""
-print "Testing display function"
-print ""
+print("")
+print("Testing display function")
+print("")
 testTable.display()
-print "------------------------------"
+print("------------------------------")
 #testTable2.display()
 # print "------------------------------"
 # testTable3.display()
