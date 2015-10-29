@@ -7,7 +7,7 @@ Pysos is a python utility to quickly parse through a sosreport and present relev
 Installation is simple, clone this git repo and then drop a symlink somewhere in your $PATH. A proper `setup.py` installation method is in the works.
 
     $ git clone https://github.com/turboturtle/pysos
-    $ ln -s $somedir/pysos.py /usr/local/bin/pysos
+    $ sudo python setup.py install
 
 
 ###Usage
@@ -46,7 +46,7 @@ Pysos takes any number of the following arguments followed by the target directo
 
 ###Requirements
 
-Pysos is written for Python 2.7 and with the exception of the `argparse` module requires nothing outside the standard library to function.
+Pysos is written for Python 3 and with the exception of the `argparse` module requires nothing outside the standard library to function.
 
 
 ###Examples
@@ -82,9 +82,8 @@ It's also good to know that if a sosreport doesn't capture the information, pyso
 
 Currently this is the (unordered) list of things I still want to implement directly into pysos:
 
- - Proper (read: actual) LVM information
+
  - Common sysctls to look at, and the ability to filter for specific sysctls
  - An integrated updater
- - A proper `setup.py` installer
  - Satellite information
  - Work with sosreport tarballs, not just the extracted directory
