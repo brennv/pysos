@@ -138,9 +138,9 @@ def doStuff(**args):
         obj.displayAllYumInfo()
     # Need to figure out how to do this without needing target argument
     if args['update']:
-        print "Currently this is not functional."
-        print "If you need to update, clone the git repo and run",
-        print "'python setup.py install' again."
+        print("Currently this is not functional.")
+        print("If you need to update, clone the git repo and run",)
+        print("'python setup.py install' again.")
 
 if __name__ == '__main__':
     args = parser.parse_args()
