@@ -510,7 +510,7 @@ class network():
             '=' * 9 + '   ' + '=' * 9 + '   ' + '=' * 9 + '   ' + '=' * 10\
             + '   ' + '=' * 8 + '   ' + '=' * 8 + '  ' + '=' * 9
         self.pprint.white(sep)
-        for dev in sorted(netStats):
+        for dev in netStats:  # sorted(netStats):  # TypeError: unorderable types: Object() < Object()
             try:
                 self.displayDev(dev.name,
                                 '\t {:^10}     {:>7.2f}\t    {:^5}m     {:>5}'.format(
