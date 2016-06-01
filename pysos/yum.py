@@ -2,28 +2,29 @@ import sys
 import os
 from . import pysosutils
 import re
-from .colors import *
+from .colors import Color as c
 
 class Object(object):
     pass
 
 class yum():
-    """ 
+    """
     Capture and optionally display yum and subscription data
     for RPM based systems.
-    
+
     Note that subscription information is RHEL specific.
     """
 
     def __init__(self, target):
         self.target = target
         self.plugins = ''
+        # self.pprint = c()
 
     def getLastUpdate(self):
         """ Get the last package updated """
         if os.path.isfile(self.target + 'var/log/yum.log'):
             with open(self.target + 'var/log/yum.log', 'r') as yfile:
-                # this is horribly ineffecient. Need a better way.  
+                # this is horribly ineffecient. Need a better way.
                 lines = yfile.readlines()
                 try:
                     return lines[-1]
@@ -66,11 +67,11 @@ class yum():
 
     def getSubMgrInst(self):
         """ Get subscription information from subscription manager """
-        if os.path.isfile(self.target + 
+        if os.path.isfile(self.target +
             'sos_commands/general/subscription-manager_list_--installed'):
             prodToParse = []
             prodInfo = []
-            with open(self.target + 
+            with open(self.target +
                     'sos_commands/general/subscription-manager_list_--installed',
                     'r') as sfile:
                 for line in sfile:
@@ -80,7 +81,7 @@ class yum():
                         prodToParse.append(prod)
             for prod in prodToParse:
                  prod.data = pysosutils.parseOutputSection(
-                    self.target + 
+                    self.target +
                     'sos_commands/general/subscription-manager_list_--installed',
                     prod.header)
                  for k in prod.data:
@@ -97,6 +98,7 @@ class yum():
         """ Display gathered yum related information """
         yumInfo = self.getRepoList()
         lastUpdate = self.getLastUpdateDate()
+        colors = c()
         print(colors.BSECTION + "Package Information"\
             + colors.ENDC)
         print(colors.BHEADER + '\t Plugins     : ' + colors.ENDC + \
